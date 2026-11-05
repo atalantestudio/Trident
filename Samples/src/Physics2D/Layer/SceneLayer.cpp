@@ -11,23 +11,8 @@
 #include "SceneLayer.hpp"
 
 namespace Trident {
-	Physics2DSceneLayer::~Physics2DSceneLayer() {
-		delete scene;
-	}
-
-	void Physics2DSceneLayer::loadScene() {
-		const Application* application = getApplication();
-		const view<char8> sceneAssetName = application->getPropertyFile()->getProperty<view<char8>>("AssetName");
-		const ref<Scene2DAsset> sceneAsset = application->getAssetLibrary()->getAsset<Scene2DAsset>(sceneAssetName);
-
-		scene = new Scene2D(sceneAsset);
-	}
-
 	void Physics2DSceneLayer::postConstruct() {
-		loadScene();
-
 		PhysicsSimulation2DDescriptor descriptor;
-		descriptor.scene = scene;
 		descriptor.deltaTime = getApplication()->getFixedDeltaTime();
 		descriptor.gravity = {0.0f, -9.80665f};
 		descriptor.maxStaticRigidBodyCount = 128;
@@ -37,10 +22,14 @@ namespace Trident {
 
 		simulation = createSimulation(descriptor);
 
-		renderer.layerInput = input;
 		renderer.setLayer(this);
-		renderer.build();
-		renderer.setScene(scene);
+		renderer.build({
+			.maxVertexCount = 0,
+			.maxTransformCount = 1,
+		});
+
+		// TODO
+		renderer.copyGeometry();
 	}
 
 	void Physics2DSceneLayer::preRender() {
@@ -53,7 +42,7 @@ namespace Trident {
 		applyImpulses(simulation);
 		integrate(simulation);
 
-		checkHover();
+		/* checkHover();
 
 		const ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
 
@@ -78,7 +67,7 @@ namespace Trident {
 			renderer.updateCameraProjection();
 		}
 
-		renderer.clearRegisteredData();
+		renderer.clearRegisteredData(); */
 	}
 
 	void Physics2DSceneLayer::render(ref<CommandEncoder> commandEncoder, float64 remainingFrameTime) const {
@@ -86,7 +75,7 @@ namespace Trident {
 	}
 
 	void Physics2DSceneLayer::checkHover() {
-		hoveredEntity = max<Entity>();
+		/* hoveredEntity = max<Entity>();
 
 		const ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
 
@@ -116,7 +105,7 @@ namespace Trident {
 			}
 
 			componentIndex -= 1;
-		}
+		} */
 	}
 
 	void Physics2DSceneLayer::onEvent(Event& event) {
@@ -163,7 +152,7 @@ namespace Trident {
 	}
 
 	bool Physics2DSceneLayer::onEvent(MouseMoveEvent& event) {
-		const Window* window = getApplication()->getWindow();
+		/* const Window* window = getApplication()->getWindow();
 		const Extent2D extent = window->getExtent();
 		const vec2<float32> previousMousePosition = mousePosition;
 
@@ -176,13 +165,13 @@ namespace Trident {
 
 		if (selectedEntity != max<Entity>()) {
 			placeholderOffset += mouseDelta;
-		}
+		} */
 
 		return true;
 	}
 
 	bool Physics2DSceneLayer::onEvent(MouseUpEvent& event) {
-		if (event.getButton() == MouseButton::RIGHT && draggingCamera) {
+		/* if (event.getButton() == MouseButton::RIGHT && draggingCamera) {
 			draggingCamera = false;
 		}
 
@@ -196,7 +185,7 @@ namespace Trident {
 			rigidBody.updateWorld(hull.centroid);
 
 			selectedEntity = max<Entity>();
-		}
+		} */
 
 		return true;
 	}

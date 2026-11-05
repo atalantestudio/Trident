@@ -1,9 +1,9 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-#pragma once
+#include "pch.hpp"
 
-#include "../../Physics2D/Renderer/Physics2DRenderer.hpp"
+#include "Physics2D/Renderer/Renderer.hpp"
 
 namespace Trident {
 	#if defined(SHOW_FEATURES)

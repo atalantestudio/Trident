@@ -6,6 +6,11 @@
 #include "Engine/API/Geometry/Plane3D.hpp"
 
 namespace Trident {
+	struct Transform2D {
+		vec2<float32> position;
+		float32 rotation;
+	};
+
 	struct Transform3D {
 		vec3<float32> position;
 		quat<float32> orientation;

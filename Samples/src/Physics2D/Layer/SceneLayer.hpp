@@ -5,13 +5,11 @@
 
 #include "Trident.hpp"
 
-#include "../Renderer/Physics2DRenderer.hpp"
+#include "Physics2D/Renderer/Renderer.hpp"
 
 namespace Trident {
 	class Physics2DSceneLayer : public Layer {
 		public:
-			~Physics2DSceneLayer();
-
 			void initialize() override {}
 
 			void postConstruct() override;
@@ -38,14 +36,12 @@ namespace Trident {
 			bool onEvent(WindowResizeEvent& event);
 
 		private:
-			Scene2D* scene;
 			PhysicsSimulation2D simulation;
 			Physics2DRenderer renderer;
 
 			Input keyMap;
 			bool jumping = false;
 
-			Entity playerEntity = max<Entity>();
 			Entity hoveredEntity = max<Entity>();
 			Entity selectedEntity = max<Entity>();
 			vec2<float32> placeholderOffset;

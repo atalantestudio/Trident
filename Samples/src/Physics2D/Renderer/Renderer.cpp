@@ -1,4 +1,4 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #include "pch.hpp"
@@ -6,21 +6,11 @@
 #include "Engine/API/Geometry/Hull2D.hpp"
 #include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 
-#include "../../Physics2D/Renderer/CenterOfMassPipeline.hpp"
-#include "../../Physics2D/Renderer/DistancePipeline.hpp"
-#include "../../Physics2D/Renderer/EdgeFeaturePipeline.hpp"
-#include "../../Physics2D/Renderer/GridPipeline.hpp"
-#include "../../Physics2D/Renderer/Physics2DRenderer.hpp"
-#include "../../Physics2D/Renderer/RigidBodyFillPipeline.hpp"
-#include "../../Physics2D/Renderer/RigidBodyPlaceholderCenterOfMassPipeline.hpp"
-#include "../../Physics2D/Renderer/RigidBodyPlaceholderFillPipeline.hpp"
-#include "../../Physics2D/Renderer/RigidBodyPlaceholderStrokePipeline.hpp"
-#include "../../Physics2D/Renderer/RigidBodyStrokePipeline.hpp"
-#include "../../Physics2D/Renderer/VertexFeaturePipeline.hpp"
+#include "Physics2D/Renderer/Renderer.hpp"
 
 namespace Trident {
 	void Physics2DRenderer::build() {
-		setupRenderPass();
+		renderPass = createRenderPass();
 
 		if (SAMPLE_COUNT != ImageSampleCount::x1) {
 			if (layerInput->swapchainImage == nullptr) {
@@ -29,9 +19,10 @@ namespace Trident {
 			}
 		}
 
-		recreateDepthStencilImage();
-		recreateDepthStencilImageView();
-		recreateFramebuffers();
+		depthStencilImage = createDepthStencilImage();
+		depthStencilImageView = createDepthStencilImageView();
+
+		createFramebuffers();
 
 		createCameraBuffer();
 		createViewBuffer();
@@ -78,44 +69,6 @@ namespace Trident {
 		updateViewport();
 	}
 
-	void Physics2DRenderer::setupRenderPass() {
-		renderPass = createRenderPass({
-			.attachments = {
-				// Color
-				{
-					.format = getSurface()->getFormat(),
-					.sampleCount = SAMPLE_COUNT,
-					.loadOperation = LoadOperation::CLEAR,
-					.storeOperation = StoreOperation::STORE,
-					.finalLayout = ImageLayout::PRESENT_SRC,
-				},
-
-				// Depth stencil
-				{
-					.format = ImageFormat::D32_SFLOAT,
-					.sampleCount = SAMPLE_COUNT,
-					.loadOperation = LoadOperation::CLEAR,
-					.storeOperation = StoreOperation::UNDEFINED,
-					.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-				},
-			},
-			.subpasses = {
-				{
-					.colorAttachmentReferences = {
-						{
-							.index = 0,
-							.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
-						},
-					},
-					.depthStencilAttachmentReference = {
-						.index = 1,
-						.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-					},
-				},
-			},
-		});
-	}
-
 	void Physics2DRenderer::recreateMultisampleImage() {
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
 
@@ -143,97 +96,6 @@ namespace Trident {
 				.name = "Multisample attachment",
 			#endif
 		});
-	}
-
-	void Physics2DRenderer::recreateDepthStencilImage() {
-		const Extent2D swapchainExtent = getSwapchain()->getExtent();
-
-		depthStencilImage = renderPass->createDepthStencilAttachmentImage(
-			{
-				.type = ImageType::TYPE_2D,
-				.extent = {swapchainExtent.x, swapchainExtent.y, 1},
-				.mipLevelCount = 1,
-				.layerCount = 1,
-				#if defined(DEBUG_OBJECT_NAME)
-					.name = "Depth stencil attachment",
-				#endif
-			},
-			0
-		);
-	}
-
-	void Physics2DRenderer::recreateDepthStencilImageView() {
-		depthStencilImageView = depthStencilImage->createView({
-			.mipLevelOffset = 0,
-			.mipLevelCount = 1,
-			.layerOffset = 0,
-			.layerCount = 1,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Depth stencil attachment",
-			#endif
-		});
-	}
-
-	void Physics2DRenderer::recreateFramebuffers() {
-		const ref<Swapchain> swapchain = getSwapchain();
-
-		framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
-
-		FramebufferDescriptor framebufferDescriptor = {
-			.renderPass = renderPass,
-			.extent = swapchain->getExtent(),
-		};
-
-		if (SAMPLE_COUNT != ImageSampleCount::x1) {
-			framebufferDescriptor.imageViews = {layerInput->swapchainImageView, depthStencilImageView, nullptr};
-		}
-		else {
-			framebufferDescriptor.imageViews = {nullptr, depthStencilImageView};
-		}
-
-		#if defined(DEBUG_OBJECT_NAME)
-			sequence<char8> name;
-		#endif
-
-		uint32 framebufferIndex = 0;
-
-		while (framebufferIndex < framebuffers.count()) {
-			#if defined(DEBUG_OBJECT_NAME)
-				name = Logger::format("In flight []", framebufferIndex);
-
-				framebufferDescriptor.name = name;
-			#endif
-
-			if (SAMPLE_COUNT != ImageSampleCount::x1) {
-				framebufferDescriptor.imageViews[2] = swapchain->getImageView(framebufferIndex);
-			}
-			else {
-				framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
-			}
-
-			framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
-
-			framebufferIndex += 1;
-		}
-	}
-
-	void Physics2DRenderer::createCameraBuffer() {
-		const uint64 alignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
-
-		cameraBuffer = createDynamicBuffer({
-			.size = ceilPowerOf2(sizeof(Camera), alignment),
-			.usage = BufferUsage::UNIFORM,
-			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
-			.persistent = true,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Camera",
-			#endif
-		});
-
-		const BufferView<Camera> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
-
-		cameraMappedRange = cameraView.map();
-		cameraMappedRange->zoomLevel = DEFAULT_ZOOM_LEVEL;
 	}
 
 	void Physics2DRenderer::createViewBuffer() {
@@ -692,6 +554,11 @@ namespace Trident {
 			commandEncoder->draw(3, 1, 0, 0);
 		}
 
+		commandEncoder->endRenderPass();
+
+		// TODO(wip)
+		return;
+
 		const view<Geometry2D> geometries = scene->getGeometries();
 		const view<Hull2D> hulls = scene->getHulls();
 		const ComponentPool<Geometry2DComponent>& geometryComponentPool = scene->ecs.getComponentPool<Geometry2DComponent>();
@@ -834,9 +701,10 @@ namespace Trident {
 			}
 		}
 
-		recreateDepthStencilImage();
-		recreateDepthStencilImageView();
-		recreateFramebuffers();
+		depthStencilImage = createDepthStencilImage();
+		depthStencilImageView = createDepthStencilImageView();
+
+		createFramebuffers();
 
 		updateCameraProjection();
 		updateViewport();

@@ -1,12 +1,12 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-#pragma once
+#include "pch.hpp"
 
-#include "../../Physics2D/Renderer/Physics2DRenderer.hpp"
+#include "Physics2D/Renderer/Renderer.hpp"
 
 namespace Trident {
-	ref<GraphicsPipeline> Physics2DRenderer::createRigidBodyFillPipeline() const {
+	ref<GraphicsPipeline> Physics2DRenderer::createRigidBodyPlaceholderStrokePipeline() const {
 		VertexInputBinding vertexInputBindings[] = {
 			VertexInputBinding(InputRate::VERTEX),
 			VertexInputBinding(InputRate::INSTANCE),
@@ -14,10 +14,36 @@ namespace Trident {
 
 		vertexInputBindings[0].registerAttribute<decltype(Vertex::position)>();
 		vertexInputBindings[1].registerAttribute<decltype(RigidBody::world)>();
-		vertexInputBindings[1].registerAttribute<decltype(RigidBody::fillColor)>();
-		vertexInputBindings[1].registerAttribute<decltype(RigidBody::strokeColor)>();
-		vertexInputBindings[1].registerAttribute<decltype(RigidBody::depth)>();
 		vertexInputBindings[1].stride = sizeof(RigidBody);
+
+		const ShaderModuleDescriptor vertexShaderModuleDescriptor = {
+			.stage = ShaderStage::VERTEX,
+			.entryPoint = "main",
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Placeholder stroke vertex",
+			#endif
+		};
+
+		ref<ShaderModule> vertexShaderModule;
+
+		switch (getGraphicsApi()) {
+			case GraphicsAPI::DX12:
+			case GraphicsAPI::VK: {
+				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderStroke.vert");
+
+				break;
+			}
+			case GraphicsAPI::GL: {
+				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderStrokeSingleSet.vert");
+
+				break;
+			}
+			default: {
+				ENGINE_ERROR_UNSUPPORTED();
+
+				break;
+			}
+		}
 
 		const ColorBlendAttachment colorBlendAttachments[] = {
 			{
@@ -28,30 +54,21 @@ namespace Trident {
 		};
 
 		return createGraphicsPipeline({
-			.pipelineLayout = cameraViewPipelineLayout,
+			.pipelineLayout = placeholderPipelineLayout,
 			.vertexInputBindings = vertexInputBindings,
-			.vertexShaderModule = loadShaderModule(
-				{
-					.stage = ShaderStage::VERTEX,
-					.entryPoint = "main",
-					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Rigid body fill vertex",
-					#endif
-				},
-				"Physics2D/RigidBodyFill.vert"
-			),
+			.vertexShaderModule = vertexShaderModule,
 			.fragmentShaderModule = loadShaderModule(
 				{
 					.stage = ShaderStage::FRAGMENT,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Rigid body fill fragment",
+						.name = "Placeholder stroke fragment",
 					#endif
 				},
-				"Physics2D/FragmentRGBA.frag"
+				"Physics2D/PlaceholderStroke.frag"
 			),
-			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
-			.polygonMode = PolygonMode::FILL,
+			.primitiveTopology = PrimitiveTopology::LINE_STRIP,
+			.polygonMode = PolygonMode::LINE,
 			.cullMode = CullMode::BACK,
 			.frontFace = FrontFace::CLOCKWISE,
 			.lineWidth = 1.0f,
@@ -60,15 +77,13 @@ namespace Trident {
 				.attachments = colorBlendAttachments,
 			},
 			.depthStencilState = {
-				.depthTest = true,
-				.depthWrite = true,
-				.compareOperation = CompareOperation::GREATER_OR_EQUAL,
+				.depthTest = false,
 			},
 			.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
 			.renderPass = renderPass,
 			.subpassIndex = 0,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Rigid body fill",
+				.name = "Rigid body placeholder stroke",
 			#endif
 		});
 	}

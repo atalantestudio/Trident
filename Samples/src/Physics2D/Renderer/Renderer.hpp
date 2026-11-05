@@ -1,4 +1,4 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
@@ -7,12 +7,14 @@
 #include "Engine/API/Scene/Scene2D.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
+#include "Physics2D/Renderer/BuildOptions.hpp"
+
 namespace Trident {
 	// Toggle vertex/edge feature rendering.
-	#define SHOW_FEATURES
+	// #define SHOW_FEATURES
 
 	// Toggle closest point distance rendering.
-	#define SHOW_DISTANCE
+	// #define SHOW_DISTANCE
 
 	// TODO(physics/2d/renderer): Deprecate LayerInput (replaced by layer groups).
 	class Physics2DRenderer : public Renderer {
@@ -53,11 +55,16 @@ namespace Trident {
 			static constexpr ImageSampleCount SAMPLE_COUNT = ImageSampleCount::x1;
 
 		public:
-			void build() override;
+			void build(const PhysicsRendererBuildOptions2D& options);
 
 			inline float32 getZoomLevel() const {
 				return cameraMappedRange->zoomLevel;
 			}
+
+			void initializeGeometryBuffers(uint32 maxVertexCount, uint32 maxTransformCount);
+
+			// TODO(wip)
+			void copyGeometry() const;
 
 			void setScene(const Scene2D* scene);
 			void setWorld(Entity entity, const mat3x3<float32>& world) const;
@@ -84,13 +91,16 @@ namespace Trident {
 			void clearRegisteredData();
 
 		private:
-			void setupRenderPass();
+			void build() override;
+
+			ref<RenderPass> createRenderPass() const;
 
 			void recreateMultisampleImage();
 			void recreateMultisampleImageView();
-			void recreateDepthStencilImage();
-			void recreateDepthStencilImageView();
-			void recreateFramebuffers();
+			ref<Image> createDepthStencilImage() const;
+			ref<ImageView> createDepthStencilImageView() const;
+
+			void createFramebuffers();
 
 			void createCameraBuffer();
 			void createViewBuffer();
@@ -198,7 +208,9 @@ namespace Trident {
 			#endif
 
 			ref<Buffer> vertexBuffer;
+			ref<Buffer> transformBuffer;
 			ref<Buffer> indexBuffer;
+
 			ref<Buffer> rigidBodyBuffer;
 			ref<Buffer> centerOfMassBuffer;
 
