@@ -65,27 +65,28 @@ namespace Trident {
 	}
 
 	void narrowPhase(PhysicsSimulation2D& simulation) {
-		static constexpr Collider2D COLLIDER_2D_TABLE[MAX_HULL_2D_TYPE_COUNT][MAX_HULL_2D_TYPE_COUNT] = {
-			{nullptr,                      nullptr,                      nullptr                     },
-			{nullptr,                      CircleCircleCollider,         CircleConvexHullCollider    },
-			{nullptr,                      nullptr,                      ConvexHullConvexHullCollider},
+		static constexpr uint32 SHAPE_TYPE_COUNT = static_cast<uint32>(ShapeType2D::count);
+		static constexpr Collider2D COLLIDER_2D_TABLE[SHAPE_TYPE_COUNT][SHAPE_TYPE_COUNT] = {
+			{CircleCircle2D, CircleCapsule2D,  CircleConvexHull2D    },
+			{nullptr,        CapsuleCapsule2D, CapsuleConvexHull2D   },
+			{nullptr,        nullptr,          ConvexHullConvexHull2D},
 		};
 
 		ContactPair2D contactPair;
 
 		for (const CollisionPair2D collisionPair : simulation.collisionPairs) {
-			const Hull2D& hullA = getHull(simulation, collisionPair.shapeIdA);
-			const Hull2D& hullB = getHull(simulation, collisionPair.shapeIdB);
+			const Shape2D& shapeA = simulation.shapes[collisionPair.shapeIdA];
+			const Shape2D& shapeB = simulation.shapes[collisionPair.shapeIdB];
 
-			const RigidBody2DComponent& rigidBodyA = simulation.scene->ecs.getComponent<RigidBody2DComponent>(collisionPair.shapeIdA);
-			const RigidBody2DComponent& rigidBodyB = simulation.scene->ecs.getComponent<RigidBody2DComponent>(collisionPair.shapeIdB);
+			const RigidBody2D& rigidBodyA = simulation.rigidBodies[shapeA.rigidBodyId];
+			const RigidBody2D& rigidBodyB = simulation.rigidBodies[shapeB.rigidBodyId];
 
 			// The broad phase must ensure that A hull type < B hull type.
-			const Collider2D collider = COLLIDER_2D_TABLE[static_cast<uint32>(hullA.type)][static_cast<uint32>(hullB.type)];
+			const Collider2D collider = COLLIDER_2D_TABLE[static_cast<uint32>(shapeA.type)][static_cast<uint32>(shapeB.type)];
 
 			DEBUG_ASSERT(collider != nullptr);
 
-			if (!collider(rigidBodyA, rigidBodyB, hullA, hullB, &contactPair.manifold)) {
+			if (!collider(shapeA, shapeB, rigidBodyA, rigidBodyB, &contactPair.manifold)) {
 				// Either a degenerate case, or the entities are not overlapping.
 				simulation.contactPairs.erase(collisionPair);
 

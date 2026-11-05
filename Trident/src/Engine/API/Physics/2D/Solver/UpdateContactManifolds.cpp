@@ -20,8 +20,9 @@ namespace Trident {
 			RigidBody2D& rigidBodyA = simulation.rigidBodies[shapeA.rigidBodyId];
 			RigidBody2D& rigidBodyB = simulation.rigidBodies[shapeB.rigidBodyId];
 
-			const Hull2D& hullA = getHull(simulation, pair.first.shapeIdA);
-			const Hull2D& hullB = getHull(simulation, pair.first.shapeIdB);
+			// TODO(physics/2d): Retrieve hulls.
+			const Hull2D hullA = {};
+			const Hull2D hullB = {};
 
 			contactPair.manifold.tangent = perpendicularRight(contactPair.manifold.normal);
 			contactPair.combinedFriction = sqrt(shapeA.material.friction * shapeB.material.friction);

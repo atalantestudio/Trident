@@ -20,8 +20,7 @@ namespace Trident {
 	class Physics2DRenderer : public Renderer {
 		private:
 			struct Camera {
-				mat4x3<float32> projection;
-				float32 zoomLevel;
+				mat4x3<float32> projectionAndZoomLevel;
 			};
 
 			struct View {
@@ -57,13 +56,14 @@ namespace Trident {
 		public:
 			void build(const PhysicsRendererBuildOptions2D& options);
 
+			void postBuild() override;
+
+			StaticMemoryDescriptor getStaticMemoryDescriptor() const override;
+
 			inline float32 getZoomLevel() const {
-				return cameraMappedRange->zoomLevel;
+				return cameraMappedRange->projectionAndZoomLevel.m[2].w;
 			}
 
-			void initializeGeometryBuffers(uint32 maxVertexCount, uint32 maxTransformCount);
-
-			// TODO(wip)
 			void copyGeometry() const;
 
 			void setScene(const Scene2D* scene);
@@ -102,6 +102,9 @@ namespace Trident {
 
 			void createFramebuffers();
 
+			ref<Buffer> createVertexBuffer(uint32 vertexCount) const;
+			ref<Buffer> createTransformBuffer(uint32 transformCount) const;
+			ref<Buffer> createIndexBuffer(uint32 indexCount) const;
 			void createCameraBuffer();
 			void createViewBuffer();
 			void createPlaceholderBuffer();
@@ -121,6 +124,7 @@ namespace Trident {
 			void createPlaceholderPipelineLayout();
 
 			ref<GraphicsPipeline> createGridPipeline() const;
+			ref<GraphicsPipeline> createCircleFillPipeline() const;
 			ref<GraphicsPipeline> createRigidBodyFillPipeline() const;
 			ref<GraphicsPipeline> createRigidBodyStrokePipeline() const;
 			ref<GraphicsPipeline> createCenterOfMassPipeline() const;
@@ -154,8 +158,10 @@ namespace Trident {
 
 		public:
 			LayerInput* layerInput;
-
 			vec2<float32> cameraPosition = {0.0_m, 0.0_m};
+
+			uint32 transformCount;
+			Transform2D* transformMappedRange;
 
 		private:
 			const Scene2D* scene = nullptr;
@@ -178,6 +184,7 @@ namespace Trident {
 			ref<PipelineLayout> placeholderPipelineLayout;
 
 			ref<GraphicsPipeline> gridPipeline;
+			ref<GraphicsPipeline> circleFillPipeline;
 			ref<GraphicsPipeline> rigidBodyFillPipeline;
 			ref<GraphicsPipeline> rigidBodyStrokePipeline;
 			ref<GraphicsPipeline> centerOfMassPipeline;
@@ -236,5 +243,7 @@ namespace Trident {
 				uint32 vertexFeatureCount = 0;
 				uint32 edgeFeatureCount = 0;
 			#endif
+
+			BufferView<Transform2D> transformBufferView;
 	};
 }

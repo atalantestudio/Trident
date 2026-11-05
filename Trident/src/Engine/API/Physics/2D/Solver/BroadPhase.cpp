@@ -9,98 +9,111 @@ namespace Trident {
 	// TODO(physics/2d/broad-phase): Improve broad-phase.
 	void broadPhase(PhysicsSimulation2D& simulation) {
 		CollisionPair2D pair;
-		pair.shapeIdA = 0;
+		uint32 shapeIdIndexA = 0;
+		uint32 shapeIdIndexB;
 
-		while (pair.shapeIdA < simulation.broadPhase.staticShapeIndices.count()) {
-			const Shape2D& shape = simulation.shapes[simulation.broadPhase.staticShapeIndices[pair.shapeIdA]];
+		while (shapeIdIndexA < simulation.broadPhase.usedStaticShapeIdCount) {
+			pair.shapeIdA = simulation.broadPhase.staticShapeIds[shapeIdIndexA];
+
+			const Shape2D& shape = simulation.shapes[pair.shapeIdA];
 			const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 
 			if (rigidBody.flags & RigidBodyFlags2D::DISABLE_SIMULATION) {
-				pair.shapeIdA += 1;
+				shapeIdIndexA += 1;
 
 				continue;
 			}
 
-			pair.shapeIdB = 0;
+			shapeIdIndexB = 0;
 
-			while (pair.shapeIdB < simulation.broadPhase.dynamicShapeIndices.count()) {
-				const Shape2D& shape = simulation.shapes[simulation.broadPhase.dynamicShapeIndices[pair.shapeIdB]];
+			while (shapeIdIndexB < simulation.broadPhase.usedDynamicShapeIdCount) {
+				pair.shapeIdB = simulation.broadPhase.dynamicShapeIds[shapeIdIndexB];
+
+				const Shape2D& shape = simulation.shapes[pair.shapeIdB];
 				const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 
 				if (rigidBody.flags & RigidBodyFlags2D::DISABLE_SIMULATION) {
-					pair.shapeIdB += 1;
+					shapeIdIndexB += 1;
 
 					continue;
 				}
 
 				simulation.collisionPairs.emplace_back(pair);
 
-				pair.shapeIdB += 1;
+				shapeIdIndexB += 1;
 			}
 
-			pair.shapeIdA += 1;
+			shapeIdIndexA += 1;
 		}
 
-		pair.shapeIdA = 0;
+		shapeIdIndexA = 0;
 
-		while (pair.shapeIdA < simulation.broadPhase.kinematicShapeIndices.count()) {
-			const Shape2D& shape = simulation.shapes[simulation.broadPhase.kinematicShapeIndices[pair.shapeIdA]];
+		while (shapeIdIndexA < simulation.broadPhase.usedKinematicShapeIdCount) {
+			pair.shapeIdA = simulation.broadPhase.kinematicShapeIds[shapeIdIndexA];
+
+			const Shape2D& shape = simulation.shapes[pair.shapeIdA];
 			const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 
 			if (rigidBody.flags & RigidBodyFlags2D::DISABLE_SIMULATION) {
-				pair.shapeIdA += 1;
+				shapeIdIndexA += 1;
 
 				continue;
 			}
 
-			while (pair.shapeIdB < simulation.broadPhase.dynamicShapeIndices.count()) {
-				const Shape2D& shape = simulation.shapes[simulation.broadPhase.dynamicShapeIndices[pair.shapeIdB]];
+			while (shapeIdIndexB < simulation.broadPhase.usedDynamicShapeIdCount) {
+				pair.shapeIdB = simulation.broadPhase.dynamicShapeIds[shapeIdIndexB];
+
+				const Shape2D& shape = simulation.shapes[pair.shapeIdB];
 				const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 
 				if (rigidBody.flags & RigidBodyFlags2D::DISABLE_SIMULATION) {
-					pair.shapeIdB += 1;
+					shapeIdIndexB += 1;
 
 					continue;
 				}
 
 				simulation.collisionPairs.emplace_back(pair);
 
-				pair.shapeIdB += 1;
+				shapeIdIndexB += 1;
 			}
 
-			pair.shapeIdA += 1;
+			shapeIdIndexA += 1;
 		}
 
-		pair.shapeIdA = 0;
+		shapeIdIndexA = 0;
 
-		while (pair.shapeIdA < simulation.broadPhase.dynamicShapeIndices.count()) {
-			const Shape2D& shape = simulation.shapes[simulation.broadPhase.dynamicShapeIndices[pair.shapeIdA]];
+		while (shapeIdIndexA < simulation.broadPhase.usedDynamicShapeIdCount) {
+			pair.shapeIdA = simulation.broadPhase.dynamicShapeIds[shapeIdIndexA];
+
+			const Shape2D& shape = simulation.shapes[pair.shapeIdA];
 			const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 
 			if (rigidBody.flags & RigidBodyFlags2D::DISABLE_SIMULATION) {
-				pair.shapeIdA += 1;
+				shapeIdIndexA += 1;
 
 				continue;
 			}
 
-			pair.shapeIdB = pair.shapeIdA + 1;
+			shapeIdIndexB = shapeIdIndexA + 1;
 
-			while (pair.shapeIdB < simulation.broadPhase.dynamicShapeIndices.count()) {
-				const Shape2D& shape = simulation.shapes[simulation.broadPhase.dynamicShapeIndices[pair.shapeIdB]];
+			while (shapeIdIndexB < simulation.broadPhase.usedDynamicShapeIdCount) {
+				pair.shapeIdB = simulation.broadPhase.dynamicShapeIds[shapeIdIndexB];
+
+				const Shape2D& shape = simulation.shapes[pair.shapeIdB];
 				const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 
 				if (rigidBody.flags & RigidBodyFlags2D::DISABLE_SIMULATION) {
-					pair.shapeIdB += 1;
+					shapeIdIndexB += 1;
 
 					continue;
 				}
 
 				simulation.collisionPairs.emplace_back(pair);
 
-				pair.shapeIdB += 1;
+				shapeIdIndexB += 1;
 			}
 
-			pair.shapeIdA += 1;
+			shapeIdIndexA += 1;
 		}
 	}
 }

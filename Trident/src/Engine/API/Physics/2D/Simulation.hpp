@@ -8,15 +8,12 @@
 #include "Engine/API/Physics/2D/ContactPair2D.hpp"
 #include "Engine/API/Physics/2D/Shape2D.hpp"
 #include "Engine/API/Physics/2D/RigidBody.hpp"
-#include "Engine/API/Scene/Scene2D.hpp"
 
 namespace Trident {
 	#define ENABLE_PHYSICS_2D_IMPULSE_ACCUMULATION
 	#define ENABLE_PHYSICS_2D_WARM_STARTING
 
 	struct PhysicsSimulation2DDescriptor {
-		Scene2D* scene;
-
 		float64 deltaTime;
 
 		/// Left-handed.
@@ -33,14 +30,17 @@ namespace Trident {
 	static constexpr float32 ALLOWED_PENETRATION = 0.01f;
 
 	struct BroadPhase2D {
-		sequence<uint32> staticShapeIndices;
-		sequence<uint32> kinematicShapeIndices;
-		sequence<uint32> dynamicShapeIndices;
+		sequence<ShapeID2D> staticShapeIds;
+		sequence<ShapeID2D> kinematicShapeIds;
+		sequence<ShapeID2D> dynamicShapeIds;
+
+		uint32 usedStaticShapeIdCount;
+		uint32 usedKinematicShapeIdCount;
+		uint32 usedDynamicShapeIdCount;
 	};
 
 	/// A simulated 2D physics world.
 	struct PhysicsSimulation2D {
-		Scene2D* scene;
 		float32 deltaTime;
 		float32 inverseDeltaTime;
 		vec2<float32> gravity;
@@ -72,10 +72,8 @@ namespace Trident {
 	/// Uses Semi-Implicit Euler.
 	void integrate(PhysicsSimulation2D& simulation);
 
-	const Hull2D& getHull(const PhysicsSimulation2D& simulation, Entity entity);
-
 	RigidBodyID2D createRigidBody(PhysicsSimulation2D& simulation, const RigidBodyDescriptor2D& descriptor);
-	ShapeID2D createShape(PhysicsSimulation2D& simulation, const ShapeDescriptor2D& descriptor);
+	ShapeID2D createShape(PhysicsSimulation2D& simulation, const ShapeDescriptor2D& descriptor, void* typeDescriptor);
 
 	/// Applies a linear force to the body.
 	void applyForce(PhysicsSimulation2D& simulation, RigidBodyID2D rigidBodyId, vec2<float32> F);

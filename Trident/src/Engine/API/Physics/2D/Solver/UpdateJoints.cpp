@@ -9,7 +9,7 @@
 
 namespace Trident {
 	void updateJoints(PhysicsSimulation2D& simulation) {
-		const ComponentPool<Joint2D>& jointPool = simulation.scene->ecs.getComponentPool<Joint2D>();
+		/* const ComponentPool<Joint2D>& jointPool = simulation.scene->ecs.getComponentPool<Joint2D>();
 		uint32 componentIndex = 0;
 
 		while (componentIndex < jointPool.componentCount) {
@@ -59,6 +59,6 @@ namespace Trident {
 			#endif
 
 			componentIndex += 1;
-		}
+		} */
 	}
 }

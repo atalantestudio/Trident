@@ -22,6 +22,6 @@ namespace Trident {
 		const BufferView<Camera> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
 
 		cameraMappedRange = cameraView.map();
-		cameraMappedRange->zoomLevel = DEFAULT_ZOOM_LEVEL;
+		cameraMappedRange->projectionAndZoomLevel.m[2].w = DEFAULT_ZOOM_LEVEL;
 	}
 }

@@ -10,7 +10,9 @@
 namespace Trident {
 	class Physics2DSceneLayer : public Layer {
 		public:
-			void initialize() override {}
+			void initialize() override;
+
+			StaticMemoryDescriptor getStaticMemoryDescriptor() const override;
 
 			void postConstruct() override;
 
@@ -22,8 +24,6 @@ namespace Trident {
 
 		private:
 			vec2<float32> getNdcMousePosition() const;
-
-			void loadScene();
 
 			void checkHover();
 

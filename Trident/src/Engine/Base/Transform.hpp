@@ -8,6 +8,7 @@
 namespace Trident {
 	struct Transform2D {
 		vec2<float32> position;
+		vec2<float32> centroid;
 		float32 rotation;
 	};
 

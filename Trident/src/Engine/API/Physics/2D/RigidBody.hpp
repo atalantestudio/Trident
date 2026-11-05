@@ -27,14 +27,13 @@ namespace Trident {
 	};
 
 	struct RigidBody2D {
+		RigidBodyType type;
+
 		vec2<float32> position;
 		float32 rotation;
 
-		/// Position of the centroid in world space.
-		vec2<float32> worldCentroid;
-
 		/// Position of the centroid in local space.
-		vec2<float32> localCentroid;
+		vec2<float32> centroid;
 
 		RigidBodyFlags2D flags;
 

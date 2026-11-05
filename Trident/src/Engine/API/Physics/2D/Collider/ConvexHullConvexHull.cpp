@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/API/Physics/2D/Collider/Collider2D.hpp"
+#include "Engine/API/Physics/2D/Feature2D.hpp"
 #include "Engine/API/Physics/2D/SAT2D.hpp"
 
 namespace Trident {
@@ -114,7 +115,14 @@ namespace Trident {
 		return clippedEdge;
 	}
 
-	bool ConvexHullConvexHullCollider(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB, ContactManifold2D* contactManifold) {
+	bool ConvexHullConvexHull2D(const Shape2D& shapeA, const Shape2D& shapeB, const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, ContactManifold2D* contactManifold) {
+		// TODO(physics/2d/collider/convex-hull-convex-hull)
+		ENGINE_ERROR_UNIMPLEMENTED();
+
+		return false;
+	}
+
+	/* bool ConvexHullConvexHullCollider(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB, ContactManifold2D* contactManifold) {
 		const SAT2DOutput sat = SAT2D(A, B, hullA, hullB);
 
 		if (sat.separation > 0.0f) {
@@ -205,5 +213,5 @@ namespace Trident {
 		}
 
 		return contactManifold->contactCount > 0;
-	}
+	} */
 }

@@ -9,66 +9,6 @@
 #include "Physics2D/Renderer/Renderer.hpp"
 
 namespace Trident {
-	void Physics2DRenderer::build() {
-		renderPass = createRenderPass();
-
-		if (SAMPLE_COUNT != ImageSampleCount::x1) {
-			if (layerInput->swapchainImage == nullptr) {
-				recreateMultisampleImage();
-				recreateMultisampleImageView();
-			}
-		}
-
-		depthStencilImage = createDepthStencilImage();
-		depthStencilImageView = createDepthStencilImageView();
-
-		createFramebuffers();
-
-		createCameraBuffer();
-		createViewBuffer();
-		createPlaceholderBuffer();
-
-		#if defined(SHOW_DISTANCE)
-			createClosestPointBuffer();
-		#endif
-
-		#if defined(SHOW_FEATURES)
-			createVertexFeatureBuffer();
-			createEdgeFeatureBuffer();
-		#endif
-
-		createCameraViewDescriptorSetLayout();
-		createPlaceholderDescriptorSetLayout();
-
-		allocateDescriptorSets();
-
-		updateCameraViewDescriptorSet();
-		updatePlaceholderDescriptorSet();
-
-		createCameraViewPipelineLayout();
-		createPlaceholderPipelineLayout();
-
-		gridPipeline = createGridPipeline();
-		rigidBodyFillPipeline = createRigidBodyFillPipeline();
-		rigidBodyStrokePipeline = createRigidBodyStrokePipeline();
-		centerOfMassPipeline = createCenterOfMassPipeline();
-		rigidBodyPlaceholderFillPipeline = createRigidBodyPlaceholderFillPipeline();
-		rigidBodyPlaceholderStrokePipeline = createRigidBodyPlaceholderStrokePipeline();
-		rigidBodyPlaceholderCenterOfMassPipeline = createRigidBodyPlaceholderCenterOfMassPipeline();
-
-		#if defined(SHOW_DISTANCE)
-			distancePipeline = createDistancePipeline();
-		#endif
-
-		#if defined(SHOW_FEATURES)
-			vertexFeaturePipeline = createVertexFeaturePipeline();
-			edgeFeaturePipeline = createEdgeFeaturePipeline();
-		#endif
-
-		updateCameraProjection();
-		updateViewport();
-	}
-
 	void Physics2DRenderer::recreateMultisampleImage() {
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
 
@@ -498,11 +438,12 @@ namespace Trident {
 		const vec2<float32> viewport = vec2<float32>(getSwapchain()->getExtent());
 		const vec2<float32> origin = -cameraPosition / (viewport * 0.5f);
 		const mat3x3<float32> P = orthographic(origin, viewport);
+		const float32 zoomLevel = getZoomLevel();
 
-		cameraMappedRange->projection = {{
+		cameraMappedRange->projectionAndZoomLevel = {{
 			{P[0].x, P[0].y, P[0].z, 1.0f},
 			{P[1].x, P[1].y, P[1].z, 1.0f},
-			{P[2].x, P[2].y, P[2].z, 1.0f},
+			{P[2].x, P[2].y, P[2].z, zoomLevel},
 		}};
 	}
 
@@ -518,7 +459,7 @@ namespace Trident {
 			delta /= abs(delta);
 		}
 
-		cameraMappedRange->zoomLevel = clamp(cameraMappedRange->zoomLevel + delta, MIN_ZOOM_LEVEL, MAX_ZOOM_LEVEL);
+		cameraMappedRange->projectionAndZoomLevel.m[2].w = clamp(getZoomLevel() + delta, MIN_ZOOM_LEVEL, MAX_ZOOM_LEVEL);
 
 		updateCameraProjection();
 	}
@@ -552,6 +493,16 @@ namespace Trident {
 			commandEncoder->bindGraphicsPipeline(gridPipeline);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
 			commandEncoder->draw(3, 1, 0, 0);
+		}
+
+		// Circle fill
+		{
+			commandEncoder->bindGraphicsPipeline(circleFillPipeline);
+			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
+			commandEncoder->bindVertexBuffer(1, transformBuffer, 0);
+			commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(indexBuffer, 0);
+			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
+			commandEncoder->drawIndexed(6, transformCount, 0, 0, 0);
 		}
 
 		commandEncoder->endRenderPass();

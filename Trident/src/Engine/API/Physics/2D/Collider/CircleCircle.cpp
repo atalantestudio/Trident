@@ -6,38 +6,31 @@
 #include "Engine/API/Physics/2D/Collider/Collider2D.hpp"
 
 namespace Trident {
-	bool CircleCircleCollider(
-		const RigidBody2DComponent& A,
-		const RigidBody2DComponent& B,
-		const Hull2D& hullA,
-		const Hull2D& hullB,
-		ContactManifold2D* contactManifold
-	) {
-		const vec2<float32> AB = B.position - A.position;
-		const float32 lengthAB = lengthSquared(AB);
+	bool CircleCircle2D(const Shape2D& shapeA, const Shape2D& shapeB, const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, ContactManifold2D* contactManifold) {
+		const vec2<float32> ab = rigidBodyB.position - rigidBodyA.position;
+		const float32 lengthSquaredAB = lengthSquared(ab);
 
-		if (abs(lengthAB) < 0.001f) {
+		if (abs(lengthSquaredAB) < 0.001f) {
 			// Degenerate case: The circles are coincident.
 			return false;
 		}
 
-		// The scaling factor is assumed to be the same in both axes.
-		const float32 scaleA = A.scale[0];
-		const float32 scaleB = B.scale[0];
-
-		const float32 d = lengthAB - pow(hullA.radius * scaleA + hullB.radius * scaleB, 2.0f);
+		const float32 rArB = shapeA.circle.radius + shapeB.circle.radius;
+		const float32 d = lengthSquaredAB - rArB * rArB;
 
 		if (d > 0.0f) {
 			return false;
 		}
 
-		const vec2<float32> sA = A.position + hullA.support(AB) * scaleA;
-		const vec2<float32> sB = B.position + hullB.support(-AB) * scaleB;
-
-		contactManifold->normal = normalized(AB);
+		contactManifold->normal = normalized(ab);
 		contactManifold->contactCount = 1;
-		contactManifold->contacts[0].position = (sA + sB) * 0.5f;
-		contactManifold->contacts[0].separation = d;
+
+		const vec2<float32> sA = rigidBodyA.position - contactManifold->normal * shapeA.circle.radius;
+		const vec2<float32> sB = rigidBodyB.position + contactManifold->normal * shapeB.circle.radius;
+
+		Contact2D& contact = contactManifold->contacts[0];
+		contact.position = (sA + sB) * 0.5f;
+		contact.separation = d;
 
 		return true;
 	}
