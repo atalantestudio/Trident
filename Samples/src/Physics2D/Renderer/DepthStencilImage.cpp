@@ -25,6 +25,7 @@ namespace Trident {
 
 	ref<ImageView> Physics2DRenderer::createDepthStencilImageView() const {
 		return depthStencilImage->createView({
+			.type = ImageViewType::TYPE_2D,
 			.mipLevelOffset = 0,
 			.mipLevelCount = 1,
 			.layerOffset = 0,

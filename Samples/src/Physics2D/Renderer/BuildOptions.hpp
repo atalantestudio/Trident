@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Engine/API/Graphics/ImageSampleCount.hpp"
+
 namespace Trident {
 	struct PhysicsRendererBuildOptions2D {
 		/// Total number of hull vertices.
@@ -10,5 +12,7 @@ namespace Trident {
 
 		/// Total number of transforms.
 		uint32 maxTransformCount;
+
+		ImageSampleCount sampleCount;
 	};
 }

@@ -6,14 +6,26 @@
 #include "Physics2D/Renderer/Renderer.hpp"
 
 namespace Trident {
+	void Physics2DRenderer::build(const PhysicsRendererBuildOptions2D& options) {
+		sampleCount = options.sampleCount;
+
+		build();
+
+		const uint32 vertexCount = options.maxVertexCount + 4;
+		const uint32 transformCount = options.maxTransformCount;
+		const uint32 indexCount = vertexCount / 2 * 3;
+
+		vertexBuffer = createVertexBuffer(vertexCount);
+		transformBuffer = createTransformBuffer(transformCount);
+		indexBuffer = createIndexBuffer(indexCount);
+	}
+
 	void Physics2DRenderer::build() {
 		renderPass = createRenderPass();
 
-		if (SAMPLE_COUNT != ImageSampleCount::x1) {
-			if (layerInput->swapchainImage == nullptr) {
-				recreateMultisampleImage();
-				recreateMultisampleImageView();
-			}
+		if (sampleCount != ImageSampleCount::x1) {
+			colorImage = createColorImage();
+			colorImageView = createColorImageView();
 		}
 
 		depthStencilImage = createDepthStencilImage();
@@ -21,7 +33,8 @@ namespace Trident {
 
 		createFramebuffers();
 
-		createCameraBuffer();
+		cameraBuffer = createCameraBuffer();
+
 		createViewBuffer();
 		createPlaceholderBuffer();
 
@@ -37,10 +50,16 @@ namespace Trident {
 		createCameraViewDescriptorSetLayout();
 		createPlaceholderDescriptorSetLayout();
 
-		allocateDescriptorSets();
+		const ref<DescriptorSetLayout> descriptorSetLayouts[] = {
+			cameraViewDescriptorSetLayout,
+			placeholderDescriptorSetLayout,
+		};
 
-		updateCameraViewDescriptorSet();
-		updatePlaceholderDescriptorSet();
+		// TODO(base/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
+		sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(descriptorSetLayouts);
+
+		cameraViewDescriptorSet = descriptorSets[0];
+		placeholderDescriptorSet = descriptorSets[1];
 
 		createCameraViewPipelineLayout();
 		createPlaceholderPipelineLayout();
@@ -62,14 +81,28 @@ namespace Trident {
 			vertexFeaturePipeline = createVertexFeaturePipeline();
 			edgeFeaturePipeline = createEdgeFeaturePipeline();
 		#endif
+	}
 
-		updateCameraProjection();
-		updateViewport();
+	StaticMemoryDescriptor Physics2DRenderer::getStaticMemoryDescriptor() const {
+		return {
+			.buffers = view<ref<Buffer>>(&vertexBuffer, 4),
+			.images = {},
+		};
 	}
 
 	void Physics2DRenderer::postBuild() {
 		transformBufferView = transformBuffer->createView<Transform2D>(0, transformBuffer->getSize());
 		transformCount = 0;
 		transformMappedRange = transformBufferView.map();
+
+		cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
+		cameraMappedRange = cameraView.map();
+		cameraMappedRange->projectionAndZoomLevel.m[2].w = DEFAULT_ZOOM_LEVEL;
+
+		updateCameraViewDescriptorSet();
+		updatePlaceholderDescriptorSet();
+
+		updateCameraProjection();
+		updateViewport();
 	}
 }

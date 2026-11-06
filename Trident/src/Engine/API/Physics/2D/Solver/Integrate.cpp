@@ -20,12 +20,12 @@ namespace Trident {
 				continue;
 			}
 
-			rigidBody.position += rigidBody.state.linearVelocity * simulation.deltaTime;
-			rigidBody.rotation += rigidBody.state.angularVelocity * simulation.deltaTime;
+			rigidBody.position += rigidBody.linearVelocity * simulation.deltaTime;
+			rigidBody.rotation += rigidBody.angularVelocity * simulation.deltaTime;
 
 			// TODO(physics/2d/integration)
-			// rigidBody.state.linearVelocity += (rigidBody.force * rigidBody.inverseMass + simulation.gravity) * simulation.halfDeltaTime;
-			// rigidBody.state.angularVelocity += rigidBody.inverseInertia * simulation.halfDeltaTime;
+			// rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + simulation.gravity) * simulation.halfDeltaTime;
+			// rigidBody.angularVelocity += rigidBody.inverseInertia * simulation.halfDeltaTime;
 
 			rigidBody.force = {0.0_N, 0.0_N};
 

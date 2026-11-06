@@ -9,35 +9,6 @@
 #include "Physics2D/Renderer/Renderer.hpp"
 
 namespace Trident {
-	void Physics2DRenderer::recreateMultisampleImage() {
-		const Extent2D swapchainExtent = getSwapchain()->getExtent();
-
-		layerInput->swapchainImage = renderPass->createColorAttachmentImage(
-			{
-				.type = ImageType::TYPE_2D,
-				.extent = {swapchainExtent.x, swapchainExtent.y, 1},
-				.mipLevelCount = 1,
-				.layerCount = 1,
-				#if defined(DEBUG_OBJECT_NAME)
-					.name = "Multisample attachment",
-				#endif
-			},
-			0
-		);
-	}
-
-	void Physics2DRenderer::recreateMultisampleImageView() {
-		layerInput->swapchainImageView = layerInput->swapchainImage->createView({
-			.mipLevelOffset = 0,
-			.mipLevelCount = 1,
-			.layerOffset = 0,
-			.layerCount = 1,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Multisample attachment",
-			#endif
-		});
-	}
-
 	void Physics2DRenderer::createViewBuffer() {
 		const uint64 alignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
 
@@ -185,19 +156,6 @@ namespace Trident {
 				.name = "Placeholder",
 			#endif
 		});
-	}
-
-	void Physics2DRenderer::allocateDescriptorSets() {
-		const ref<DescriptorSetLayout> descriptorSetLayouts[] = {
-			cameraViewDescriptorSetLayout,
-			placeholderDescriptorSetLayout,
-		};
-
-		// TODO(base/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
-		sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(descriptorSetLayouts);
-
-		cameraViewDescriptorSet = descriptorSets[0];
-		placeholderDescriptorSet = descriptorSets[1];
 	}
 
 	void Physics2DRenderer::setScene(const Scene2D* scene) {
@@ -470,14 +428,14 @@ namespace Trident {
 		const float32 height = static_cast<float32>(swapchainExtent.y);
 
 		// TODO(physics/2d/renderer): Store the clear values inside the renderer.
-		sequence<ClearValue> clearValues(2 + (SAMPLE_COUNT != ImageSampleCount::x1));
+		sequence<ClearValue> clearValues(2 + (sampleCount != ImageSampleCount::x1));
 		clearValues[0] = {1.0f, 1.0f, 1.0f, 1.0f};
 		clearValues[1] = {
 			.depth = 0.0f,
 			.stencil = 0,
 		};
 
-		if (SAMPLE_COUNT != ImageSampleCount::x1) {
+		if (sampleCount != ImageSampleCount::x1) {
 			clearValues[2] = {0.0f, 0.0f, 0.0f, 1.0f};
 		}
 
@@ -645,11 +603,9 @@ namespace Trident {
 	#endif
 
 	void Physics2DRenderer::resize(WindowResizeEvent& event) {
-		if (SAMPLE_COUNT != ImageSampleCount::x1) {
-			if (layerInput->swapchainImage == nullptr) {
-				recreateMultisampleImage();
-				recreateMultisampleImageView();
-			}
+		if (sampleCount != ImageSampleCount::x1) {
+			colorImage = createColorImage();
+			colorImageView = createColorImageView();
 		}
 
 		depthStencilImage = createDepthStencilImage();

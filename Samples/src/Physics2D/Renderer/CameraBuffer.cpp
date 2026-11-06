@@ -6,10 +6,10 @@
 #include "Physics2D/Renderer/Renderer.hpp"
 
 namespace Trident {
-	void Physics2DRenderer::createCameraBuffer() {
+	ref<Buffer> Physics2DRenderer::createCameraBuffer() const {
 		const uint64 alignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
 
-		cameraBuffer = createDynamicBuffer({
+		return createStaticBuffer({
 			.size = ceilPowerOf2(sizeof(Camera), alignment),
 			.usage = BufferUsage::UNIFORM,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
@@ -18,10 +18,5 @@ namespace Trident {
 				.name = "Camera",
 			#endif
 		});
-
-		const BufferView<Camera> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
-
-		cameraMappedRange = cameraView.map();
-		cameraMappedRange->projectionAndZoomLevel.m[2].w = DEFAULT_ZOOM_LEVEL;
 	}
 }

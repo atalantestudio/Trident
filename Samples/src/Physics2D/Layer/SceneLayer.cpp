@@ -3,10 +3,6 @@
 
 #include "pch.hpp"
 
-#include "Engine/API/Physics/2D/Constraint/RotationConstraint2D.hpp"
-#include "Engine/API/Physics/2D/Joint2D.hpp"
-#include "Engine/API/Scene/Scene2D.hpp"
-
 #include "SampleApplication.hpp"
 #include "Physics2D/Layer/SceneLayer.hpp"
 
@@ -16,6 +12,7 @@ namespace Trident {
 		renderer.build({
 			.maxVertexCount = 0,
 			.maxTransformCount = 128,
+			.sampleCount = ImageSampleCount::x1,
 		});
 	}
 

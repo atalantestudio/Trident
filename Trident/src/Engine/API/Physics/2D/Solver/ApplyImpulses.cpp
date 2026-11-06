@@ -7,7 +7,7 @@
 
 namespace Trident {
 	inline static vec2<float32> calculateRelativeVelocity(const RigidBody2D& A, const RigidBody2D& B, vec2<float32> rA, vec2<float32> rB) {
-		return B.state.linearVelocity + perpendicularRight(rB) * B.state.angularVelocity - A.state.linearVelocity - perpendicularRight(rA) * A.state.angularVelocity;
+		return B.linearVelocity + perpendicularRight(rB) * B.angularVelocity - A.linearVelocity - perpendicularRight(rA) * A.angularVelocity;
 	}
 
 	void applyImpulses(PhysicsSimulation2D& simulation) {

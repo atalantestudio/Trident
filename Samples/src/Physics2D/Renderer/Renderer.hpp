@@ -16,7 +16,6 @@ namespace Trident {
 	// Toggle closest point distance rendering.
 	// #define SHOW_DISTANCE
 
-	// TODO(physics/2d/renderer): Deprecate LayerInput (replaced by layer groups).
 	class Physics2DRenderer : public Renderer {
 		private:
 			struct Camera {
@@ -51,7 +50,6 @@ namespace Trident {
 			static constexpr float32 MIN_ZOOM_LEVEL = 1.0f;
 			static constexpr float32 MAX_ZOOM_LEVEL = 64.0f;
 			static constexpr float32 DEFAULT_ZOOM_LEVEL = 32.0f;
-			static constexpr ImageSampleCount SAMPLE_COUNT = ImageSampleCount::x1;
 
 		public:
 			void build(const PhysicsRendererBuildOptions2D& options);
@@ -95,9 +93,10 @@ namespace Trident {
 
 			ref<RenderPass> createRenderPass() const;
 
-			void recreateMultisampleImage();
-			void recreateMultisampleImageView();
+			ref<Image> createColorImage() const;
 			ref<Image> createDepthStencilImage() const;
+
+			ref<ImageView> createColorImageView() const;
 			ref<ImageView> createDepthStencilImageView() const;
 
 			void createFramebuffers();
@@ -105,7 +104,7 @@ namespace Trident {
 			ref<Buffer> createVertexBuffer(uint32 vertexCount) const;
 			ref<Buffer> createTransformBuffer(uint32 transformCount) const;
 			ref<Buffer> createIndexBuffer(uint32 indexCount) const;
-			void createCameraBuffer();
+			ref<Buffer> createCameraBuffer() const;
 			void createViewBuffer();
 			void createPlaceholderBuffer();
 
@@ -141,8 +140,6 @@ namespace Trident {
 				ref<GraphicsPipeline> createEdgeFeaturePipeline() const;
 			#endif
 
-			void allocateDescriptorSets();
-
 			void updateCameraViewDescriptorSet() const;
 			void updatePlaceholderDescriptorSet() const;
 			void updateCentersOfMass() const;
@@ -157,19 +154,22 @@ namespace Trident {
 			#endif
 
 		public:
-			LayerInput* layerInput;
 			vec2<float32> cameraPosition = {0.0_m, 0.0_m};
 
 			uint32 transformCount;
 			Transform2D* transformMappedRange;
+
+			sequence<Transform2D*> mappedRangesPerShapeType;
 
 		private:
 			const Scene2D* scene = nullptr;
 
 			ref<RenderPass> renderPass;
 
+			ref<Image> colorImage;
 			ref<Image> depthStencilImage;
 
+			ref<ImageView> colorImageView;
 			ref<ImageView> depthStencilImageView;
 
 			sequence<ref<Framebuffer>> framebuffers;
@@ -201,6 +201,9 @@ namespace Trident {
 				ref<GraphicsPipeline> edgeFeaturePipeline;
 			#endif
 
+			ref<Buffer> vertexBuffer;
+			ref<Buffer> transformBuffer;
+			ref<Buffer> indexBuffer;
 			ref<Buffer> cameraBuffer;
 			ref<Buffer> viewBuffer;
 			ref<Buffer> placeholderBuffer;
@@ -213,10 +216,6 @@ namespace Trident {
 				ref<Buffer> vertexFeatureBuffer;
 				ref<Buffer> edgeFeatureBuffer;
 			#endif
-
-			ref<Buffer> vertexBuffer;
-			ref<Buffer> transformBuffer;
-			ref<Buffer> indexBuffer;
 
 			ref<Buffer> rigidBodyBuffer;
 			ref<Buffer> centerOfMassBuffer;
@@ -245,5 +244,8 @@ namespace Trident {
 			#endif
 
 			BufferView<Transform2D> transformBufferView;
+			BufferView<Camera> cameraView;
+
+			ImageSampleCount sampleCount;
 	};
 }

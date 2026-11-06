@@ -152,7 +152,6 @@ namespace Trident {
 			HighResolutionTimer timer;
 			AssetLibrary* assetLibrary = nullptr;
 			Window* window = nullptr;
-			LayerInput lastLayerInput;
 
 		protected:
 			ref<GraphicsAdapter> graphicsAdapter;

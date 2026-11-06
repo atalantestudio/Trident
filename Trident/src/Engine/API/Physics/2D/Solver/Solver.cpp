@@ -16,10 +16,10 @@ namespace Trident {
 	}
 
 	void applyImpulse(RigidBody2D& rigidBody, vec2<float32> j, vec2<float32> r) {
-		rigidBody.state.linearVelocity += j * rigidBody.inverseMass;
+		rigidBody.linearVelocity += j * rigidBody.inverseMass;
 
 		// Subtract to get a clockwise rotation.
-		rigidBody.state.angularVelocity -= parallelogramArea(r, j) * rigidBody.inverseInertia;
+		rigidBody.angularVelocity -= parallelogramArea(r, j) * rigidBody.inverseInertia;
 	}
 
 	mat3x3<float32> computeWorld(const PhysicsSimulation2D& simulation, RigidBodyID2D rigidBodyId) {

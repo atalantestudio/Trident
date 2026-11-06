@@ -6,7 +6,6 @@
 #include "Engine/API/Event/Event.hpp"
 #include "Engine/API/Graphics/CommandEncoder.hpp"
 #include "Engine/API/Graphics/Descriptor/StaticMemoryDescriptor.hpp"
-#include "Engine/Layer/LayerInput.hpp"
 
 namespace Trident {
 	class Application;
@@ -44,9 +43,6 @@ namespace Trident {
 			virtual void postRender();
 
 			virtual void onEvent(Event& event);
-
-		public:
-			LayerInput* input;
 
 		private:
 			Application* application;

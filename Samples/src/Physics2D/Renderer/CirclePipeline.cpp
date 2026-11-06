@@ -14,8 +14,7 @@ namespace Trident {
 
 		vertexInputBindings[0].registerAttribute<vec2<float32>>();
 		vertexInputBindings[1].registerAttribute<decltype(Transform2D::position)>();
-		vertexInputBindings[1].registerAttribute<decltype(Transform2D::centroid)>();
-		vertexInputBindings[1].registerAttribute<decltype(Transform2D::rotation)>();
+		vertexInputBindings[1].stride = sizeof(Transform2D);
 
 		const ColorBlendAttachment colorBlendAttachments[] = {
 			{

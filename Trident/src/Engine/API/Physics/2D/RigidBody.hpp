@@ -15,22 +15,27 @@ namespace Trident {
 		vec2<float32> position;
 
 		float32 rotation;
-		float32 mass;
-		float32 inertia;
-	};
 
-	struct RigidBodyState2D {
+		/// Initial linear velocity.
 		vec2<float32> linearVelocity;
+
+		/// Initial angular velocity.
 		float32 angularVelocity;
 
-		// TODO(physics/2d): Use delta position.
+		float32 mass;
+		float32 inertia;
 	};
 
 	struct RigidBody2D {
 		RigidBodyType type;
 
+		// TODO(physics/2d): Use delta position.
 		vec2<float32> position;
+
 		float32 rotation;
+
+		vec2<float32> linearVelocity;
+		float32 angularVelocity;
 
 		/// Position of the centroid in local space.
 		vec2<float32> centroid;
@@ -43,7 +48,5 @@ namespace Trident {
 
 		/// Inverse inertia about the center of mass.
 		float32 inverseInertia;
-
-		RigidBodyState2D state;
 	};
 }

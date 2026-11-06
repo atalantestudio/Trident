@@ -54,6 +54,8 @@ namespace Trident {
 		rigidBody.type = descriptor.type;
 		rigidBody.position = descriptor.position;
 		rigidBody.rotation = descriptor.rotation;
+		rigidBody.linearVelocity = descriptor.linearVelocity;
+		rigidBody.angularVelocity = descriptor.angularVelocity;
 		rigidBody.centroid = {0.0_m, 0.0_m};
 		rigidBody.flags = descriptor.flags;
 		rigidBody.force = {0.0f, 0.0f};
@@ -69,9 +71,6 @@ namespace Trident {
 		if (descriptor.inertia != max<float32>()) {
 			rigidBody.inverseInertia = 1.0f / descriptor.inertia;
 		}
-
-		rigidBody.state.linearVelocity = {0.0_m_s, 0.0_m_s};
-		rigidBody.state.angularVelocity = 0.0f;
 
 		const uint32 id = simulation.usedRigidBodyCount;
 

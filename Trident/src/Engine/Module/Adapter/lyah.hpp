@@ -136,25 +136,11 @@ namespace Trident {
 	}
 
 	inline vec2<float32> edgeNormalClockwise(vec2<float32> a, vec2<float32> b) {
-		return perpendicularLeft(normalized(b - a));
+		return normalized(perpendicularLeft(b - a));
 	}
 
 	inline vec3<float32> edgeNormalClockwise(vec3<float32> a, vec3<float32> b, vec3<float32> up) {
 		return normalized(cross(b - a, up));
-	}
-
-	inline bool parallelOrOpposite(vec3<float32> a, vec3<float32> b) {
-		constexpr float32 E = 0.0001f;
-
-		if (dot(a, b) / sqrt(lengthSquared(a) * lengthSquared(b)) > 1.0f - E) {
-			return true;
-		}
-
-		if (dot(a, -b) / sqrt(lengthSquared(a) * lengthSquared(b)) > 1.0f - E) {
-			return true;
-		}
-
-		return false;
 	}
 
 	// TODO(lyah/quaternion): Add to Lyah as `rotation` or `rotationFromTo`.

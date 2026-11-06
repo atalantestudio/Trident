@@ -15,8 +15,8 @@ namespace Trident {
 		framebufferDescriptor.renderPass = ref_cast<RenderPass>(renderPass);
 		framebufferDescriptor.extent = swapchain->getExtent();
 
-		if (SAMPLE_COUNT != ImageSampleCount::x1) {
-			framebufferDescriptor.imageViews = {layerInput->swapchainImageView, depthStencilImageView, nullptr};
+		if (sampleCount != ImageSampleCount::x1) {
+			framebufferDescriptor.imageViews = {colorImageView, depthStencilImageView, nullptr};
 		}
 		else {
 			framebufferDescriptor.imageViews = {nullptr, depthStencilImageView};
@@ -35,7 +35,7 @@ namespace Trident {
 				framebufferDescriptor.name = name;
 			#endif
 
-			if (SAMPLE_COUNT != ImageSampleCount::x1) {
+			if (sampleCount != ImageSampleCount::x1) {
 				framebufferDescriptor.imageViews[2] = swapchain->getImageView(framebufferIndex);
 			}
 			else {

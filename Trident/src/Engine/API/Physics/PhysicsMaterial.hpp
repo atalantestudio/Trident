@@ -8,7 +8,8 @@ namespace Trident {
 		/// Coulomb friction.
 		float32 friction;
 
-		/// Coefficient of restitution.
+		/// The coefficient of restitution.
+		/// See https://en.wikipedia.org/wiki/Coefficient_of_restitution.
 		float32 restitution;
 	};
 }
