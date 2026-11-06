@@ -495,9 +495,9 @@ namespace Trident {
 			commandEncoder->draw(3, 1, 0, 0);
 		}
 
-		// Circle fill
+		// Circle
 		{
-			commandEncoder->bindGraphicsPipeline(circleFillPipeline);
+			commandEncoder->bindGraphicsPipeline(circlePipeline);
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
 			commandEncoder->bindVertexBuffer(1, transformBuffer, 0);
 			commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(indexBuffer, 0);

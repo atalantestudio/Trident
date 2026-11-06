@@ -46,7 +46,7 @@ namespace Trident {
 		createPlaceholderPipelineLayout();
 
 		gridPipeline = createGridPipeline();
-		circleFillPipeline = createCircleFillPipeline();
+		circlePipeline = createCirclePipeline();
 		rigidBodyFillPipeline = createRigidBodyFillPipeline();
 		rigidBodyStrokePipeline = createRigidBodyStrokePipeline();
 		centerOfMassPipeline = createCenterOfMassPipeline();

@@ -124,7 +124,7 @@ namespace Trident {
 			void createPlaceholderPipelineLayout();
 
 			ref<GraphicsPipeline> createGridPipeline() const;
-			ref<GraphicsPipeline> createCircleFillPipeline() const;
+			ref<GraphicsPipeline> createCirclePipeline() const;
 			ref<GraphicsPipeline> createRigidBodyFillPipeline() const;
 			ref<GraphicsPipeline> createRigidBodyStrokePipeline() const;
 			ref<GraphicsPipeline> createCenterOfMassPipeline() const;
@@ -184,7 +184,7 @@ namespace Trident {
 			ref<PipelineLayout> placeholderPipelineLayout;
 
 			ref<GraphicsPipeline> gridPipeline;
-			ref<GraphicsPipeline> circleFillPipeline;
+			ref<GraphicsPipeline> circlePipeline;
 			ref<GraphicsPipeline> rigidBodyFillPipeline;
 			ref<GraphicsPipeline> rigidBodyStrokePipeline;
 			ref<GraphicsPipeline> centerOfMassPipeline;

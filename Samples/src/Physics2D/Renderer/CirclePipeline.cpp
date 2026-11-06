@@ -6,7 +6,7 @@
 #include "Physics2D/Renderer/Renderer.hpp"
 
 namespace Trident {
-	ref<GraphicsPipeline> Physics2DRenderer::createCircleFillPipeline() const {
+	ref<GraphicsPipeline> Physics2DRenderer::createCirclePipeline() const {
 		VertexInputBinding vertexInputBindings[] = {
 			VertexInputBinding(InputRate::VERTEX),
 			VertexInputBinding(InputRate::INSTANCE),
@@ -33,20 +33,20 @@ namespace Trident {
 					.stage = ShaderStage::VERTEX,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Circle fill vertex",
+						.name = "Circle vertex",
 					#endif
 				},
-				"Physics2D/CircleFill.vert"
+				"Physics2D/Circle.vert"
 			),
 			.fragmentShaderModule = loadShaderModule(
 				{
 					.stage = ShaderStage::FRAGMENT,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Circle fill fragment",
+						.name = "Circle fragment",
 					#endif
 				},
-				"Physics2D/CircleFill.frag"
+				"Physics2D/Circle.frag"
 			),
 			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
 			.polygonMode = PolygonMode::FILL,
@@ -64,7 +64,7 @@ namespace Trident {
 			.renderPass = renderPass,
 			.subpassIndex = 0,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Circle fill",
+				.name = "Circle",
 			#endif
 		});
 	}

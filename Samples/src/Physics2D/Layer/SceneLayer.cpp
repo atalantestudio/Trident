@@ -7,8 +7,8 @@
 #include "Engine/API/Physics/2D/Joint2D.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 
-#include "../../SampleApplication.hpp"
-#include "SceneLayer.hpp"
+#include "SampleApplication.hpp"
+#include "Physics2D/Layer/SceneLayer.hpp"
 
 namespace Trident {
 	void Physics2DSceneLayer::initialize() {
@@ -67,7 +67,7 @@ namespace Trident {
 				.flags = {},
 				.position = {0.2f, 2.0f},
 				.rotation = 0.0f,
-				.mass = 1.0_kg,
+				.mass = 70.0_kg,
 				.inertia = max<float32>(),
 			});
 
@@ -82,7 +82,6 @@ namespace Trident {
 			}, &typeDescriptor);
 		}
 
-		// TODO
 		renderer.copyGeometry();
 	}
 

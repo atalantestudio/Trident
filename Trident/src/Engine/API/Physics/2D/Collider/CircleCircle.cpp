@@ -7,30 +7,37 @@
 
 namespace Trident {
 	bool CircleCircle2D(const Shape2D& shapeA, const Shape2D& shapeB, const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, ContactManifold2D* contactManifold) {
-		const vec2<float32> ab = rigidBodyB.position - rigidBodyA.position;
-		const float32 lengthSquaredAB = lengthSquared(ab);
+		DEBUG_ASSERT(shapeA.type == ShapeType2D::CIRCLE);
+		DEBUG_ASSERT(shapeB.type == ShapeType2D::CIRCLE);
 
-		if (abs(lengthSquaredAB) < 0.001f) {
-			// Degenerate case: The circles are coincident.
+		const vec2<float32> a = rigidBodyA.position;
+		const vec2<float32> b = rigidBodyB.position;
+		const vec2<float32> ab = b - a;
+
+		const float32 rA = shapeA.circle.radius;
+		const float32 rB = shapeB.circle.radius;
+		const float32 r = rA + rB;
+
+		const float32 dd = lengthSquared(ab);
+
+		if (dd > r * r) {
 			return false;
 		}
 
-		const float32 rArB = shapeA.circle.radius + shapeB.circle.radius;
-		const float32 d = lengthSquaredAB - rArB * rArB;
-
-		if (d > 0.0f) {
+		// Handle coincident circles.
+		if (abs(dd) < 0.001f) {
 			return false;
 		}
 
-		contactManifold->normal = normalized(ab);
+		const float32 d = sqrt(dd);
+		const vec2<float32> normal = ab / d;
+
+		contactManifold->normal = normal;
 		contactManifold->contactCount = 1;
 
-		const vec2<float32> sA = rigidBodyA.position - contactManifold->normal * shapeA.circle.radius;
-		const vec2<float32> sB = rigidBodyB.position + contactManifold->normal * shapeB.circle.radius;
-
 		Contact2D& contact = contactManifold->contacts[0];
-		contact.position = (sA + sB) * 0.5f;
-		contact.separation = d;
+		contact.position = (a + normal * rA + b - normal * rB) * 0.5f;
+		contact.separation = d - r;
 
 		return true;
 	}
