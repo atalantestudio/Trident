@@ -17,7 +17,7 @@ namespace Trident {
 	class Physics2DRenderer : public Renderer {
 		private:
 			struct Camera {
-				mat4x3<float32> projectionAndZoomLevel;
+				mat4x3<float32> projection;
 			};
 
 			struct View {
@@ -59,10 +59,9 @@ namespace Trident {
 			void encodeOneTimeCommands() const;
 
 			inline float32 getZoomLevel() const {
-				return cameraMappedRange->projectionAndZoomLevel.m[2].w;
+				return cameraMappedRange->projection.m[2].w;
 			}
 
-			// void setWorld(Entity entity, const mat3x3<float32>& world) const;
 			// void setPlaceholderOffset(vec2<float32> offset) const;
 
 			#if defined(SHOW_DISTANCE)
@@ -75,7 +74,6 @@ namespace Trident {
 
 			// void selectEntity(Entity entity);
 
-			void registerShape(uint32 hullIndex);
 			void setTransform(uint32 hullIndex, const Transform2D& transform);
 
 			void render(ref<CommandEncoder> commandEncoder) const override;
@@ -155,8 +153,6 @@ namespace Trident {
 
 		public:
 			vec2<float32> cameraPosition = {0.0_m, 0.0_m};
-
-			Transform2D* transformMappedRange;
 
 			// Transform mapped ranges per shape type.
 			sequence<Transform2D*> transformMappedRanges;

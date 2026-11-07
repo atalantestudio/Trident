@@ -47,7 +47,7 @@ namespace Trident {
 				.type = RigidBodyType::STATIC,
 				.flags = {},
 				.position = {0.0f, -10.0f},
-				.rotation = 0.0f,
+				.rotation = 0.3f,
 				.mass = max<float32>(),
 				.inertia = max<float32>(),
 			});
@@ -66,7 +66,7 @@ namespace Trident {
 				.flags = {},
 				.position = {0.2f, 2.0f},
 				.rotation = 0.0f,
-				.mass = 70.0_kg,
+				.mass = 1.0_kg,
 				.inertia = max<float32>(),
 			});
 
@@ -106,7 +106,7 @@ namespace Trident {
 			Transform2D transform;
 			transform.position = rigidBody.position;
 			transform.centroid = rigidBody.centroid;
-			transform.rotation = rigidBody.rotation;
+			transform.rotation = rotationAngle<mat2x2<float32>>(-rigidBody.rotation);
 
 			switch (shape.type) {
 				case ShapeType2D::CIRCLE: {

@@ -297,10 +297,6 @@ namespace Trident {
 		}
 	#endif
 
-	/* void Physics2DRenderer::setWorld(Entity entity, const mat3x3<float32>& world) const {
-		rigidBodyMappedRange[entity].world = world;
-	} */
-
 	/* void Physics2DRenderer::setPlaceholderOffset(vec2<float32> offset) const {
 		placeholderMappedRange->offset = offset;
 	} */
@@ -395,10 +391,10 @@ namespace Trident {
 	void Physics2DRenderer::updateCameraProjection() const {
 		const vec2<float32> viewport = vec2<float32>(getSwapchain()->getExtent());
 		const vec2<float32> origin = -cameraPosition / (viewport * 0.5f);
-		const mat3x3<float32> P = orthographic(origin, viewport);
 		const float32 zoomLevel = getZoomLevel();
+		const mat3x3<float32> P = orthographic(origin * zoomLevel, viewport / zoomLevel);
 
-		cameraMappedRange->projectionAndZoomLevel = {{
+		cameraMappedRange->projection = {{
 			{P[0].x, P[0].y, P[0].z, 1.0f},
 			{P[1].x, P[1].y, P[1].z, 1.0f},
 			{P[2].x, P[2].y, P[2].z, zoomLevel},
@@ -406,10 +402,10 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::updateViewport() const {
-		const Extent2D swapchainExtent = getSwapchain()->getExtent();
+		const vec2<float32> extent = vec2<float32>(getSwapchain()->getExtent());
 
-		viewMappedRange->viewport.x = static_cast<float32>(swapchainExtent.x);
-		viewMappedRange->viewport.y = static_cast<float32>(swapchainExtent.y);
+		viewMappedRange->viewport.x = extent.x;
+		viewMappedRange->viewport.y = extent.y;
 	}
 
 	void Physics2DRenderer::zoom(float32 delta) {
@@ -417,17 +413,10 @@ namespace Trident {
 			delta /= abs(delta);
 		}
 
-		cameraMappedRange->projectionAndZoomLevel.m[2].w = clamp(getZoomLevel() + delta, MIN_ZOOM_LEVEL, MAX_ZOOM_LEVEL);
+		cameraMappedRange->projection.m[2].w = clamp(getZoomLevel() + delta, MIN_ZOOM_LEVEL, MAX_ZOOM_LEVEL);
 
 		updateCameraProjection();
 	}
-
-	/* void Physics2DRenderer::registerShape(uint32 hullIndex) {
-		if (hullIndex == 0) {
-			circleT
-			return;
-		}
-	} */
 
 	void Physics2DRenderer::setTransform(uint32 hullIndex, const Transform2D& transform) {
 		if (hullIndex == 0) {
@@ -474,28 +463,25 @@ namespace Trident {
 			commandEncoder->draw(3, 1, 0, 0);
 		}
 
-		uint64 vertexOffset = 0;
-		uint32 transformOffset = 0;
-		uint32 indexOffset = 0;
-
-		commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(indexBuffer, indexOffset * sizeof(uint16));
-		commandEncoder->bindVertexBuffer(1, transformBuffer, transformOffset * sizeof(Transform2D));
-
 		// Draw circle shapes.
 		if (circleTransformCount > 0) {
 			commandEncoder->bindGraphicsPipeline(circlePipeline);
-			commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset);
+			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
+			commandEncoder->bindVertexBuffer(1, transformBuffer, 0);
+			commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(indexBuffer, 0);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
-			commandEncoder->drawIndexed(6, circleTransformCount, 0, 0, transformOffset);
+			commandEncoder->drawIndexed(6, circleTransformCount, 0, 0, 0);
 		}
 
-		vertexOffset += 4 * sizeof(vec2<float32>);
-		transformOffset += maxCircleTransformCount;
-		indexOffset += 6;
+		uint64 vertexOffset = 4 * sizeof(vec2<float32>);
+		uint32 transformOffset = maxCircleTransformCount;
+		uint32 indexOffset = 6;
 
 		// Draw hull shape.
 		{
 			commandEncoder->bindGraphicsPipeline(shapeFillPipeline);
+			commandEncoder->bindVertexBuffer(1, transformBuffer, 0);
+			commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(indexBuffer, 0);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
 
 			uint32 shapeIndex = 0;
@@ -519,10 +505,11 @@ namespace Trident {
 		transformOffset = maxCircleTransformCount;
 		indexOffset = 6;
 
-		// TODO(wip)
 		// Draw hull shape wireframes.
 		{
 			commandEncoder->bindGraphicsPipeline(shapeStrokePipeline);
+			commandEncoder->bindVertexBuffer(1, transformBuffer, 0);
+			commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(indexBuffer, 0);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
 
 			uint32 shapeIndex = 0;

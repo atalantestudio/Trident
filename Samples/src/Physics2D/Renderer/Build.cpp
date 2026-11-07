@@ -127,7 +127,7 @@ namespace Trident {
 
 		cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
 		cameraMappedRange = cameraView.map();
-		cameraMappedRange->projectionAndZoomLevel.m[2].w = DEFAULT_ZOOM_LEVEL;
+		cameraMappedRange->projection.m[2].w = DEFAULT_ZOOM_LEVEL;
 
 		updateCameraViewDescriptorSet();
 		// updatePlaceholderDescriptorSet();
