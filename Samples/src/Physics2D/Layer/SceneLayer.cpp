@@ -8,20 +8,9 @@
 
 namespace Trident {
 	void Physics2DSceneLayer::initialize() {
-		renderer.setLayer(this);
-		renderer.build({
-			.maxVertexCount = 0,
-			.maxTransformCount = 128,
-			.sampleCount = ImageSampleCount::x1,
-		});
-	}
-
-	StaticMemoryDescriptor Physics2DSceneLayer::getStaticMemoryDescriptor() const {
-		return renderer.getStaticMemoryDescriptor();
-	}
-
-	void Physics2DSceneLayer::postConstruct() {
-		renderer.postBuild();
+		rendererOptions.hulls = sequence<PhysicsRendererBuildHull2D>(1);
+		rendererOptions.maxCircleTransformCount = 128;
+		rendererOptions.sampleCount = ImageSampleCount::x1;
 
 		PhysicsSimulation2DDescriptor simulationDescriptor;
 		simulationDescriptor.deltaTime = getApplication()->getFixedDeltaTime();
@@ -33,6 +22,22 @@ namespace Trident {
 
 		simulation = createSimulation(simulationDescriptor);
 
+		boxHull = createBoxHull({50.0f, 10.0f});
+
+		registerHullForRender(&boxHull.header);
+
+		renderer.setLayer(this);
+		renderer.build(rendererOptions);
+	}
+
+	StaticMemoryDescriptor Physics2DSceneLayer::getStaticMemoryDescriptor() const {
+		return renderer.getStaticMemoryDescriptor();
+	}
+
+	void Physics2DSceneLayer::postConstruct() {
+		renderer.postBuild();
+		renderer.encodeOneTimeCommands();
+
 		PhysicsMaterial material;
 		material.friction = 0.2f;
 		material.restitution = 0.0f;
@@ -41,21 +46,18 @@ namespace Trident {
 			const RigidBodyID2D rigidBodyId = createRigidBody(simulation, {
 				.type = RigidBodyType::STATIC,
 				.flags = {},
-				.position = {0.0f, 0.0f},
+				.position = {0.0f, -10.0f},
 				.rotation = 0.0f,
 				.mass = max<float32>(),
 				.inertia = max<float32>(),
 			});
 
-			CircleShape2D typeDescriptor;
-			typeDescriptor.centroid = {0.0f, 0.0f};
-			typeDescriptor.radius = 0.5f;
-
 			createShape(simulation, {
+				.type = ShapeType2D::CONVEX_HULL,
 				.rigidBodyId = rigidBodyId,
 				.material = material,
 				.density = 1.0f,
-			}, &typeDescriptor);
+			}, &boxHull);
 		}
 
 		{
@@ -73,13 +75,12 @@ namespace Trident {
 			typeDescriptor.radius = 0.5f;
 
 			createShape(simulation, {
+				.type = ShapeType2D::CIRCLE,
 				.rigidBodyId = rigidBodyId,
 				.material = material,
 				.density = 1.0f,
 			}, &typeDescriptor);
 		}
-
-		renderer.copyGeometry();
 	}
 
 	void Physics2DSceneLayer::preRender() {
@@ -94,9 +95,9 @@ namespace Trident {
 
 		// checkHover();
 
-		uint32 shapeIndex = 0;
+		renderer.resetCounters();
 
-		renderer.transformCount = simulation.usedShapeCount;
+		uint32 shapeIndex = 0;
 
 		while (shapeIndex < simulation.usedShapeCount) {
 			const Shape2D& shape = simulation.shapes[shapeIndex];
@@ -107,7 +108,28 @@ namespace Trident {
 			transform.centroid = rigidBody.centroid;
 			transform.rotation = rigidBody.rotation;
 
-			renderer.transformMappedRange[shapeIndex] = transform;
+			switch (shape.type) {
+				case ShapeType2D::CIRCLE: {
+					renderer.setTransform(0, transform);
+
+					break;
+				}
+				case ShapeType2D::CAPSULE: {
+					ENGINE_ERROR_UNIMPLEMENTED();
+
+					break;
+				}
+				case ShapeType2D::CONVEX_HULL: {
+					renderer.setTransform(shape.hull->userIndex, transform);
+
+					break;
+				}
+				default: {
+					DEBUG_ASSERT(false);
+
+					break;
+				}
+			}
 
 			shapeIndex += 1;
 		}
@@ -121,8 +143,6 @@ namespace Trident {
 		if (draggingCamera) {
 			renderer.updateCameraProjection();
 		}
-
-		// renderer.clearRegisteredData();
 	}
 
 	void Physics2DSceneLayer::render(ref<CommandEncoder> commandEncoder, float64 remainingFrameTime) const {
@@ -161,6 +181,14 @@ namespace Trident {
 
 			componentIndex -= 1;
 		} */
+	}
+
+	void Physics2DSceneLayer::registerHullForRender(const HullHeader2D* hullHeader) {
+		PhysicsRendererBuildHull2D& hull = rendererOptions.hulls[hullIndex];
+		hull.hullHeader = hullHeader;
+		hull.maxTransformCount = 128;
+
+		hullIndex += 1;
 	}
 
 	void Physics2DSceneLayer::onEvent(Event& event) {

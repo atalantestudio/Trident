@@ -5,8 +5,9 @@
 
 #include "Engine/API/Physics/2D/Base.hpp"
 #include "Engine/API/Physics/2D/CollisionPair.hpp"
-#include "Engine/API/Physics/2D/ContactPair2D.hpp"
-#include "Engine/API/Physics/2D/Shape2D.hpp"
+#include "Engine/API/Physics/2D/ContactPair.hpp"
+#include "Engine/API/Physics/2D/Hull/BoxHull.hpp"
+#include "Engine/API/Physics/2D/Shape.hpp"
 #include "Engine/API/Physics/2D/RigidBody.hpp"
 
 namespace Trident {
@@ -73,7 +74,9 @@ namespace Trident {
 	void integrate(PhysicsSimulation2D& simulation);
 
 	RigidBodyID2D createRigidBody(PhysicsSimulation2D& simulation, const RigidBodyDescriptor2D& descriptor);
-	ShapeID2D createShape(PhysicsSimulation2D& simulation, const ShapeDescriptor2D& descriptor, void* typeDescriptor);
+	ShapeID2D createShape(PhysicsSimulation2D& simulation, const ShapeDescriptor2D& descriptor, const void* typeDescriptor);
+
+	BoxHull2D createBoxHull(vec2<float32> halfSize);
 
 	/// Applies a linear force to the body.
 	void applyForce(PhysicsSimulation2D& simulation, RigidBodyID2D rigidBodyId, vec2<float32> F);

@@ -6,7 +6,7 @@
 #include "Physics2D/Renderer/Renderer.hpp"
 
 namespace Trident {
-	void Physics2DRenderer::copyGeometry() const {
+	void Physics2DRenderer::encodeOneTimeCommands() const {
 		static constexpr vec2<float32> CIRCLE_VERTICES[] = {
 			{-0.5f,  0.5f},
 			{ 0.5f,  0.5f},
@@ -31,8 +31,54 @@ namespace Trident {
 		const BufferView<vec2<float32>> vertexStagingView = stagingBuffer->createView<vec2<float32>>(0, vertexBuffer->getSize());
 		const BufferView<uint16> indexStagingView = stagingBuffer->createView<uint16>(vertexStagingView.getOffset() + vertexStagingView.getSize(), indexBuffer->getSize());
 
-		std::copy_n(CIRCLE_VERTICES, 4, vertexStagingView.map());
-		std::copy_n(CIRCLE_INDICES, 6, indexStagingView.map());
+		vec2<float32>* vertexMappedRange = vertexStagingView.map();
+		uint16* indexMappedRange = indexStagingView.map();
+
+		std::copy_n(CIRCLE_VERTICES, 4, vertexMappedRange);
+		std::copy_n(CIRCLE_INDICES, 6, indexMappedRange);
+
+		vertexMappedRange += 4;
+		indexMappedRange += 6;
+
+		for (const PhysicsRendererBuildHull2D& hull : hulls) {
+			const vec2<float32>* hullVertices = pointer_cast<const vec2<float32>*>(pointer_cast<const uint8*>(hull.hullHeader) + hull.hullHeader->vertexOffset);
+
+			std::copy_n(hullVertices, hull.hullHeader->vertexCount, vertexMappedRange);
+
+			indexMappedRange[0] = 0;
+
+			const uint32 halfVertexCount = hull.hullHeader->vertexCount / 2;
+
+			uint16 index = 1;
+
+			while (index < hull.hullHeader->vertexCount) {
+				const uint16 x = (index + (index & 1)) / 2;
+
+				if (index & 1) {
+					indexMappedRange[index] = x;
+				}
+				else {
+					indexMappedRange[hull.hullHeader->vertexCount - index] = halfVertexCount + x;
+				}
+
+				index += 1;
+			}
+
+			index = 0;
+
+			while (index < hull.hullHeader->vertexCount) {
+				indexMappedRange[hull.hullHeader->vertexCount + index] = index;
+
+				index += 1;
+			}
+
+			indexMappedRange[hull.hullHeader->vertexCount + index] = 0;
+
+			vertexMappedRange += hull.hullHeader->vertexCount;
+			indexMappedRange += hull.hullHeader->vertexCount * 2 + 1;
+		}
+
+		stagingBuffer->unmap();
 
 		const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
 		const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({

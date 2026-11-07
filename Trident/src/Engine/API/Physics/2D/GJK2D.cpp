@@ -6,12 +6,44 @@
 #include "Engine/API/Physics/2D/GJK2D.hpp"
 
 namespace Trident {
+	static mat3x3<float32> world(const RigidBody2D& rigidBody) {
+		return (
+			translation<mat3x3<float32>>(-rigidBody.centroid) *
+			rotationAngle<mat3x3<float32>>(rigidBody.rotation) *
+			translation<mat3x3<float32>>(rigidBody.position)
+		);
+	}
+
+	static vec2<float32> shapeVertex(const Shape2D& shape, uint32 index) {
+		DEBUG_ASSERT(shape.type == ShapeType2D::CONVEX_HULL);
+
+		return pointer_cast<const vec2<float32>*>(pointer_cast<const uint8*>(shape.hull) + shape.hull->vertexOffset)[index];
+	}
+
 	// TODO: Some geometries (e.g. CircleGeometry2D) don't implement `supportIndex`. Use `supportVertex` instead.
 	// Returns the index of the farthest point on `A` along `d`, in local space.
-	inline static uint32 supportIndex(const RigidBody2DComponent& A, const Hull2D& hull, vec2<float32> d) {
-		const mat2x2<float32> inverseRotation = rotationAngle<mat2x2<float32>>(-A.rotation);
+	static uint32 supportIndex(const RigidBody2D& rigidBody, const Shape2D& shape, vec2<float32> d) {
+		const vec2<float32>* vertices = pointer_cast<const vec2<float32>*>(pointer_cast<const uint8*>(shape.hull) + shape.hull->vertexOffset);
+		const mat2x2<float32> inverseRotation = rotationAngle<mat2x2<float32>>(-rigidBody.rotation);
 
-		return hull.supportIndex(d * inverseRotation);
+		d *= inverseRotation;
+
+		float32 maxValue = dot(vertices[0], d);
+		uint32 maxVertexIndex = 0;
+		uint32 vertexIndex = 1;
+
+		while (vertexIndex < shape.hull->vertexCount) {
+			const float32 value = dot(vertices[vertexIndex], d);
+
+			if (value > maxValue) {
+				maxValue = value;
+				maxVertexIndex = vertexIndex;
+			}
+
+			vertexIndex += 1;
+		}
+
+		return maxVertexIndex;
 	}
 
 	// Calculates the closest point to the origin on a line formed by the simplex s.
@@ -155,33 +187,30 @@ namespace Trident {
 	}
 
 	// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
-	GJK2DOutput GJK2D(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB) {
+	GJK2DOutput GJK2D(const RigidBody2D& A, const RigidBody2D& B, const Shape2D& shapeA, const Shape2D& shapeB) {
 		constexpr uint8 GJK_2D_ITERATION_LIMIT = 8;
 
-		DEBUG_ASSERT(hullA.vertices.count() < max<uint8>());
-		DEBUG_ASSERT(hullB.vertices.count() < max<uint8>());
+		DEBUG_ASSERT(shapeA.type == ShapeType2D::CIRCLE);
+		DEBUG_ASSERT(shapeB.type == ShapeType2D::CONVEX_HULL);
+		DEBUG_ASSERT(shapeB.hull->vertexCount < max<uint8>());
 
 		vec2<float32> d = B.position - A.position;
 
 		Simplex2Vertex vertex;
 		vertex.iA = 0;
 		vertex.iB = 0;
-		vertex.vA = hullA.vertices[vertex.iA] * A.world;
-		vertex.vB = hullB.vertices[vertex.iB] * B.world;
+		vertex.vA = A.position;
+		vertex.vB = shapeVertex(shapeB, vertex.iB) * world(B);
 		vertex.v = vertex.vB - vertex.vA;
 
 		Simplex2 s = {vertex};
-
-		uint32 saveA[3];
 		uint32 saveB[3];
-
 		uint8 i = 0;
 
 		while (i < GJK_2D_ITERATION_LIMIT) {
 			uint8 index = 0;
 
 			while (index < s.count) {
-				saveA[index] = s[index].iA;
 				saveB[index] = s[index].iB;
 
 				index += 1;
@@ -247,14 +276,14 @@ namespace Trident {
 			}
 
 			Simplex2Vertex vertex;
-			vertex.iA = supportIndex(A, hullA, -d);
-			vertex.iB = supportIndex(B, hullB, d);
+			vertex.iA = 0;
+			vertex.iB = supportIndex(B, shapeB, d);
 
 			bool duplicate = false;
 			uint8 j = 0;
 
 			while (j < countCopy) {
-				if (vertex.iA == saveA[j] && vertex.iB == saveB[j]) {
+				if (vertex.iB == saveB[j]) {
 					duplicate = true;
 
 					break;
@@ -267,8 +296,8 @@ namespace Trident {
 				break;
 			}
 
-			vertex.vA = hullA.vertices[vertex.iA] * A.world;
-			vertex.vB = hullB.vertices[vertex.iB] * B.world;
+			vertex.vA = A.position;
+			vertex.vB = shapeVertex(shapeB, vertex.iB) * world(B);
 			vertex.v = vertex.vB - vertex.vA;
 
 			s[s.count] = vertex;
@@ -284,25 +313,24 @@ namespace Trident {
 		}
 
 		GJK2DOutput output{};
+		output.simplex = s;
+		output.closestA = s[0].vA;
 
 		const float32 divisor = 1.0f / s.divisor;
 
 		switch (s.count) {
 			case 1: {
-				output.closestA = s[0].vA;
 				output.closestB = s[0].vB;
 
 				break;
 			}
 			case 2: {
-				output.closestA = (s[0].vA * s[0].u + s[1].vA * s[1].u) * divisor;
 				output.closestB = (s[0].vB * s[0].u + s[1].vB * s[1].u) * divisor;
 
 				break;
 			}
 			case 3: {
-				output.closestA = (s[0].vA * s[0].u + s[1].vA * s[1].u + s[2].vA * s[2].u) * divisor;
-				output.closestB = output.closestA;
+				output.closestB = (s[0].vB * s[0].u + s[1].vB * s[1].u + s[2].vB * s[2].u) * divisor;
 
 				break;
 			}

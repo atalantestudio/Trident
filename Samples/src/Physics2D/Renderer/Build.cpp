@@ -8,16 +8,31 @@
 namespace Trident {
 	void Physics2DRenderer::build(const PhysicsRendererBuildOptions2D& options) {
 		sampleCount = options.sampleCount;
+		maxCircleTransformCount = options.maxCircleTransformCount;
+		circleTransformCount = 0;
+		hulls = options.hulls;
 
 		build();
 
-		const uint32 vertexCount = options.maxVertexCount + 4;
-		const uint32 transformCount = options.maxTransformCount;
-		const uint32 indexCount = vertexCount / 2 * 3;
+		uint32 vertexCount = 4;
+		uint32 transformCount = options.maxCircleTransformCount;
+		uint32 triangleStripIndexCount = 6;
+		uint32 maxLineStripIndexCount = 0;
+
+		for (const PhysicsRendererBuildHull2D& hull : hulls) {
+			vertexCount += hull.hullHeader->vertexCount;
+			triangleStripIndexCount += hull.hullHeader->vertexCount;
+			maxLineStripIndexCount = max(maxLineStripIndexCount, hull.hullHeader->vertexCount + 1);
+			transformCount += hull.maxTransformCount;
+		}
+
+		lineStripIndexOffset = triangleStripIndexCount;
 
 		vertexBuffer = createVertexBuffer(vertexCount);
 		transformBuffer = createTransformBuffer(transformCount);
-		indexBuffer = createIndexBuffer(indexCount);
+		indexBuffer = createIndexBuffer(triangleStripIndexCount + maxLineStripIndexCount);
+
+		transformMappedRanges = sequence<Transform2D*>(hulls.count() + 1);
 	}
 
 	void Physics2DRenderer::build() {
@@ -36,50 +51,50 @@ namespace Trident {
 		cameraBuffer = createCameraBuffer();
 
 		createViewBuffer();
-		createPlaceholderBuffer();
+		// createPlaceholderBuffer();
 
 		#if defined(SHOW_DISTANCE)
-			createClosestPointBuffer();
+			// createClosestPointBuffer();
 		#endif
 
 		#if defined(SHOW_FEATURES)
-			createVertexFeatureBuffer();
-			createEdgeFeatureBuffer();
+			// createVertexFeatureBuffer();
+			// createEdgeFeatureBuffer();
 		#endif
 
 		createCameraViewDescriptorSetLayout();
-		createPlaceholderDescriptorSetLayout();
+		// createPlaceholderDescriptorSetLayout();
 
 		const ref<DescriptorSetLayout> descriptorSetLayouts[] = {
 			cameraViewDescriptorSetLayout,
-			placeholderDescriptorSetLayout,
+			// placeholderDescriptorSetLayout,
 		};
 
 		// TODO(base/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
 		sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(descriptorSetLayouts);
 
 		cameraViewDescriptorSet = descriptorSets[0];
-		placeholderDescriptorSet = descriptorSets[1];
+		// placeholderDescriptorSet = descriptorSets[1];
 
 		createCameraViewPipelineLayout();
-		createPlaceholderPipelineLayout();
+		// createPlaceholderPipelineLayout();
 
 		gridPipeline = createGridPipeline();
 		circlePipeline = createCirclePipeline();
-		rigidBodyFillPipeline = createRigidBodyFillPipeline();
-		rigidBodyStrokePipeline = createRigidBodyStrokePipeline();
-		centerOfMassPipeline = createCenterOfMassPipeline();
-		rigidBodyPlaceholderFillPipeline = createRigidBodyPlaceholderFillPipeline();
-		rigidBodyPlaceholderStrokePipeline = createRigidBodyPlaceholderStrokePipeline();
-		rigidBodyPlaceholderCenterOfMassPipeline = createRigidBodyPlaceholderCenterOfMassPipeline();
+		shapeFillPipeline = createShapeFillPipeline();
+		shapeStrokePipeline = createShapeStrokePipeline();
+		// centerOfMassPipeline = createCenterOfMassPipeline();
+		// rigidBodyPlaceholderFillPipeline = createRigidBodyPlaceholderFillPipeline();
+		// rigidBodyPlaceholderStrokePipeline = createRigidBodyPlaceholderStrokePipeline();
+		// rigidBodyPlaceholderCenterOfMassPipeline = createRigidBodyPlaceholderCenterOfMassPipeline();
 
 		#if defined(SHOW_DISTANCE)
-			distancePipeline = createDistancePipeline();
+			// distancePipeline = createDistancePipeline();
 		#endif
 
 		#if defined(SHOW_FEATURES)
-			vertexFeaturePipeline = createVertexFeaturePipeline();
-			edgeFeaturePipeline = createEdgeFeaturePipeline();
+			// vertexFeaturePipeline = createVertexFeaturePipeline();
+			// edgeFeaturePipeline = createEdgeFeaturePipeline();
 		#endif
 	}
 
@@ -92,15 +107,30 @@ namespace Trident {
 
 	void Physics2DRenderer::postBuild() {
 		transformBufferView = transformBuffer->createView<Transform2D>(0, transformBuffer->getSize());
-		transformCount = 0;
-		transformMappedRange = transformBufferView.map();
+
+		Transform2D* transformMappedRange = transformBufferView.map();
+
+		transformMappedRanges = sequence<Transform2D*>(hulls.count() + 1);
+		transformMappedRanges[0] = transformMappedRange;
+		transformMappedRange += maxCircleTransformCount;
+
+		uint32 hullIndex = 0;
+
+		while (hullIndex < hulls.count()) {
+			const PhysicsRendererBuildHull2D& hull = hulls[hullIndex];
+
+			transformMappedRanges[hullIndex + 1] = transformMappedRange;
+			transformMappedRange += hull.maxTransformCount;
+
+			hullIndex += 1;
+		}
 
 		cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
 		cameraMappedRange = cameraView.map();
 		cameraMappedRange->projectionAndZoomLevel.m[2].w = DEFAULT_ZOOM_LEVEL;
 
 		updateCameraViewDescriptorSet();
-		updatePlaceholderDescriptorSet();
+		// updatePlaceholderDescriptorSet();
 
 		updateCameraProjection();
 		updateViewport();

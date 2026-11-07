@@ -6,9 +6,11 @@
 namespace Trident {
 	struct Plane3D {
 		vec3<float32> normal;
+
+		// TODO(base/plane-3d): Rename to "offset".
 		float32 distance;
 
-		// TODO(base/plane): The count should be 8-bits, as a face cannot be referred to by more than 255 edges.
+		// TODO(base/plane-3d): The count should be 8-bits, as a face cannot be referred to by more than 255 edges.
 		range<uint16, uint16> edgeIndexRange;
 	};
 

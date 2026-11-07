@@ -6,7 +6,7 @@
 #include "Physics2D/Renderer/Renderer.hpp"
 
 namespace Trident {
-	ref<GraphicsPipeline> Physics2DRenderer::createCenterOfMassPipeline() const {
+	/* ref<GraphicsPipeline> Physics2DRenderer::createCenterOfMassPipeline() const {
 		VertexInputBinding vertexInputBindings[] = {
 			VertexInputBinding(InputRate::VERTEX),
 		};
@@ -63,5 +63,5 @@ namespace Trident {
 				.name = "Center of mass",
 			#endif
 		});
-	}
+	} */
 }

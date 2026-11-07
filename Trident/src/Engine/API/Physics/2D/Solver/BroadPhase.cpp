@@ -6,6 +6,17 @@
 #include "Engine/API/Physics/2D/Simulation.hpp"
 
 namespace Trident {
+	static void addPair(PhysicsSimulation2D& simulation, CollisionPair2D pair) {
+		const Shape2D& shapeA = simulation.shapes[pair.shapeIdA];
+		const Shape2D& shapeB = simulation.shapes[pair.shapeIdB];
+
+		if (shapeA.type > shapeB.type) {
+			std::swap(pair.shapeIdA, pair.shapeIdB);
+		}
+
+		simulation.collisionPairs.emplace_back(pair);
+	}
+
 	// TODO(physics/2d/broad-phase): Improve broad-phase.
 	void broadPhase(PhysicsSimulation2D& simulation) {
 		CollisionPair2D pair;
@@ -38,7 +49,7 @@ namespace Trident {
 					continue;
 				}
 
-				simulation.collisionPairs.emplace_back(pair);
+				addPair(simulation, pair);
 
 				shapeIdIndexB += 1;
 			}
@@ -72,7 +83,7 @@ namespace Trident {
 					continue;
 				}
 
-				simulation.collisionPairs.emplace_back(pair);
+				addPair(simulation, pair);
 
 				shapeIdIndexB += 1;
 			}
@@ -108,7 +119,7 @@ namespace Trident {
 					continue;
 				}
 
-				simulation.collisionPairs.emplace_back(pair);
+				addPair(simulation, pair);
 
 				shapeIdIndexB += 1;
 			}

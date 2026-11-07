@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include "Engine/API/Physics/2D/Feature2D.hpp"
-#include "Engine/API/Scene/Scene2D.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 #include "Physics2D/Renderer/BuildOptions.hpp"
@@ -54,29 +52,31 @@ namespace Trident {
 		public:
 			void build(const PhysicsRendererBuildOptions2D& options);
 
+			StaticMemoryDescriptor getStaticMemoryDescriptor() const override;
+
 			void postBuild() override;
 
-			StaticMemoryDescriptor getStaticMemoryDescriptor() const override;
+			void encodeOneTimeCommands() const;
 
 			inline float32 getZoomLevel() const {
 				return cameraMappedRange->projectionAndZoomLevel.m[2].w;
 			}
 
-			void copyGeometry() const;
-
-			void setScene(const Scene2D* scene);
-			void setWorld(Entity entity, const mat3x3<float32>& world) const;
-			void setPlaceholderOffset(vec2<float32> offset) const;
+			// void setWorld(Entity entity, const mat3x3<float32>& world) const;
+			// void setPlaceholderOffset(vec2<float32> offset) const;
 
 			#if defined(SHOW_DISTANCE)
-				void setClosestPoints(vec2<float32> closestPointA, vec2<float32> closestPointB) const;
+				// void setClosestPoints(vec2<float32> closestPointA, vec2<float32> closestPointB) const;
 			#endif
 
 			#if defined(SHOW_FEATURES)
-				void registerFeature(const Feature2D& feature);
+				// void registerFeature(const Feature2D& feature);
 			#endif
 
-			void selectEntity(Entity entity);
+			// void selectEntity(Entity entity);
+
+			void registerShape(uint32 hullIndex);
+			void setTransform(uint32 hullIndex, const Transform2D& transform);
 
 			void render(ref<CommandEncoder> commandEncoder) const override;
 
@@ -86,7 +86,7 @@ namespace Trident {
 
 			void zoom(float32 delta);
 
-			void clearRegisteredData();
+			void resetCounters();
 
 		private:
 			void build() override;
@@ -106,7 +106,7 @@ namespace Trident {
 			ref<Buffer> createIndexBuffer(uint32 indexCount) const;
 			ref<Buffer> createCameraBuffer() const;
 			void createViewBuffer();
-			void createPlaceholderBuffer();
+			// void createPlaceholderBuffer();
 
 			#if defined(SHOW_DISTANCE)
 				void createClosestPointBuffer();
@@ -118,31 +118,31 @@ namespace Trident {
 			#endif
 
 			void createCameraViewDescriptorSetLayout();
-			void createPlaceholderDescriptorSetLayout();
+			// void createPlaceholderDescriptorSetLayout();
 			void createCameraViewPipelineLayout();
-			void createPlaceholderPipelineLayout();
+			// void createPlaceholderPipelineLayout();
 
 			ref<GraphicsPipeline> createGridPipeline() const;
 			ref<GraphicsPipeline> createCirclePipeline() const;
-			ref<GraphicsPipeline> createRigidBodyFillPipeline() const;
-			ref<GraphicsPipeline> createRigidBodyStrokePipeline() const;
-			ref<GraphicsPipeline> createCenterOfMassPipeline() const;
-			ref<GraphicsPipeline> createRigidBodyPlaceholderFillPipeline() const;
-			ref<GraphicsPipeline> createRigidBodyPlaceholderStrokePipeline() const;
-			ref<GraphicsPipeline> createRigidBodyPlaceholderCenterOfMassPipeline() const;
+			ref<GraphicsPipeline> createShapeFillPipeline() const;
+			ref<GraphicsPipeline> createShapeStrokePipeline() const;
+			// ref<GraphicsPipeline> createCenterOfMassPipeline() const;
+			// ref<GraphicsPipeline> createRigidBodyPlaceholderFillPipeline() const;
+			// ref<GraphicsPipeline> createRigidBodyPlaceholderStrokePipeline() const;
+			// ref<GraphicsPipeline> createRigidBodyPlaceholderCenterOfMassPipeline() const;
 
 			#if defined(SHOW_DISTANCE)
-				ref<GraphicsPipeline> createDistancePipeline() const;
+				// ref<GraphicsPipeline> createDistancePipeline() const;
 			#endif
 
 			#if defined(SHOW_FEATURES)
-				ref<GraphicsPipeline> createVertexFeaturePipeline() const;
-				ref<GraphicsPipeline> createEdgeFeaturePipeline() const;
+				// ref<GraphicsPipeline> createVertexFeaturePipeline() const;
+				// ref<GraphicsPipeline> createEdgeFeaturePipeline() const;
 			#endif
 
 			void updateCameraViewDescriptorSet() const;
-			void updatePlaceholderDescriptorSet() const;
-			void updateCentersOfMass() const;
+			// void updatePlaceholderDescriptorSet() const;
+			// void updateCentersOfMass() const;
 			void updateViewport() const;
 
 			#if defined(SHOW_DISTANCE)
@@ -156,14 +156,12 @@ namespace Trident {
 		public:
 			vec2<float32> cameraPosition = {0.0_m, 0.0_m};
 
-			uint32 transformCount;
 			Transform2D* transformMappedRange;
 
-			sequence<Transform2D*> mappedRangesPerShapeType;
+			// Transform mapped ranges per shape type.
+			sequence<Transform2D*> transformMappedRanges;
 
 		private:
-			const Scene2D* scene = nullptr;
-
 			ref<RenderPass> renderPass;
 
 			ref<Image> colorImage;
@@ -175,22 +173,22 @@ namespace Trident {
 			sequence<ref<Framebuffer>> framebuffers;
 
 			ref<DescriptorSetLayout> cameraViewDescriptorSetLayout;
-			ref<DescriptorSetLayout> placeholderDescriptorSetLayout;
+			// ref<DescriptorSetLayout> placeholderDescriptorSetLayout;
 
 			ref<DescriptorSet> cameraViewDescriptorSet;
-			ref<DescriptorSet> placeholderDescriptorSet;
+			// ref<DescriptorSet> placeholderDescriptorSet;
 
 			ref<PipelineLayout> cameraViewPipelineLayout;
-			ref<PipelineLayout> placeholderPipelineLayout;
+			// ref<PipelineLayout> placeholderPipelineLayout;
 
 			ref<GraphicsPipeline> gridPipeline;
 			ref<GraphicsPipeline> circlePipeline;
-			ref<GraphicsPipeline> rigidBodyFillPipeline;
-			ref<GraphicsPipeline> rigidBodyStrokePipeline;
-			ref<GraphicsPipeline> centerOfMassPipeline;
-			ref<GraphicsPipeline> rigidBodyPlaceholderFillPipeline;
-			ref<GraphicsPipeline> rigidBodyPlaceholderStrokePipeline;
-			ref<GraphicsPipeline> rigidBodyPlaceholderCenterOfMassPipeline;
+			ref<GraphicsPipeline> shapeFillPipeline;
+			ref<GraphicsPipeline> shapeStrokePipeline;
+			// ref<GraphicsPipeline> centerOfMassPipeline;
+			// ref<GraphicsPipeline> rigidBodyPlaceholderFillPipeline;
+			// ref<GraphicsPipeline> rigidBodyPlaceholderStrokePipeline;
+			// ref<GraphicsPipeline> rigidBodyPlaceholderCenterOfMassPipeline;
 
 			#if defined(SHOW_DISTANCE)
 				ref<GraphicsPipeline> distancePipeline;
@@ -236,8 +234,6 @@ namespace Trident {
 			RigidBody* rigidBodyMappedRange = nullptr;
 			CenterOfMass* centerOfMassMappedRange = nullptr;
 
-			Entity selectedEntity = max<Entity>();
-
 			#if defined(SHOW_FEATURES)
 				uint32 vertexFeatureCount = 0;
 				uint32 edgeFeatureCount = 0;
@@ -247,5 +243,9 @@ namespace Trident {
 			BufferView<Camera> cameraView;
 
 			ImageSampleCount sampleCount;
+			uint32 maxCircleTransformCount;
+			uint32 circleTransformCount;
+			sequence<PhysicsRendererBuildHull2D> hulls;
+			uint32 lineStripIndexOffset;
 	};
 }

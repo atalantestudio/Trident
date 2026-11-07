@@ -4,15 +4,18 @@
 #pragma once
 
 #include "Engine/API/Graphics/ImageSampleCount.hpp"
+#include "Engine/API/Physics/2D/Hull/HullHeader.hpp"
 
 namespace Trident {
+	struct PhysicsRendererBuildHull2D {
+		const HullHeader2D* hullHeader;
+		uint16 maxTransformCount;
+		uint16 transformCount = 0;
+	};
+
 	struct PhysicsRendererBuildOptions2D {
-		/// Total number of hull vertices.
-		uint32 maxVertexCount;
-
-		/// Total number of transforms.
-		uint32 maxTransformCount;
-
 		ImageSampleCount sampleCount;
+		sequence<PhysicsRendererBuildHull2D> hulls;
+		uint16 maxCircleTransformCount;
 	};
 }

@@ -27,6 +27,8 @@ namespace Trident {
 
 			void checkHover();
 
+			void registerHullForRender(const HullHeader2D* hullHeader);
+
 			bool onEvent(KeyDownEvent& event);
 			bool onEvent(KeyUpEvent& event);
 			bool onEvent(MouseDownEvent& event);
@@ -38,6 +40,7 @@ namespace Trident {
 		private:
 			PhysicsSimulation2D simulation;
 			Physics2DRenderer renderer;
+			PhysicsRendererBuildOptions2D rendererOptions;
 
 			Input keyMap;
 			bool jumping = false;
@@ -48,6 +51,9 @@ namespace Trident {
 
 			vec2<float32> mousePosition = {0.0_m, 0.0_m};
 			vec2<float32> mouseDelta;
+
+			BoxHull2D boxHull;
+			uint32 hullIndex = 0;
 
 			bool draggingCamera = false;
 	};

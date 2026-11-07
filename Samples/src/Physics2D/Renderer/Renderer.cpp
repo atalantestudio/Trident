@@ -27,7 +27,7 @@ namespace Trident {
 		viewMappedRange = viewView.map();
 	}
 
-	void Physics2DRenderer::createPlaceholderBuffer() {
+	/* void Physics2DRenderer::createPlaceholderBuffer() {
 		const uint64 alignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
 
 		placeholderBuffer = createDynamicBuffer({
@@ -44,7 +44,7 @@ namespace Trident {
 
 		placeholderMappedRange = placeholderView.map();
 		placeholderMappedRange->offset = {0.0f, 0.0f};
-	}
+	} */
 
 	#if defined(SHOW_DISTANCE)
 		void Physics2DRenderer::createClosestPointBuffer() {
@@ -123,7 +123,7 @@ namespace Trident {
 		});
 	}
 
-	void Physics2DRenderer::createPlaceholderDescriptorSetLayout() {
+	/* void Physics2DRenderer::createPlaceholderDescriptorSetLayout() {
 		const DescriptorSetLayoutBinding bindings[] = {
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
@@ -138,7 +138,7 @@ namespace Trident {
 				.name = "Placeholder",
 			#endif
 		});
-	}
+	} */
 
 	void Physics2DRenderer::createCameraViewPipelineLayout() {
 		cameraViewPipelineLayout = createPipelineLayout({
@@ -149,16 +149,16 @@ namespace Trident {
 		});
 	}
 
-	void Physics2DRenderer::createPlaceholderPipelineLayout() {
+	/* void Physics2DRenderer::createPlaceholderPipelineLayout() {
 		placeholderPipelineLayout = createPipelineLayout({
 			.descriptorSetLayouts = {cameraViewDescriptorSetLayout, placeholderDescriptorSetLayout},
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Placeholder",
 			#endif
 		});
-	}
+	} */
 
-	void Physics2DRenderer::setScene(const Scene2D* scene) {
+	/* void Physics2DRenderer::setScene(const Scene2D* scene) {
 		this->scene = scene;
 
 		const view<uint8> dataBuffer = scene->getDataBuffer();
@@ -288,7 +288,7 @@ namespace Trident {
 
 		transferQueue->submit(commandBuffer);
 		transferQueue->waitIdle();
-	}
+	} */
 
 	#if defined(SHOW_DISTANCE)
 		void Physics2DRenderer::setClosestPoints(vec2<float32> closestPointA, vec2<float32> closestPointB) const {
@@ -297,13 +297,13 @@ namespace Trident {
 		}
 	#endif
 
-	void Physics2DRenderer::setWorld(Entity entity, const mat3x3<float32>& world) const {
+	/* void Physics2DRenderer::setWorld(Entity entity, const mat3x3<float32>& world) const {
 		rigidBodyMappedRange[entity].world = world;
-	}
+	} */
 
-	void Physics2DRenderer::setPlaceholderOffset(vec2<float32> offset) const {
+	/* void Physics2DRenderer::setPlaceholderOffset(vec2<float32> offset) const {
 		placeholderMappedRange->offset = offset;
-	}
+	} */
 
 	#if defined(SHOW_FEATURES)
 		void Physics2DRenderer::registerFeature(const Feature2D& feature) {
@@ -330,7 +330,7 @@ namespace Trident {
 		}
 	#endif
 
-	void Physics2DRenderer::selectEntity(Entity entity) {
+	/* void Physics2DRenderer::selectEntity(Entity entity) {
 		if (selectedEntity != max<Entity>()) {
 			rigidBodyMappedRange[selectedEntity].selected = 0;
 		}
@@ -340,7 +340,7 @@ namespace Trident {
 		if (selectedEntity != max<Entity>()) {
 			rigidBodyMappedRange[selectedEntity].selected = 1;
 		}
-	}
+	} */
 
 	void Physics2DRenderer::updateCameraViewDescriptorSet() const {
 		const BufferView<Camera> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
@@ -362,7 +362,7 @@ namespace Trident {
 		getDevice()->updateDescriptorSets(writeDescriptorSets);
 	}
 
-	void Physics2DRenderer::updatePlaceholderDescriptorSet() const {
+	/* void Physics2DRenderer::updatePlaceholderDescriptorSet() const {
 		const BufferView<Placeholder> placeholderView = placeholderBuffer->createView<Placeholder>(0, placeholderBuffer->getSize());
 
 		const WriteDescriptorSet writeDescriptorSets[] = {
@@ -374,9 +374,9 @@ namespace Trident {
 		};
 
 		getDevice()->updateDescriptorSets(writeDescriptorSets);
-	}
+	} */
 
-	void Physics2DRenderer::updateCentersOfMass() const {
+	/* void Physics2DRenderer::updateCentersOfMass() const {
 		const ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
 		const uint32 componentCount = rigidBodyComponentPool.componentCount;
 		const float32 inverseComponentCount = 1.0f / componentCount;
@@ -390,7 +390,7 @@ namespace Trident {
 			centerOfMassMappedRange[entity].position = {rigidBodyComponent.position[0], rigidBodyComponent.position[1], componentIndex * inverseComponentCount};
 			componentIndex += 1;
 		}
-	}
+	} */
 
 	void Physics2DRenderer::updateCameraProjection() const {
 		const vec2<float32> viewport = vec2<float32>(getSwapchain()->getExtent());
@@ -420,6 +420,27 @@ namespace Trident {
 		cameraMappedRange->projectionAndZoomLevel.m[2].w = clamp(getZoomLevel() + delta, MIN_ZOOM_LEVEL, MAX_ZOOM_LEVEL);
 
 		updateCameraProjection();
+	}
+
+	/* void Physics2DRenderer::registerShape(uint32 hullIndex) {
+		if (hullIndex == 0) {
+			circleT
+			return;
+		}
+	} */
+
+	void Physics2DRenderer::setTransform(uint32 hullIndex, const Transform2D& transform) {
+		if (hullIndex == 0) {
+			transformMappedRanges[0][circleTransformCount] = transform;
+			circleTransformCount += 1;
+
+			return;
+		}
+
+		PhysicsRendererBuildHull2D& hull = hulls[hullIndex - 1];
+
+		transformMappedRanges[hullIndex][hull.transformCount] = transform;
+		hull.transformCount += 1;
 	}
 
 	void Physics2DRenderer::render(ref<CommandEncoder> commandEncoder) const {
@@ -453,81 +474,85 @@ namespace Trident {
 			commandEncoder->draw(3, 1, 0, 0);
 		}
 
-		// Circle
-		{
+		uint64 vertexOffset = 0;
+		uint32 transformOffset = 0;
+		uint32 indexOffset = 0;
+
+		commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(indexBuffer, indexOffset * sizeof(uint16));
+		commandEncoder->bindVertexBuffer(1, transformBuffer, transformOffset * sizeof(Transform2D));
+
+		// Draw circle shapes.
+		if (circleTransformCount > 0) {
 			commandEncoder->bindGraphicsPipeline(circlePipeline);
-			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
-			commandEncoder->bindVertexBuffer(1, transformBuffer, 0);
-			commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(indexBuffer, 0);
+			commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
-			commandEncoder->drawIndexed(6, transformCount, 0, 0, 0);
+			commandEncoder->drawIndexed(6, circleTransformCount, 0, 0, transformOffset);
 		}
 
-		commandEncoder->endRenderPass();
+		vertexOffset += 4 * sizeof(vec2<float32>);
+		transformOffset += maxCircleTransformCount;
+		indexOffset += 6;
+
+		// Draw hull shape.
+		{
+			commandEncoder->bindGraphicsPipeline(shapeFillPipeline);
+			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
+
+			uint32 shapeIndex = 0;
+
+			while (shapeIndex < hulls.count()) {
+				const PhysicsRendererBuildHull2D& hull = hulls[shapeIndex];
+
+				if (hull.transformCount > 0) {
+					commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset);
+					commandEncoder->drawIndexed(hull.hullHeader->vertexCount, hull.transformCount, indexOffset, 0, transformOffset);
+				}
+
+				vertexOffset += hull.hullHeader->vertexCount * sizeof(vec2<float32>);
+				transformOffset += hull.maxTransformCount;
+				indexOffset += hull.hullHeader->vertexCount * 2 + 1;
+				shapeIndex += 1;
+			}
+		}
+
+		vertexOffset = 4 * sizeof(vec2<float32>);
+		transformOffset = maxCircleTransformCount;
+		indexOffset = 6;
 
 		// TODO(wip)
-		return;
-
-		const view<Geometry2D> geometries = scene->getGeometries();
-		const view<Hull2D> hulls = scene->getHulls();
-		const ComponentPool<Geometry2DComponent>& geometryComponentPool = scene->ecs.getComponentPool<Geometry2DComponent>();
-
-		uint32 componentIndex = 0;
-
-		// Rigid body fill
+		// Draw hull shape wireframes.
 		{
-			commandEncoder->bindGraphicsPipeline(rigidBodyFillPipeline);
-			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
-			commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0);
-			commandEncoder->bindIndexBuffer<IndexFormat::R32_UINT>(indexBuffer, 0);
+			commandEncoder->bindGraphicsPipeline(shapeStrokePipeline);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
 
-			while (componentIndex < geometryComponentPool.componentCount) {
-				const Entity entity = geometryComponentPool.componentIndexToEntity[componentIndex];
-				const Geometry2DComponent& geometryComponent = geometryComponentPool.components[componentIndex];
-				const Geometry2D& geometry = geometries[geometryComponent.geometryIndex];
+			uint32 shapeIndex = 0;
 
-				// TODO(physics/2d/materials): Restore materials (test colors were 0xf4fedbff and 0xe6ddffff).
-				commandEncoder->drawIndexed(geometry.getIndexRange().count, 1, geometry.getIndexRange().offset, geometry.getVertexPositionComponentRange().offset / 2, entity);
+			while (shapeIndex < hulls.count()) {
+				const PhysicsRendererBuildHull2D& hull = hulls[shapeIndex];
 
-				componentIndex += 1;
+				indexOffset += hull.hullHeader->vertexCount;
+
+				if (hull.transformCount > 0) {
+					commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset);
+					commandEncoder->drawIndexed(hull.hullHeader->vertexCount + 1, hull.transformCount, indexOffset, 0, transformOffset);
+				}
+
+				vertexOffset += hull.hullHeader->vertexCount * sizeof(vec2<float32>);
+				transformOffset += hull.maxTransformCount;
+				indexOffset += hull.hullHeader->vertexCount + 1;
+				shapeIndex += 1;
 			}
 		}
-
-		componentIndex = 0;
-
-		// Rigid body stroke
-		{
-			commandEncoder->bindGraphicsPipeline(rigidBodyStrokePipeline);
-			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
-			commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0);
-			commandEncoder->bindIndexBuffer<IndexFormat::R32_UINT>(indexBuffer, 0);
-			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
-
-			while (componentIndex < geometryComponentPool.componentCount) {
-				const Entity entity = geometryComponentPool.componentIndexToEntity[componentIndex];
-				const Geometry2DComponent& geometryComponent = geometryComponentPool.components[componentIndex];
-				const Geometry2D& geometry = geometries[geometryComponent.geometryIndex];
-				const Hull2D& hull = hulls[geometry.hullIndex];
-
-				// TODO(physics/2d/materials): Restore materials (test colors were 0xf4fedbff and 0xe6ddffff).
-				commandEncoder->drawIndexed(hull.lineIndexRange.count, 1, hull.lineIndexRange.offset, geometry.getVertexPositionComponentRange().offset / 2, entity);
-
-				componentIndex += 1;
-			}
-		}
-
-		const ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
 
 		// Center of mass
-		{
+		/* {
 			updateCentersOfMass();
 
 			commandEncoder->bindGraphicsPipeline(centerOfMassPipeline);
 			commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, 0);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
 			commandEncoder->draw(rigidBodyComponentPool.componentCount, 1, 0, 0);
-		}
+		} */
 
 		/* #if defined(SHOW_DISTANCE)
 			renderDistance(commandEncoder);
@@ -537,7 +562,7 @@ namespace Trident {
 			renderFeatures(commandEncoder);
 		#endif */
 
-		if (selectedEntity != max<Entity>()) {
+		/* if (selectedEntity != max<Entity>()) {
 			const ref<DescriptorSet> descriptorSets[2] = {cameraViewDescriptorSet, placeholderDescriptorSet};
 			const Geometry2DComponent geometryComponent = scene->ecs.getComponent<Geometry2DComponent>(selectedEntity);
 			const Geometry2D& geometry = geometries[geometryComponent.geometryIndex];
@@ -570,7 +595,7 @@ namespace Trident {
 				commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, descriptorSets);
 				commandEncoder->drawIndexed(hull.lineIndexRange.count, 1, hull.lineIndexRange.offset, geometry.getVertexPositionComponentRange().offset / 2, selectedEntity);
 			}
-		}
+		} */
 
 		commandEncoder->endRenderPass();
 	}
@@ -617,15 +642,21 @@ namespace Trident {
 		updateViewport();
 	}
 
-	void Physics2DRenderer::clearRegisteredData() {
-		#if defined(SHOW_DISTANCE)
+	void Physics2DRenderer::resetCounters() {
+		/* #if defined(SHOW_DISTANCE)
 			closestPointMappedRange[0].position = {0.0f, 0.0f};
 			closestPointMappedRange[1].position = {0.0f, 0.0f};
-		#endif
+		#endif */
 
-		#if defined(SHOW_FEATURES)
+		/* #if defined(SHOW_FEATURES)
 			vertexFeatureCount = 0;
 			edgeFeatureCount = 0;
-		#endif
+		#endif */
+
+		circleTransformCount = 0;
+
+		for (PhysicsRendererBuildHull2D& hull : hulls) {
+			hull.transformCount = 0;
+		}
 	}
 }

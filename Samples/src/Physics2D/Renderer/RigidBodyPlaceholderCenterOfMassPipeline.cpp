@@ -6,7 +6,7 @@
 #include "Physics2D/Renderer/Renderer.hpp"
 
 namespace Trident {
-	ref<GraphicsPipeline> Physics2DRenderer::createRigidBodyPlaceholderCenterOfMassPipeline() const {
+	/* ref<GraphicsPipeline> Physics2DRenderer::createRigidBodyPlaceholderCenterOfMassPipeline() const {
 		VertexInputBinding vertexInputBindings[] = {
 			VertexInputBinding(InputRate::VERTEX),
 		};
@@ -82,5 +82,5 @@ namespace Trident {
 				.name = "Rigid body placeholder center of mass",
 			#endif
 		});
-	}
+	} */
 }

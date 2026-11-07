@@ -6,24 +6,26 @@
 #include "Physics2D/Renderer/Renderer.hpp"
 
 namespace Trident {
-	ref<GraphicsPipeline> Physics2DRenderer::createRigidBodyFillPipeline() const {
+	ref<GraphicsPipeline> Physics2DRenderer::createShapeFillPipeline() const {
 		VertexInputBinding vertexInputBindings[] = {
 			VertexInputBinding(InputRate::VERTEX),
 			VertexInputBinding(InputRate::INSTANCE),
 		};
 
-		vertexInputBindings[0].registerAttribute<decltype(Vertex::position)>();
-		vertexInputBindings[1].registerAttribute<decltype(RigidBody::world)>();
-		vertexInputBindings[1].registerAttribute<decltype(RigidBody::fillColor)>();
-		vertexInputBindings[1].registerAttribute<decltype(RigidBody::strokeColor)>();
-		vertexInputBindings[1].registerAttribute<decltype(RigidBody::depth)>();
-		vertexInputBindings[1].stride = sizeof(RigidBody);
+		vertexInputBindings[0].registerAttribute<vec2<float32>>();
+		vertexInputBindings[1].registerAttribute<decltype(Transform2D::position)>();
+		vertexInputBindings[1].stride = sizeof(Transform2D);
+		// vertexInputBindings[1].registerAttribute<decltype(Transform2D::centroid)>();
+		// vertexInputBindings[1].registerAttribute<decltype(Transform2D::rotation)>();
+
+		// TODO(physics/2d/renderer): Restore depth and fill/stroke colors.
+		// vertexInputBindings[1].registerAttribute<decltype(RigidBody::fillColor)>();
+		// vertexInputBindings[1].registerAttribute<decltype(RigidBody::strokeColor)>();
+		// vertexInputBindings[1].registerAttribute<decltype(RigidBody::depth)>();
 
 		const ColorBlendAttachment colorBlendAttachments[] = {
 			{
-				.blend = true,
-				.srcColorBlendFactor = BlendFactor::SRC_ALPHA,
-				.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA,
+				.blend = false,
 			},
 		};
 
@@ -35,22 +37,22 @@ namespace Trident {
 					.stage = ShaderStage::VERTEX,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Rigid body fill vertex",
+						.name = "Shape fill vertex",
 					#endif
 				},
-				"Physics2D/RigidBodyFill.vert"
+				"Physics2D/ShapeFill.vert"
 			),
 			.fragmentShaderModule = loadShaderModule(
 				{
 					.stage = ShaderStage::FRAGMENT,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Rigid body fill fragment",
+						.name = "Shape fill fragment",
 					#endif
 				},
 				"Physics2D/FragmentRGBA.frag"
 			),
-			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
+			.primitiveTopology = PrimitiveTopology::TRIANGLE_STRIP,
 			.polygonMode = PolygonMode::FILL,
 			.cullMode = CullMode::BACK,
 			.frontFace = FrontFace::CLOCKWISE,
@@ -60,15 +62,17 @@ namespace Trident {
 				.attachments = colorBlendAttachments,
 			},
 			.depthStencilState = {
-				.depthTest = true,
-				.depthWrite = true,
-				.compareOperation = CompareOperation::GREATER_OR_EQUAL,
+				.depthTest = false,
+
+				// TODO(physics/2d/renderer): Restore depth testing.
+				// .depthWrite = true,
+				// .compareOperation = CompareOperation::GREATER_OR_EQUAL,
 			},
 			.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
 			.renderPass = renderPass,
 			.subpassIndex = 0,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Rigid body fill",
+				.name = "Shape fill",
 			#endif
 		});
 	}

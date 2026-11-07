@@ -6,7 +6,7 @@
 #include "Physics2D/Renderer/Renderer.hpp"
 
 namespace Trident {
-	ref<GraphicsPipeline> Physics2DRenderer::createRigidBodyPlaceholderFillPipeline() const {
+	/* ref<GraphicsPipeline> Physics2DRenderer::createRigidBodyPlaceholderFillPipeline() const {
 		VertexInputBinding vertexInputBindings[] = {
 			VertexInputBinding(InputRate::VERTEX),
 			VertexInputBinding(InputRate::INSTANCE),
@@ -87,5 +87,5 @@ namespace Trident {
 				.name = "Rigid body placeholder fill",
 			#endif
 		});
-	}
+	} */
 }

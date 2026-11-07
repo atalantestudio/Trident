@@ -4,26 +4,17 @@
 #pragma once
 
 #include "Engine/API/Physics/2D/Base.hpp"
+#include "Engine/API/Physics/2D/CircleShape.hpp"
+#include "Engine/API/Physics/2D/Hull/HullHeader.hpp"
 #include "Engine/API/Physics/2D/ShapeType.hpp"
 #include "Engine/API/Physics/PhysicsMaterial.hpp"
 
 namespace Trident {
-	struct CircleShape2D {
-		// In local space.
-		vec2<float32> centroid;
-
-		float32 radius;
-	};
-
 	struct ShapeDescriptor2D {
 		ShapeType2D type;
 		RigidBodyID2D rigidBodyId;
 		PhysicsMaterial material;
 		float32 density;
-
-		union {
-			CircleShape2D circle;
-		};
 	};
 
 	struct Shape2D {
@@ -34,9 +25,11 @@ namespace Trident {
 		RigidBodyID2D rigidBodyId;
 		PhysicsMaterial material;
 		float32 density;
+		uint32 userDataIndex;
 
 		union {
 			CircleShape2D circle;
+			const HullHeader2D* hull;
 		};
 	};
 }

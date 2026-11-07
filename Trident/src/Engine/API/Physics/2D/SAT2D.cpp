@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 
+#include "Engine/API/Physics/2D/Base.hpp"
 #include "Engine/API/Physics/2D/SAT2D.hpp"
 
 namespace Trident {
@@ -30,7 +31,6 @@ namespace Trident {
 				output.separation = separation;
 				output.axis = d;
 				output.referenceEdgeIndex = edgeIndex;
-				output.incidentSupportPoint = sT;
 				output.referenceBody = &referenceBody;
 				output.incidentBody = &incidentBody;
 				output.referenceHull = &referenceHull;
@@ -69,18 +69,61 @@ namespace Trident {
 		return output;
 	}
 
-	SAT2DOutput SATCircleConvexHull2D(const RigidBody2DComponent& circleBody, const RigidBody2DComponent& convexHullBody, const Hull2D& circleHull, const Hull2D& convexHullGeometry) {
-		SAT2DOutput output{};
+	static mat3x3<float32> world(const RigidBody2D& rigidBody) {
+		return (
+			translation<mat3x3<float32>>(-rigidBody.centroid) *
+			rotationAngle<mat3x3<float32>>(rigidBody.rotation) *
+			translation<mat3x3<float32>>(rigidBody.position)
+		);
+	}
+
+	// `referenceBody` is the convex hull, `incidentBody` is the circle.
+	static void queryEdgeDirectionsCircleConvexHull(const RigidBody2D& referenceBody, const RigidBody2D& incidentBody, const Shape2D& referenceShape, const Shape2D& incidentShape, SATCircleConvexHullOutput2D& output) {
+		const vec2<float32>* vertices = pointer_cast<const vec2<float32>*>(pointer_cast<const uint8*>(referenceShape.hull) + referenceShape.hull->vertexOffset);
+		const mat2x2<float32> RA = rotationAngle<mat2x2<float32>>(referenceBody.rotation);
+
+		uint32 vertexIndex = 0;
+
+		while (vertexIndex < referenceShape.hull->vertexCount) {
+			const vec2<float32> a = vertices[vertexIndex];
+			const vec2<float32> b = vertices[(vertexIndex + 1) % referenceShape.hull->vertexCount];
+			const vec2<float32> d = edgeNormalClockwise(a, b);
+
+			// TODO(physics/2d/sat): Optimize.
+			const vec2<float32> sT = incidentBody.position;
+
+			// The centroid is not involved when calculating the edge distance because it is applied when multiplying by the world matrix.
+			const float32 edgeDistance = abs(signedDistanceLPAB(a, b, {0.0f, 0.0f}));
+			const vec2<float32> offset = edgeDistance * d * world(referenceBody);
+
+			const float32 separation = signedDistanceLP(d * RA, offset, sT);
+
+			if (separation > output.separation) {
+				output.separation = separation;
+				output.axis = d;
+				output.incidentSupportPoint = sT;
+			}
+
+			if (separation > 0.0f) {
+				break;
+			}
+
+			vertexIndex += 1;
+		}
+	}
+
+	SATCircleConvexHullOutput2D SATCircleConvexHull2D(const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, const Shape2D& shapeA, const Shape2D& shapeB) {
+		SATCircleConvexHullOutput2D output{};
 		output.separation = min<float32>();
 
-		queryEdgeDirections(convexHullBody, circleBody, convexHullGeometry, circleHull, output);
+		queryEdgeDirectionsCircleConvexHull(rigidBodyB, rigidBodyA, shapeB, shapeA, output);
 
 		if (output.separation > 0.0f) {
 			return output;
 		}
 
 		// TODO(physics/2d/sat-circle-convex-hull): Since the incident body is always the circle, does the axis need to be corrected?
-		output.axis *= rotationAngle<mat2x2<float32>>(output.referenceBody->rotation);
+		output.axis *= rotationAngle<mat2x2<float32>>(rigidBodyB.rotation);
 
 		return output;
 	}

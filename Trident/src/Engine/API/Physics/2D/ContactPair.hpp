@@ -9,10 +9,10 @@ namespace Trident {
 	struct ContactPair2D {
 		ContactManifold2D manifold;
 
-		// TODO: Differentiate static and dynamic friction.
+		// TODO(physics/2d): Differentiate static and dynamic friction.
 		float32 combinedFriction;
 
-		// TODO: Store combined restitution.
+		// TODO(physics/2d): Store combined restitution.
 		// float32 combinedRestitution;
 	};
 }

@@ -79,7 +79,7 @@ namespace Trident {
 		return id;
 	}
 
-	ShapeID2D createShape(PhysicsSimulation2D& simulation, const ShapeDescriptor2D& descriptor, void* typeDescriptor) {
+	ShapeID2D createShape(PhysicsSimulation2D& simulation, const ShapeDescriptor2D& descriptor, const void* typeDescriptor) {
 		DEBUG_ASSERT(!std::isinf(descriptor.density) && !std::isnan(descriptor.density) && descriptor.density >= 0.0f);
 		DEBUG_ASSERT(!std::isinf(descriptor.material.friction) && !std::isnan(descriptor.material.friction) && descriptor.material.friction >= 0.0f);
 		DEBUG_ASSERT(!std::isinf(descriptor.material.restitution) && !std::isnan(descriptor.material.restitution) && descriptor.material.restitution >= 0.0f);
@@ -106,8 +106,7 @@ namespace Trident {
 				break;
 			}
 			case ShapeType2D::CONVEX_HULL: {
-				// TODO(physics/2d/shape/convex-hull)
-				ENGINE_ERROR_UNIMPLEMENTED();
+				shape.hull = static_cast<const HullHeader2D*>(typeDescriptor);
 
 				break;
 			}
@@ -145,5 +144,30 @@ namespace Trident {
 		simulation.usedShapeCount += 1;
 
 		return id;
+	}
+
+	BoxHull2D createBoxHull(vec2<float32> halfSize) {
+		static uint32 userIndex = 1;
+
+		const float32 hx = halfSize.x;
+		const float32 hy = halfSize.y;
+
+		BoxHull2D boxHull;
+		boxHull.header.centroid = {0.0f, 0.0f};
+		boxHull.header.area = hx * hy * 4.0f;
+		boxHull.header.radius = sqrt(0.5f) * 0.5f;
+		boxHull.header.mass = boxHull.header.area;
+		boxHull.header.inertia = boxHull.header.mass * boxHull.header.area / 12.0f;
+		boxHull.header.vertexCount = 4;
+		boxHull.header.vertexOffset = offsetof(BoxHull2D, vertices);
+		boxHull.header.userIndex = userIndex;
+		boxHull.vertices[0] = {-hx,  hy};
+		boxHull.vertices[1] = { hx,  hy};
+		boxHull.vertices[2] = { hx, -hy};
+		boxHull.vertices[3] = {-hx, -hy};
+
+		userIndex += 1;
+
+		return boxHull;
 	}
 }
