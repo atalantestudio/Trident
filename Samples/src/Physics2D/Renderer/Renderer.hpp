@@ -242,6 +242,6 @@ namespace Trident {
 			uint32 maxCircleTransformCount;
 			uint32 circleTransformCount;
 			sequence<PhysicsRendererBuildHull2D> hulls;
-			uint32 lineStripIndexOffset;
+			uint64 lineStripIndexOffset;
 	};
 }

@@ -17,20 +17,20 @@ namespace Trident {
 		uint32 vertexCount = 4;
 		uint32 transformCount = options.maxCircleTransformCount;
 		uint32 triangleStripIndexCount = 6;
-		uint32 maxLineStripIndexCount = 0;
+		uint32 lineStripIndexCount = 0;
 
 		for (const PhysicsRendererBuildHull2D& hull : hulls) {
 			vertexCount += hull.hullHeader->vertexCount;
 			triangleStripIndexCount += hull.hullHeader->vertexCount;
-			maxLineStripIndexCount = max(maxLineStripIndexCount, hull.hullHeader->vertexCount + 1);
+			lineStripIndexCount = max(lineStripIndexCount, hull.hullHeader->vertexCount + 1);
 			transformCount += hull.maxTransformCount;
 		}
 
-		lineStripIndexOffset = triangleStripIndexCount;
+		lineStripIndexOffset = triangleStripIndexCount * sizeof(uint16);
 
 		vertexBuffer = createVertexBuffer(vertexCount);
 		transformBuffer = createTransformBuffer(transformCount);
-		indexBuffer = createIndexBuffer(triangleStripIndexCount + maxLineStripIndexCount);
+		indexBuffer = createIndexBuffer(triangleStripIndexCount + lineStripIndexCount);
 
 		transformMappedRanges = sequence<Transform2D*>(hulls.count() + 1);
 	}

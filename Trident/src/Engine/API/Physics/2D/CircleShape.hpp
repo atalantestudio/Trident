@@ -5,9 +5,6 @@
 
 namespace Trident {
 	struct CircleShape2D {
-		// In local space.
-		vec2<float32> centroid;
-
 		float32 radius;
 	};
 }

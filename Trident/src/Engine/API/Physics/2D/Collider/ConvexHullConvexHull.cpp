@@ -8,58 +8,65 @@
 #include "Engine/API/Physics/2D/SAT2D.hpp"
 
 namespace Trident {
+	static mat3x3<float32> world(const RigidBody2D& rigidBody) {
+		return (
+			translation<mat3x3<float32>>(-rigidBody.centroid) *
+			rotationAngle<mat3x3<float32>>(rigidBody.rotation) *
+			translation<mat3x3<float32>>(rigidBody.position)
+		);
+	}
+
 	/// Finds and returns the incident edge on the provided rigid body.
 	static ClipFeature2D findIncidentEdge(
 		/// The rigid body owning the incident edge.
-		const RigidBody2DComponent& incidentBody,
+		const RigidBody2D& incidentBody,
 
 		/// The hull used by the rigid body.
-		const Hull2D& incidentHull,
+		const Shape2D& incidentShape,
 
 		/// The reference edge normal, rotated by (Reference - Incident).
 		vec2<float32> referenceEdgeNormal
 	) {
+		const vec2<float32>* vertices = pointer_cast<const vec2<float32>*>(pointer_cast<const uint8*>(incidentShape.hull) + incidentShape.hull->vertexOffset);
+
 		ClipFeature2D incidentEdge{};
 		incidentEdge.vertexCount = 2;
 
-		const uint16 edgeCount = static_cast<uint16>(incidentHull.edges.count());
-
 		float32 minAngle = max<float32>();
 		uint32 incidentEdgeIndex = 0;
-		uint16 edgeIndex = 0;
+		uint16 vertexIndex = 0;
 
-		while (edgeIndex < edgeCount) {
-			const Edge2D edge = incidentHull.edges[edgeIndex];
-			const vec2<float32> a = incidentHull.vertices[edge.indexA];
-			const vec2<float32> b = incidentHull.vertices[edge.indexB];
+		while (vertexIndex < incidentShape.hull->vertexCount) {
+			const vec2<float32> a = vertices[vertexIndex];
+			const vec2<float32> b = vertices[(vertexIndex + 1) % incidentShape.hull->vertexCount];
 			const vec2<float32> d = perpendicularLeft(b - a);
 			const float32 angle = dot(d, referenceEdgeNormal);
 
 			if (angle < minAngle) {
 				minAngle = angle;
-				incidentEdgeIndex = edgeIndex;
+				incidentEdgeIndex = vertexIndex;
 
 				// TODO(physics/2d/incident-edge-vertex-order): Why is the simulation unstable when a and b are inverted?
 				incidentEdge.edge[0].position = b;
 				incidentEdge.edge[1].position = a;
 			}
 
-			edgeIndex += 1;
+			vertexIndex += 1;
 		}
 
 		ClipVertex2D& a = incidentEdge.edge[0];
-		a.position = a.position * incidentBody.world;
+		a.position = a.position * world(incidentBody);
 		a.id.referenceEdgeAIndex = Contact2DID::NULL_EDGE_INDEX;
 		a.id.referenceEdgeBIndex = Contact2DID::NULL_EDGE_INDEX;
-		a.id.incidentEdgeAIndex = (incidentEdgeIndex + 1) % edgeCount;
+		a.id.incidentEdgeAIndex = (incidentEdgeIndex + 1) % incidentShape.hull->vertexCount;
 		a.id.incidentEdgeBIndex = incidentEdgeIndex;
 
 		ClipVertex2D& b = incidentEdge.edge[1];
-		b.position = b.position * incidentBody.world;
+		b.position = b.position * world(incidentBody);
 		b.id.referenceEdgeAIndex = Contact2DID::NULL_EDGE_INDEX;
 		b.id.referenceEdgeBIndex = Contact2DID::NULL_EDGE_INDEX;
 		b.id.incidentEdgeAIndex = incidentEdgeIndex;
-		b.id.incidentEdgeBIndex = (static_cast<sint16>(incidentEdgeIndex) - 1) % edgeCount;
+		b.id.incidentEdgeBIndex = (static_cast<sint16>(incidentEdgeIndex) - 1) % incidentShape.hull->vertexCount;
 
 		return incidentEdge;
 	}
@@ -116,42 +123,33 @@ namespace Trident {
 	}
 
 	bool ConvexHullConvexHull2D(const Shape2D& shapeA, const Shape2D& shapeB, const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, ContactManifold2D* contactManifold) {
-		// TODO(physics/2d/collider/convex-hull-convex-hull)
-		ENGINE_ERROR_UNIMPLEMENTED();
-
-		return false;
-	}
-
-	/* bool ConvexHullConvexHullCollider(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB, ContactManifold2D* contactManifold) {
-		const SAT2DOutput sat = SAT2D(A, B, hullA, hullB);
+		const SAT2DOutput sat = SAT2D(rigidBodyA, rigidBodyB, shapeA, shapeB);
 
 		if (sat.separation > 0.0f) {
 			return false;
 		}
 
-		const vec2<float32> referenceCentroid = sat.referenceHull->centroid;
+		const vec2<float32> referenceCentroid = sat.referenceBody->centroid;
 		const mat2x2<float32> referenceRotation = rotationAngle<mat2x2<float32>>(sat.referenceBody->rotation);
 
-		const uint32 referenceLeftEdgeIndex = (static_cast<sint32>(sat.referenceEdgeIndex) - 1) % sat.referenceHull->edges.count();
-		const uint32 referenceRightEdgeIndex = (sat.referenceEdgeIndex + 1) % sat.referenceHull->edges.count();
+		const uint32 referenceLeftEdgeIndex = (static_cast<sint32>(sat.referenceEdgeIndex) - 1) % sat.referenceShape->hull->vertexCount;
+		const uint32 referenceRightEdgeIndex = (sat.referenceEdgeIndex + 1) % sat.referenceShape->hull->vertexCount;
 
-		const Edge2D referenceLeftEdge = sat.referenceHull->edges[referenceLeftEdgeIndex];
-		const Edge2D referenceEdge = sat.referenceHull->edges[sat.referenceEdgeIndex];
-		const Edge2D referenceRightEdge = sat.referenceHull->edges[referenceRightEdgeIndex];
+		const vec2<float32>* referenceVertices = pointer_cast<const vec2<float32>*>(pointer_cast<const uint8*>(sat.referenceShape->hull) + sat.referenceShape->hull->vertexOffset);
 
-		const vec2<float32> referenceLeftEdgeA = sat.referenceHull->vertices[referenceLeftEdge.indexA];
-		const vec2<float32> referenceEdgeA = sat.referenceHull->vertices[referenceEdge.indexA];
-		const vec2<float32> referenceEdgeB = sat.referenceHull->vertices[referenceEdge.indexB];
-		const vec2<float32> referenceRightEdgeB = sat.referenceHull->vertices[referenceRightEdge.indexB];
+		const vec2<float32> referenceLeftEdgeA = referenceVertices[(static_cast<sint32>(sat.referenceEdgeIndex) - 1) % sat.referenceShape->hull->vertexCount];
+		const vec2<float32> referenceEdgeA = referenceVertices[sat.referenceEdgeIndex];
+		const vec2<float32> referenceEdgeB = referenceVertices[(sat.referenceEdgeIndex + 1) % sat.referenceShape->hull->vertexCount];
+		const vec2<float32> referenceRightEdgeB = referenceVertices[(sat.referenceEdgeIndex + 2) % sat.referenceShape->hull->vertexCount];
 
 		const vec2<float32> referenceLeftEdgeNormal = edgeNormalClockwise(referenceLeftEdgeA, referenceEdgeA) * referenceRotation;
 		const vec2<float32> referenceRightEdgeNormal = edgeNormalClockwise(referenceEdgeB, referenceRightEdgeB) * referenceRotation;
 
-		const float32 referenceEdgeDistanceToCentroid = abs(signedDistanceLPAB(referenceEdgeA * sat.referenceBody->scale, referenceEdgeB * sat.referenceBody->scale, referenceCentroid));
-		const float32 referenceLeftEdgeDistanceToCentroid = abs(signedDistanceLPAB(referenceLeftEdgeA * sat.referenceBody->scale, referenceEdgeA * sat.referenceBody->scale, referenceCentroid));
-		const float32 referenceRightEdgeDistanceToCentroid = abs(signedDistanceLPAB(referenceEdgeB * sat.referenceBody->scale, referenceRightEdgeB * sat.referenceBody->scale, referenceCentroid));
+		const float32 referenceEdgeDistanceToCentroid = abs(signedDistanceLPAB(referenceEdgeA, referenceEdgeB, referenceCentroid));
+		const float32 referenceLeftEdgeDistanceToCentroid = abs(signedDistanceLPAB(referenceLeftEdgeA, referenceEdgeA, referenceCentroid));
+		const float32 referenceRightEdgeDistanceToCentroid = abs(signedDistanceLPAB(referenceEdgeB, referenceRightEdgeB, referenceCentroid));
 
-		ClipFeature2D incidentEdge = findIncidentEdge(*sat.incidentBody, *sat.incidentHull, sat.axis * rotationAngle<mat2x2<float32>>(-sat.incidentBody->rotation));
+		ClipFeature2D incidentEdge = findIncidentEdge(*sat.incidentBody, *sat.incidentShape, sat.axis * rotationAngle<mat2x2<float32>>(-sat.incidentBody->rotation));
 		Plane2D plane;
 
 		// Clip against reference left edge.
@@ -200,7 +198,7 @@ namespace Trident {
 			vertexIndex += 1;
 		}
 
-		if (sat.referenceBody == &B) {
+		if (sat.referenceBody == &rigidBodyB) {
 			contactManifold->normal *= -1.0f;
 
 			uint8 contactIndex = 0;
@@ -213,5 +211,5 @@ namespace Trident {
 		}
 
 		return contactManifold->contactCount > 0;
-	} */
+	}
 }

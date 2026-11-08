@@ -18,9 +18,7 @@ namespace Trident {
 		/// Axis-aligned box in local space.
 		// AABB2D bounds;
 
-		/// The mass in kg.
-		float32 mass;
-
+		// TODO(physics/2d/hull/inertia): Mass not included for now.
 		/// The inertia about the centroid.
 		float32 inertia;
 

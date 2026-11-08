@@ -40,16 +40,17 @@ namespace Trident {
 		vertexMappedRange += 4;
 		indexMappedRange += 6;
 
+		uint16 index;
+
 		for (const PhysicsRendererBuildHull2D& hull : hulls) {
 			const vec2<float32>* hullVertices = pointer_cast<const vec2<float32>*>(pointer_cast<const uint8*>(hull.hullHeader) + hull.hullHeader->vertexOffset);
+			const uint32 halfVertexCount = hull.hullHeader->vertexCount / 2;
 
 			std::copy_n(hullVertices, hull.hullHeader->vertexCount, vertexMappedRange);
 
 			indexMappedRange[0] = 0;
 
-			const uint32 halfVertexCount = hull.hullHeader->vertexCount / 2;
-
-			uint16 index = 1;
+			index = 1;
 
 			while (index < hull.hullHeader->vertexCount) {
 				const uint16 x = (index + (index & 1)) / 2;
@@ -64,19 +65,21 @@ namespace Trident {
 				index += 1;
 			}
 
-			index = 0;
-
-			while (index < hull.hullHeader->vertexCount) {
-				indexMappedRange[hull.hullHeader->vertexCount + index] = index;
-
-				index += 1;
-			}
-
-			indexMappedRange[hull.hullHeader->vertexCount + index] = 0;
-
 			vertexMappedRange += hull.hullHeader->vertexCount;
-			indexMappedRange += hull.hullHeader->vertexCount * 2 + 1;
+			indexMappedRange += hull.hullHeader->vertexCount;
 		}
+
+		const uint16 lineStripIndexCount = static_cast<uint16>((indexStagingView.getSize() - lineStripIndexOffset) / sizeof(uint16));
+
+		index = 0;
+
+		while (index < lineStripIndexCount - 1) {
+			indexMappedRange[index] = index;
+
+			index += 1;
+		}
+
+		indexMappedRange[index] = 0;
 
 		stagingBuffer->unmap();
 

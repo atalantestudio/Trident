@@ -93,6 +93,8 @@ namespace Trident {
 		shape.material = descriptor.material;
 		shape.density = descriptor.density;
 
+		RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
+
 		switch (shape.type) {
 			case ShapeType2D::CIRCLE: {
 				shape.circle = *static_cast<const CircleShape2D*>(typeDescriptor);
@@ -108,6 +110,12 @@ namespace Trident {
 			case ShapeType2D::CONVEX_HULL: {
 				shape.hull = static_cast<const HullHeader2D*>(typeDescriptor);
 
+				if (shape.hull->inertia > 0.0f && rigidBody.inverseMass != 0.0f) {
+					const float32 mass = 1.0f / rigidBody.inverseMass;
+
+					rigidBody.inverseInertia = 1.0f / (shape.hull->inertia * mass);
+				}
+
 				break;
 			}
 			default: {
@@ -117,7 +125,6 @@ namespace Trident {
 			}
 		}
 
-		const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 		const uint32 id = simulation.usedShapeCount;
 
 		switch (rigidBody.type) {
@@ -154,10 +161,9 @@ namespace Trident {
 
 		BoxHull2D boxHull;
 		boxHull.header.centroid = {0.0f, 0.0f};
-		boxHull.header.area = hx * hy * 4.0f;
-		boxHull.header.radius = sqrt(0.5f) * 0.5f;
-		boxHull.header.mass = boxHull.header.area;
-		boxHull.header.inertia = boxHull.header.mass * boxHull.header.area / 12.0f;
+		boxHull.header.area = hx * hy * 8.0f;
+		boxHull.header.radius = length(halfSize);
+		boxHull.header.inertia = boxHull.header.area / 12.0f;
 		boxHull.header.vertexCount = 4;
 		boxHull.header.vertexOffset = offsetof(BoxHull2D, vertices);
 		boxHull.header.userIndex = userIndex;

@@ -52,8 +52,8 @@ namespace Trident {
 			vec2<float32> mousePosition = {0.0_m, 0.0_m};
 			vec2<float32> mouseDelta;
 
+			BoxHull2D floorHull;
 			BoxHull2D boxHull;
-			uint32 hullIndex = 0;
 
 			bool draggingCamera = false;
 	};

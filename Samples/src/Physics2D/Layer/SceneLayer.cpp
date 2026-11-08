@@ -8,7 +8,7 @@
 
 namespace Trident {
 	void Physics2DSceneLayer::initialize() {
-		rendererOptions.hulls = sequence<PhysicsRendererBuildHull2D>(1);
+		rendererOptions.hulls = sequence<PhysicsRendererBuildHull2D>(2);
 		rendererOptions.maxCircleTransformCount = 128;
 		rendererOptions.sampleCount = ImageSampleCount::x1;
 
@@ -22,8 +22,10 @@ namespace Trident {
 
 		simulation = createSimulation(simulationDescriptor);
 
-		boxHull = createBoxHull({50.0f, 10.0f});
+		floorHull = createBoxHull({50.0f, 10.0f});
+		boxHull = createBoxHull({0.5f, 0.5f});
 
+		registerHullForRender(&floorHull.header);
 		registerHullForRender(&boxHull.header);
 
 		renderer.setLayer(this);
@@ -47,7 +49,7 @@ namespace Trident {
 				.type = RigidBodyType::STATIC,
 				.flags = {},
 				.position = {0.0f, -10.0f},
-				.rotation = 0.3f,
+				.rotation = 0.0f,
 				.mass = max<float32>(),
 				.inertia = max<float32>(),
 			});
@@ -57,29 +59,25 @@ namespace Trident {
 				.rigidBodyId = rigidBodyId,
 				.material = material,
 				.density = 1.0f,
-			}, &boxHull);
+			}, &floorHull);
 		}
 
 		{
 			const RigidBodyID2D rigidBodyId = createRigidBody(simulation, {
 				.type = RigidBodyType::DYNAMIC,
 				.flags = {},
-				.position = {0.2f, 2.0f},
+				.position = {0.0f, 4.0f},
 				.rotation = 0.0f,
 				.mass = 1.0_kg,
 				.inertia = max<float32>(),
 			});
 
-			CircleShape2D typeDescriptor;
-			typeDescriptor.centroid = {0.0f, 0.0f};
-			typeDescriptor.radius = 0.5f;
-
 			createShape(simulation, {
-				.type = ShapeType2D::CIRCLE,
+				.type = ShapeType2D::CONVEX_HULL,
 				.rigidBodyId = rigidBodyId,
 				.material = material,
 				.density = 1.0f,
-			}, &typeDescriptor);
+			}, &boxHull);
 		}
 	}
 
@@ -184,11 +182,9 @@ namespace Trident {
 	}
 
 	void Physics2DSceneLayer::registerHullForRender(const HullHeader2D* hullHeader) {
-		PhysicsRendererBuildHull2D& hull = rendererOptions.hulls[hullIndex];
+		PhysicsRendererBuildHull2D& hull = rendererOptions.hulls[hullHeader->userIndex - 1];
 		hull.hullHeader = hullHeader;
 		hull.maxTransformCount = 128;
-
-		hullIndex += 1;
 	}
 
 	void Physics2DSceneLayer::onEvent(Event& event) {

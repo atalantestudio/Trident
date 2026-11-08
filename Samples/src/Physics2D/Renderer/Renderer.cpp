@@ -496,20 +496,19 @@ namespace Trident {
 
 				vertexOffset += hull.hullHeader->vertexCount * sizeof(vec2<float32>);
 				transformOffset += hull.maxTransformCount;
-				indexOffset += hull.hullHeader->vertexCount * 2 + 1;
+				indexOffset += hull.hullHeader->vertexCount;
 				shapeIndex += 1;
 			}
 		}
 
 		vertexOffset = 4 * sizeof(vec2<float32>);
 		transformOffset = maxCircleTransformCount;
-		indexOffset = 6;
 
 		// Draw hull shape wireframes.
 		{
 			commandEncoder->bindGraphicsPipeline(shapeStrokePipeline);
 			commandEncoder->bindVertexBuffer(1, transformBuffer, 0);
-			commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(indexBuffer, 0);
+			commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(indexBuffer, lineStripIndexOffset);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
 
 			uint32 shapeIndex = 0;
@@ -517,16 +516,13 @@ namespace Trident {
 			while (shapeIndex < hulls.count()) {
 				const PhysicsRendererBuildHull2D& hull = hulls[shapeIndex];
 
-				indexOffset += hull.hullHeader->vertexCount;
-
 				if (hull.transformCount > 0) {
 					commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset);
-					commandEncoder->drawIndexed(hull.hullHeader->vertexCount + 1, hull.transformCount, indexOffset, 0, transformOffset);
+					commandEncoder->drawIndexed(hull.hullHeader->vertexCount + 1, hull.transformCount, 0, 0, transformOffset);
 				}
 
 				vertexOffset += hull.hullHeader->vertexCount * sizeof(vec2<float32>);
 				transformOffset += hull.maxTransformCount;
-				indexOffset += hull.hullHeader->vertexCount + 1;
 				shapeIndex += 1;
 			}
 		}

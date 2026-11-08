@@ -14,17 +14,17 @@ namespace Trident {
 		/// The shapes overlap if the separation is negative or 0.
 		float32 separation;
 
-		// The separating axis (the normal of the reference edge).
+		/// The separating axis (the normal of the reference edge).
 		vec2<float32> axis;
 
-		// Index of the reference edge in the geometry vertex array.
+		/// Index of the reference edge in the geometry vertex array.
 		uint32 referenceEdgeIndex;
 
-		const RigidBody2DComponent* referenceBody;
-		const RigidBody2DComponent* incidentBody;
+		const RigidBody2D* referenceBody;
+		const RigidBody2D* incidentBody;
 
-		const Hull2D* referenceHull;
-		const Hull2D* incidentHull;
+		const Shape2D* referenceShape;
+		const Shape2D* incidentShape;
 	};
 
 	struct SATCircleConvexHullOutput2D {
@@ -47,7 +47,7 @@ namespace Trident {
 	// - Don't test parallel axes (https://dyn4j.org/2010/01/sat).
 	// - Reuse the separation axis from the last run to make the algorithm O(1) in non-intersection cases.
 	//   But what if the separation axis changes e.g. due to rotation?
-	SAT2DOutput SAT2D(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB);
+	SAT2DOutput SAT2D(const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, const Shape2D& shapeA, const Shape2D& shapeB);
 
 	/// The Separating Axis Theorem algorithm in 2D.
 	/// A has a circle geometry and B has a convex hull geometry.
