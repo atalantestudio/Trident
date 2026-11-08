@@ -8,14 +8,14 @@
 namespace Trident {
 	void Physics2DRenderer::build(const PhysicsRendererBuildOptions2D& options) {
 		sampleCount = options.sampleCount;
-		maxCircleTransformCount = options.maxCircleTransformCount;
-		circleTransformCount = 0;
+		maxCircleInstanceCount = options.maxCircleInstanceCount;
+		circleInstanceCount = 0;
 		hulls = options.hulls;
 
 		build();
 
 		uint32 vertexCount = 4;
-		uint32 transformCount = options.maxCircleTransformCount;
+		uint32 instanceCount = options.maxCircleInstanceCount;
 		uint32 triangleStripIndexCount = 6;
 		uint32 lineStripIndexCount = 0;
 
@@ -23,16 +23,14 @@ namespace Trident {
 			vertexCount += hull.hullHeader->vertexCount;
 			triangleStripIndexCount += hull.hullHeader->vertexCount;
 			lineStripIndexCount = max(lineStripIndexCount, hull.hullHeader->vertexCount + 1);
-			transformCount += hull.maxTransformCount;
+			instanceCount += hull.maxInstanceCount;
 		}
 
 		lineStripIndexOffset = triangleStripIndexCount * sizeof(uint16);
 
 		vertexBuffer = createVertexBuffer(vertexCount);
-		transformBuffer = createTransformBuffer(transformCount);
+		instanceBuffer = createInstanceBuffer(instanceCount);
 		indexBuffer = createIndexBuffer(triangleStripIndexCount + lineStripIndexCount);
-
-		transformMappedRanges = sequence<Transform2D*>(hulls.count() + 1);
 	}
 
 	void Physics2DRenderer::build() {
@@ -106,21 +104,21 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::postBuild() {
-		transformBufferView = transformBuffer->createView<Transform2D>(0, transformBuffer->getSize());
+		instanceBufferView = instanceBuffer->createView<PhysicsRendererInstance2D>(0, instanceBuffer->getSize());
 
-		Transform2D* transformMappedRange = transformBufferView.map();
+		PhysicsRendererInstance2D* instanceMappedRange = instanceBufferView.map();
 
-		transformMappedRanges = sequence<Transform2D*>(hulls.count() + 1);
-		transformMappedRanges[0] = transformMappedRange;
-		transformMappedRange += maxCircleTransformCount;
+		instanceMappedRanges = sequence<PhysicsRendererInstance2D*>(hulls.count() + 1);
+		instanceMappedRanges[0] = instanceMappedRange;
+		instanceMappedRange += maxCircleInstanceCount;
 
 		uint32 hullIndex = 0;
 
 		while (hullIndex < hulls.count()) {
 			const PhysicsRendererBuildHull2D& hull = hulls[hullIndex];
 
-			transformMappedRanges[hullIndex + 1] = transformMappedRange;
-			transformMappedRange += hull.maxTransformCount;
+			instanceMappedRanges[hullIndex + 1] = instanceMappedRange;
+			instanceMappedRange += hull.maxInstanceCount;
 
 			hullIndex += 1;
 		}

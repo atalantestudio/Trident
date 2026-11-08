@@ -9,13 +9,15 @@
 namespace Trident {
 	struct PhysicsRendererBuildHull2D {
 		const HullHeader2D* hullHeader;
-		uint16 maxTransformCount;
-		uint16 transformCount = 0;
+		uint16 maxInstanceCount;
+
+		// Used internally by the renderer.
+		uint16 instanceCount = 0;
 	};
 
 	struct PhysicsRendererBuildOptions2D {
 		ImageSampleCount sampleCount;
 		sequence<PhysicsRendererBuildHull2D> hulls;
-		uint16 maxCircleTransformCount;
+		uint16 maxCircleInstanceCount;
 	};
 }

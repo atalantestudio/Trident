@@ -9,7 +9,7 @@
 namespace Trident {
 	void Physics2DSceneLayer::initialize() {
 		rendererOptions.hulls = sequence<PhysicsRendererBuildHull2D>(2);
-		rendererOptions.maxCircleTransformCount = 128;
+		rendererOptions.maxCircleInstanceCount = 128;
 		rendererOptions.sampleCount = ImageSampleCount::x1;
 
 		PhysicsSimulation2DDescriptor simulationDescriptor;
@@ -95,6 +95,10 @@ namespace Trident {
 
 		renderer.resetCounters();
 
+		// TODO(physics/2d/test)
+		// constexpr vec3<float32> color = {0.956863, 0.996078, 0.858824};
+		constexpr vec3<float32> color = {0.0f, 0.2078f, 0.2471f};
+
 		uint32 shapeIndex = 0;
 
 		while (shapeIndex < simulation.usedShapeCount) {
@@ -108,7 +112,7 @@ namespace Trident {
 
 			switch (shape.type) {
 				case ShapeType2D::CIRCLE: {
-					renderer.setTransform(0, transform);
+					renderer.setInstance(0, transform, color);
 
 					break;
 				}
@@ -118,7 +122,7 @@ namespace Trident {
 					break;
 				}
 				case ShapeType2D::CONVEX_HULL: {
-					renderer.setTransform(shape.hull->userIndex, transform);
+					renderer.setInstance(shape.hull->userIndex, transform, color);
 
 					break;
 				}
@@ -184,7 +188,7 @@ namespace Trident {
 	void Physics2DSceneLayer::registerHullForRender(const HullHeader2D* hullHeader) {
 		PhysicsRendererBuildHull2D& hull = rendererOptions.hulls[hullHeader->userIndex - 1];
 		hull.hullHeader = hullHeader;
-		hull.maxTransformCount = 128;
+		hull.maxInstanceCount = 128;
 	}
 
 	void Physics2DSceneLayer::onEvent(Event& event) {

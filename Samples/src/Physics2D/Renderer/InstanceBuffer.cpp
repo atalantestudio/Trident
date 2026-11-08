@@ -6,14 +6,14 @@
 #include "Physics2D/Renderer/Renderer.hpp"
 
 namespace Trident {
-	ref<Buffer> Physics2DRenderer::createTransformBuffer(uint32 transformCount) const {
+	ref<Buffer> Physics2DRenderer::createInstanceBuffer(uint32 instanceCount) const {
 		return createStaticBuffer({
-			.size = transformCount * sizeof(Transform2D),
+			.size = instanceCount * sizeof(PhysicsRendererInstance2D),
 			.usage = BufferUsage::VERTEX,
 			.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
 			.persistent = true,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Transform",
+				.name = "Instance",
 			#endif
 		});
 	}

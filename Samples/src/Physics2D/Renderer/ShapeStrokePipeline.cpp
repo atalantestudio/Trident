@@ -13,10 +13,11 @@ namespace Trident {
 		};
 
 		vertexInputBindings[0].registerAttribute<vec2<float32>>();
-		vertexInputBindings[1].registerAttribute<decltype(Transform2D::position)>();
-		vertexInputBindings[1].registerAttribute<decltype(Transform2D::centroid)>();
-		vertexInputBindings[1].registerAttribute<decltype(Transform2D::rotation)>();
-		vertexInputBindings[1].stride = sizeof(Transform2D);
+		vertexInputBindings[1].registerAttribute<decltype(PhysicsRendererInstance2D::transform.position)>();
+		vertexInputBindings[1].registerAttribute<decltype(PhysicsRendererInstance2D::transform.centroid)>();
+		vertexInputBindings[1].registerAttribute<decltype(PhysicsRendererInstance2D::transform.rotation)>();
+		vertexInputBindings[1].registerAttribute<decltype(PhysicsRendererInstance2D::color)>();
+		vertexInputBindings[1].registerAttribute<decltype(PhysicsRendererInstance2D::index)>();
 
 		// TODO(physics/2d/renderer): Restore depth, selection state and fill/stroke colors.
 		// vertexInputBindings[1].registerAttribute<decltype(RigidBody::fillColor)>();

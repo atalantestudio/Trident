@@ -44,6 +44,14 @@ namespace Trident {
 				vec2<float32> offset;
 			};
 
+			struct PhysicsRendererInstance2D {
+				Transform2D transform;
+				vec3<float32> color;
+
+				// The rigid body index.
+				uint32 index;
+			};
+
 		private:
 			static constexpr float32 MIN_ZOOM_LEVEL = 1.0f;
 			static constexpr float32 MAX_ZOOM_LEVEL = 64.0f;
@@ -74,7 +82,7 @@ namespace Trident {
 
 			// void selectEntity(Entity entity);
 
-			void setTransform(uint32 hullIndex, const Transform2D& transform);
+			void setInstance(uint32 hullIndex, const Transform2D& transform, vec3<float32> color);
 
 			void render(ref<CommandEncoder> commandEncoder) const override;
 
@@ -100,7 +108,7 @@ namespace Trident {
 			void createFramebuffers();
 
 			ref<Buffer> createVertexBuffer(uint32 vertexCount) const;
-			ref<Buffer> createTransformBuffer(uint32 transformCount) const;
+			ref<Buffer> createInstanceBuffer(uint32 instanceCount) const;
 			ref<Buffer> createIndexBuffer(uint32 indexCount) const;
 			ref<Buffer> createCameraBuffer() const;
 			void createViewBuffer();
@@ -154,9 +162,6 @@ namespace Trident {
 		public:
 			vec2<float32> cameraPosition = {0.0_m, 0.0_m};
 
-			// Transform mapped ranges per shape type.
-			sequence<Transform2D*> transformMappedRanges;
-
 		private:
 			ref<RenderPass> renderPass;
 
@@ -196,7 +201,7 @@ namespace Trident {
 			#endif
 
 			ref<Buffer> vertexBuffer;
-			ref<Buffer> transformBuffer;
+			ref<Buffer> instanceBuffer;
 			ref<Buffer> indexBuffer;
 			ref<Buffer> cameraBuffer;
 			ref<Buffer> viewBuffer;
@@ -227,20 +232,22 @@ namespace Trident {
 				Vertex* edgeFeatureMappedRange = nullptr;
 			#endif
 
-			RigidBody* rigidBodyMappedRange = nullptr;
 			CenterOfMass* centerOfMassMappedRange = nullptr;
+
+			// One mapped range per unique hull shape + 1 for circle shapes.
+			sequence<PhysicsRendererInstance2D*> instanceMappedRanges;
 
 			#if defined(SHOW_FEATURES)
 				uint32 vertexFeatureCount = 0;
 				uint32 edgeFeatureCount = 0;
 			#endif
 
-			BufferView<Transform2D> transformBufferView;
+			BufferView<PhysicsRendererInstance2D> instanceBufferView;
 			BufferView<Camera> cameraView;
 
 			ImageSampleCount sampleCount;
-			uint32 maxCircleTransformCount;
-			uint32 circleTransformCount;
+			uint32 maxCircleInstanceCount;
+			uint32 circleInstanceCount;
 			sequence<PhysicsRendererBuildHull2D> hulls;
 			uint64 lineStripIndexOffset;
 	};
