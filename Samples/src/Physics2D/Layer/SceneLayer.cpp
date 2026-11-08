@@ -15,6 +15,7 @@ namespace Trident {
 		PhysicsSimulation2DDescriptor simulationDescriptor;
 		simulationDescriptor.deltaTime = getApplication()->getFixedDeltaTime();
 		simulationDescriptor.gravity = {0.0f, -9.80665f};
+		simulationDescriptor.impulseIterationCount = 10;
 		simulationDescriptor.maxStaticRigidBodyCount = 128;
 		simulationDescriptor.maxKinematicAndDynamicRigidBodyCount = 128;
 		simulationDescriptor.maxStaticShapeCount = 16;

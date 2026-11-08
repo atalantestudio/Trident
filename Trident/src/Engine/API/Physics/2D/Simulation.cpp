@@ -11,6 +11,7 @@ namespace Trident {
 		simulation.deltaTime = static_cast<float32>(descriptor.deltaTime);
 		simulation.inverseDeltaTime = static_cast<float32>(1.0 / descriptor.deltaTime);
 		simulation.gravity = descriptor.gravity;
+		simulation.impulseIterationCount = descriptor.impulseIterationCount;
 		simulation.rigidBodies = sequence<RigidBody2D>(descriptor.maxStaticRigidBodyCount + descriptor.maxKinematicAndDynamicRigidBodyCount);
 		simulation.shapes = sequence<Shape2D>(descriptor.maxStaticShapeCount + descriptor.maxKinematicAndDynamicShapeCount);
 		simulation.usedRigidBodyCount = 0;

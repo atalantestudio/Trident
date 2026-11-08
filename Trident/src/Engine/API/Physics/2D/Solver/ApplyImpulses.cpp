@@ -26,7 +26,7 @@ namespace Trident {
 		// TODO(physics/2d/joint): Restore joints.
 		// uint32 jointComponentIndex;
 
-		while (iteration < SEQUENTIAL_IMPULSE_ITERATION_COUNT) {
+		while (iteration < simulation.impulseIterationCount) {
 			for (std::pair<const CollisionPair2D, ContactPair2D>& pair : simulation.contactPairs) {
 				ContactPair2D& contactPair = pair.second;
 

@@ -20,6 +20,9 @@ namespace Trident {
 		/// Left-handed.
 		vec2<float32> gravity;
 
+		/// Number of iterations in the sequential solver.
+		uint32 impulseIterationCount;
+
 		// TODO(physics/2d): Ensure that x > 0.
 		uint32 maxStaticRigidBodyCount;
 		uint32 maxKinematicAndDynamicRigidBodyCount;
@@ -27,7 +30,6 @@ namespace Trident {
 		uint32 maxKinematicAndDynamicShapeCount;
 	};
 
-	static constexpr uint32 SEQUENTIAL_IMPULSE_ITERATION_COUNT = 10;
 	static constexpr float32 ALLOWED_PENETRATION = 0.01f;
 
 	struct BroadPhase2D {
@@ -45,6 +47,8 @@ namespace Trident {
 		float32 deltaTime;
 		float32 inverseDeltaTime;
 		vec2<float32> gravity;
+
+		uint32 impulseIterationCount;
 
 		// TODO(physics/2d/delta-time): Need half delta-time too?
 
