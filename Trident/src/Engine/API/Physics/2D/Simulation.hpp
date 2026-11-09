@@ -69,13 +69,14 @@ namespace Trident {
 	void clearPairs(PhysicsSimulation2D& simulation);
 	void broadPhase(PhysicsSimulation2D& simulation);
 	void narrowPhase(PhysicsSimulation2D& simulation);
-	void applyForces(PhysicsSimulation2D& simulation);
+	void integrateVelocities(PhysicsSimulation2D& simulation);
 	void updateContactManifolds(PhysicsSimulation2D& simulation);
 	void updateJoints(PhysicsSimulation2D& simulation);
 	void applyImpulses(PhysicsSimulation2D& simulation);
+	void integratePositions(PhysicsSimulation2D& simulation);
+	void resetForces(PhysicsSimulation2D& simulation);
 
-	/// Uses Semi-Implicit Euler.
-	void integrate(PhysicsSimulation2D& simulation);
+	void tick(PhysicsSimulation2D& simulation);
 
 	RigidBodyID2D createRigidBody(PhysicsSimulation2D& simulation, const RigidBodyDescriptor2D& descriptor);
 	ShapeID2D createShape(PhysicsSimulation2D& simulation, const ShapeDescriptor2D& descriptor, const void* typeDescriptor);

@@ -6,7 +6,7 @@
 #include "Engine/API/Physics/2D/Simulation.hpp"
 
 namespace Trident {
-	void applyForces(PhysicsSimulation2D& simulation) {
+	void integrateVelocities(PhysicsSimulation2D& simulation) {
 		uint32 shapeIdIndex = 0;
 
 		while (shapeIdIndex < simulation.broadPhase.usedDynamicShapeIdCount) {
@@ -20,11 +20,6 @@ namespace Trident {
 				continue;
 			}
 
-			// TODO(physics/2d/apply-forces)
-			// Integrate gravity like in https://web.archive.org/web/20161201054257/https://www.niksula.hut.fi/~hkankaan/Homepages/gravity.html.
-			// This looks like Velocity Verlet for gravity to me?
-			// rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + simulation.gravity) * simulation.halfDeltaTime;
-			// rigidBody.angularVelocity += rigidBody.inverseInertia * halfDeltaTime;
 			rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + simulation.gravity) * simulation.deltaTime;
 			rigidBody.angularVelocity += rigidBody.torque * rigidBody.inverseInertia * simulation.deltaTime;
 

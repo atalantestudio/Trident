@@ -28,6 +28,18 @@ namespace Trident {
 		return simulation;
 	}
 
+	void tick(PhysicsSimulation2D& simulation) {
+		clearPairs(simulation);
+		broadPhase(simulation);
+		narrowPhase(simulation);
+		integrateVelocities(simulation);
+		updateContactManifolds(simulation);
+		// updateJoints(simulation);
+		applyImpulses(simulation);
+		integratePositions(simulation);
+		resetForces(simulation);
+	}
+
 	RigidBodyID2D createRigidBody(PhysicsSimulation2D& simulation, const RigidBodyDescriptor2D& descriptor) {
 		DEBUG_ASSERT(!std::isinf(descriptor.position.x) && !std::isnan(descriptor.position.x) && !std::isinf(descriptor.position.y) && !std::isnan(descriptor.position.y));
 		DEBUG_ASSERT(!std::isinf(descriptor.rotation) && !std::isnan(descriptor.rotation));

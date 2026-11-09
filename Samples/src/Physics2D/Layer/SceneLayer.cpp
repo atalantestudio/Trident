@@ -79,14 +79,7 @@ namespace Trident {
 	}
 
 	void Physics2DSceneLayer::preRender() {
-		clearPairs(simulation);
-		broadPhase(simulation);
-		narrowPhase(simulation);
-		applyForces(simulation);
-		updateContactManifolds(simulation);
-		// updateJoints(simulation);
-		applyImpulses(simulation);
-		integrate(simulation);
+		tick(simulation);
 
 		// checkHover();
 
