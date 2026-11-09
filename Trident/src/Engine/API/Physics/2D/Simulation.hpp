@@ -15,7 +15,7 @@ namespace Trident {
 	#define ENABLE_PHYSICS_2D_WARM_STARTING
 
 	struct PhysicsSimulation2DDescriptor {
-		float64 deltaTime;
+		float32 deltaTime;
 
 		/// Left-handed.
 		vec2<float32> gravity;
@@ -97,4 +97,6 @@ namespace Trident {
 	);
 
 	mat3x3<float32> computeWorld(const PhysicsSimulation2D& simulation, RigidBodyID2D rigidBodyId);
+
+	void updateMassAndInertia(PhysicsSimulation2D& simulation, RigidBodyID2D rigidBodyId);
 }

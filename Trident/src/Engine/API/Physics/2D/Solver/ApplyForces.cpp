@@ -7,9 +7,6 @@
 
 namespace Trident {
 	void applyForces(PhysicsSimulation2D& simulation) {
-		// TODO(physics/2d/apply-forces): Implement torque.
-		constexpr float32 torque = 0.0_Nm;
-
 		uint32 shapeIdIndex = 0;
 
 		while (shapeIdIndex < simulation.broadPhase.usedDynamicShapeIdCount) {
@@ -27,9 +24,9 @@ namespace Trident {
 			// Integrate gravity like in https://web.archive.org/web/20161201054257/https://www.niksula.hut.fi/~hkankaan/Homepages/gravity.html.
 			// This looks like Velocity Verlet for gravity to me?
 			// rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + simulation.gravity) * simulation.halfDeltaTime;
-			rigidBody.linearVelocity += ((rigidBody.force + simulation.gravity) * rigidBody.inverseMass) * simulation.deltaTime;
 			// rigidBody.angularVelocity += rigidBody.inverseInertia * halfDeltaTime;
-			rigidBody.angularVelocity += torque * rigidBody.inverseInertia * simulation.deltaTime;
+			rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + simulation.gravity) * simulation.deltaTime;
+			rigidBody.angularVelocity += rigidBody.torque * rigidBody.inverseInertia * simulation.deltaTime;
 
 			shapeIdIndex += 1;
 		}

@@ -13,7 +13,7 @@ namespace Trident {
 		rendererOptions.sampleCount = ImageSampleCount::x1;
 
 		PhysicsSimulation2DDescriptor simulationDescriptor;
-		simulationDescriptor.deltaTime = getApplication()->getFixedDeltaTime();
+		simulationDescriptor.deltaTime = static_cast<float32>(getApplication()->getFixedDeltaTime());
 		simulationDescriptor.gravity = {0.0f, -9.80665f};
 		simulationDescriptor.impulseIterationCount = 10;
 		simulationDescriptor.maxStaticRigidBodyCount = 128;
@@ -51,8 +51,6 @@ namespace Trident {
 				.flags = {},
 				.position = {0.0f, -10.0f},
 				.rotation = 0.0f,
-				.mass = max<float32>(),
-				.inertia = max<float32>(),
 			});
 
 			createShape(simulation, {
@@ -69,15 +67,13 @@ namespace Trident {
 				.flags = {},
 				.position = {0.0f, 4.0f},
 				.rotation = 0.0f,
-				.mass = 1.0_kg,
-				.inertia = max<float32>(),
 			});
 
 			createShape(simulation, {
 				.type = ShapeType2D::CONVEX_HULL,
 				.rigidBodyId = rigidBodyId,
 				.material = material,
-				.density = 1.0f,
+				.density = 200.0f,
 			}, &boxHull);
 		}
 	}

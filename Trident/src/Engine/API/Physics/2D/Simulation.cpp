@@ -8,8 +8,8 @@
 namespace Trident {
 	PhysicsSimulation2D createSimulation(const PhysicsSimulation2DDescriptor& descriptor) {
 		PhysicsSimulation2D simulation;
-		simulation.deltaTime = static_cast<float32>(descriptor.deltaTime);
-		simulation.inverseDeltaTime = static_cast<float32>(1.0 / descriptor.deltaTime);
+		simulation.deltaTime = descriptor.deltaTime;
+		simulation.inverseDeltaTime = 1.0f / descriptor.deltaTime;
 		simulation.gravity = descriptor.gravity;
 		simulation.impulseIterationCount = descriptor.impulseIterationCount;
 		simulation.rigidBodies = sequence<RigidBody2D>(descriptor.maxStaticRigidBodyCount + descriptor.maxKinematicAndDynamicRigidBodyCount);
@@ -25,53 +25,27 @@ namespace Trident {
 		simulation.collisionPairs = {};
 		simulation.contactPairs = {};
 
-		// TODO
-		// Create index arrays for each body type (static, kinematic, dynamic)
-		// Broad phase: collect every static-dynamic and dynamic-dynamic pair
-		// Narrow phase: process pairs
-		// Update manifolds: update intersecting pairs
-
 		return simulation;
 	}
 
 	RigidBodyID2D createRigidBody(PhysicsSimulation2D& simulation, const RigidBodyDescriptor2D& descriptor) {
 		DEBUG_ASSERT(!std::isinf(descriptor.position.x) && !std::isnan(descriptor.position.x) && !std::isinf(descriptor.position.y) && !std::isnan(descriptor.position.y));
 		DEBUG_ASSERT(!std::isinf(descriptor.rotation) && !std::isnan(descriptor.rotation));
-		DEBUG_ASSERT(!std::isinf(descriptor.mass) && !std::isnan(descriptor.mass) && descriptor.mass > 0.0_kg);
 
 		ENGINE_ASSERT(simulation.usedRigidBodyCount + 1 < simulation.rigidBodies.count(), "Rigid body count limit already reached.");
 
-		if (descriptor.type == RigidBodyType::DYNAMIC) {
-			if (descriptor.mass == max<float32>()) {
-				ENGINE_WARNING("Dynamic bodies should have non-infinite mass.");
-			}
-
-			if (descriptor.inertia == max<float32>()) {
-				ENGINE_WARNING("Dynamic bodies should have non-infinite inertia.");
-			}
-		}
-
 		RigidBody2D& rigidBody = simulation.rigidBodies[simulation.usedRigidBodyCount];
 		rigidBody.type = descriptor.type;
+		rigidBody.flags = descriptor.flags;
 		rigidBody.position = descriptor.position;
+		rigidBody.centroid = {0.0_m, 0.0_m};
 		rigidBody.rotation = descriptor.rotation;
+		rigidBody.inverseMass = 0.0_kg;
+		rigidBody.inverseInertia = 0.0f;
 		rigidBody.linearVelocity = descriptor.linearVelocity;
 		rigidBody.angularVelocity = descriptor.angularVelocity;
-		rigidBody.centroid = {0.0_m, 0.0_m};
-		rigidBody.flags = descriptor.flags;
 		rigidBody.force = {0.0f, 0.0f};
 		rigidBody.torque = 0.0_Nm;
-		rigidBody.inverseMass = 0.0_kg;
-
-		if (descriptor.mass != max<float32>()) {
-			rigidBody.inverseMass = 1.0f / descriptor.mass;
-		}
-
-		rigidBody.inverseInertia = 0.0f;
-
-		if (descriptor.inertia != max<float32>()) {
-			rigidBody.inverseInertia = 1.0f / descriptor.inertia;
-		}
 
 		const uint32 id = simulation.usedRigidBodyCount;
 
@@ -111,12 +85,6 @@ namespace Trident {
 			case ShapeType2D::CONVEX_HULL: {
 				shape.hull = static_cast<const HullHeader2D*>(typeDescriptor);
 
-				if (shape.hull->inertia > 0.0f && rigidBody.inverseMass != 0.0f) {
-					const float32 mass = 1.0f / rigidBody.inverseMass;
-
-					rigidBody.inverseInertia = 1.0f / (shape.hull->inertia * mass);
-				}
-
 				break;
 			}
 			default: {
@@ -125,6 +93,8 @@ namespace Trident {
 				break;
 			}
 		}
+
+		updateMassAndInertia(simulation, shape.rigidBodyId);
 
 		const uint32 id = simulation.usedShapeCount;
 
@@ -160,11 +130,14 @@ namespace Trident {
 		const float32 hx = halfSize.x;
 		const float32 hy = halfSize.y;
 
+		const float32 x = hx * 2.0f;
+		const float32 y = hy * 2.0f;
+
 		BoxHull2D boxHull;
 		boxHull.header.centroid = {0.0f, 0.0f};
-		boxHull.header.area = hx * hy * 8.0f;
+		boxHull.header.area = x * y;
 		boxHull.header.radius = length(halfSize);
-		boxHull.header.inertia = boxHull.header.area / 12.0f;
+		boxHull.header.inertia = (x * x + y * y) / 12.0f;
 		boxHull.header.vertexCount = 4;
 		boxHull.header.vertexOffset = offsetof(BoxHull2D, vertices);
 		boxHull.header.userIndex = userIndex;
@@ -176,5 +149,47 @@ namespace Trident {
 		userIndex += 1;
 
 		return boxHull;
+	}
+
+	void updateMassAndInertia(PhysicsSimulation2D& simulation, RigidBodyID2D rigidBodyId) {
+		RigidBody2D& rigidBody = simulation.rigidBodies[rigidBodyId];
+		rigidBody.inverseMass = 0.0f;
+		rigidBody.inverseInertia = 0.0f;
+
+		if (rigidBody.type != RigidBodyType::DYNAMIC) {
+			return;
+		}
+
+		const Shape2D& shape = simulation.shapes[simulation.usedShapeCount];
+
+		float32 m;
+		float32 I;
+
+		switch (shape.type) {
+			case ShapeType2D::CIRCLE: {
+				ENGINE_ERROR_UNIMPLEMENTED();
+
+				break;
+			}
+			case ShapeType2D::CAPSULE: {
+				ENGINE_ERROR_UNIMPLEMENTED();
+
+				break;
+			}
+			case ShapeType2D::CONVEX_HULL: {
+				m = shape.hull->area * shape.density;
+				I = shape.hull->inertia * shape.density;
+
+				break;
+			}
+			default: {
+				DEBUG_ASSERT(false);
+
+				break;
+			}
+		}
+
+		rigidBody.inverseMass = 1.0f / m;
+		rigidBody.inverseInertia = 1.0f / I;
 	}
 }
