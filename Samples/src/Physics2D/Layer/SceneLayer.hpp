@@ -37,10 +37,22 @@ namespace Trident {
 			bool onEvent(MouseWheelEvent& event);
 			bool onEvent(WindowResizeEvent& event);
 
+			void LoadBoxSample(PhysicsSimulation2DDescriptor& simulationDescriptor);
+			void LoadBoxPyramidSample(PhysicsSimulation2DDescriptor& simulationDescriptor);
+			void LoadBoxStackingSample(PhysicsSimulation2DDescriptor& simulationDescriptor);
+			void LoadCircleSample(PhysicsSimulation2DDescriptor& simulationDescriptor);
+			void LoadCircleSlidingSample(PhysicsSimulation2DDescriptor& simulationDescriptor);
+			void LoadDominoSample(PhysicsSimulation2DDescriptor& simulationDescriptor);
+			void LoadFrictionSample(PhysicsSimulation2DDescriptor& simulationDescriptor);
+			void LoadPolygonSample(PhysicsSimulation2DDescriptor& simulationDescriptor);
+			void LoadSwingSample(PhysicsSimulation2DDescriptor& simulationDescriptor);
+
 		private:
 			PhysicsSimulation2D simulation;
 			Physics2DRenderer renderer;
 			PhysicsRendererBuildOptions2D rendererOptions;
+
+			sequence<BoxHull2D> boxHulls;
 
 			Input keyMap;
 			bool jumping = false;
@@ -51,9 +63,6 @@ namespace Trident {
 
 			vec2<float32> mousePosition = {0.0_m, 0.0_m};
 			vec2<float32> mouseDelta;
-
-			BoxHull2D floorHull;
-			BoxHull2D boxHull;
 
 			bool draggingCamera = false;
 	};

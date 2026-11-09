@@ -69,7 +69,6 @@ namespace Trident {
 	ShapeID2D createShape(PhysicsSimulation2D& simulation, const ShapeDescriptor2D& descriptor, const void* typeDescriptor) {
 		DEBUG_ASSERT(!std::isinf(descriptor.density) && !std::isnan(descriptor.density) && descriptor.density >= 0.0f);
 		DEBUG_ASSERT(!std::isinf(descriptor.material.friction) && !std::isnan(descriptor.material.friction) && descriptor.material.friction >= 0.0f);
-		DEBUG_ASSERT(!std::isinf(descriptor.material.restitution) && !std::isnan(descriptor.material.restitution) && descriptor.material.restitution >= 0.0f);
 
 		ENGINE_ASSERT(simulation.usedShapeCount + 1 < simulation.shapes.count(), "Shape count limit already reached.");
 		ENGINE_ASSERT(descriptor.rigidBodyId < simulation.usedRigidBodyCount, "Invalid rigid body ID.");
@@ -179,6 +178,7 @@ namespace Trident {
 
 		switch (shape.type) {
 			case ShapeType2D::CIRCLE: {
+				// TODO(physics/2d/circle/update-mass)
 				ENGINE_ERROR_UNIMPLEMENTED();
 
 				break;

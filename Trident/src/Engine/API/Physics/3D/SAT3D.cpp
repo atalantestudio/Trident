@@ -154,7 +154,7 @@ namespace Trident {
 		Transform3D tB = rigidBodyB.getTransform();
 		tB.position += hullB.centroid;
 
-		SATOutput3D output;
+		SATOutput3D output{};
 		output.overlap = false;
 		output.faceQueryA = queryFaceDirections(tA, tB, rigidBodyA, rigidBodyB, hullA, hullB);
 

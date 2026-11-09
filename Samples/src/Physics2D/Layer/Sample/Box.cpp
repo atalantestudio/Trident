@@ -1,0 +1,57 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
+#pragma once
+
+#include "Physics2D/Layer/SceneLayer.hpp"
+
+namespace Trident {
+	void Physics2DSceneLayer::LoadBoxSample(PhysicsSimulation2DDescriptor& simulationDescriptor) {
+		rendererOptions.hulls = sequence<PhysicsRendererBuildHull2D>(2);
+		rendererOptions.maxCircleInstanceCount = 0;
+
+		simulationDescriptor.maxStaticRigidBodyCount = 1;
+		simulationDescriptor.maxKinematicAndDynamicRigidBodyCount = 1;
+		simulationDescriptor.maxStaticShapeCount = 1;
+		simulationDescriptor.maxKinematicAndDynamicShapeCount = 1;
+
+		simulation = createSimulation(simulationDescriptor);
+
+		boxHulls = {
+			createBoxHull({50.0f, 10.0f}),
+			createBoxHull({0.5f, 0.5f}),
+		};
+
+		registerHullForRender(&boxHulls[0].header);
+		registerHullForRender(&boxHulls[1].header);
+
+		PhysicsMaterial material;
+		material.friction = 0.2f;
+
+		// Floor
+		createShape(simulation, {
+			.type = ShapeType2D::CONVEX_HULL,
+			.rigidBodyId = createRigidBody(simulation, {
+				.type = RigidBodyType::STATIC,
+				.flags = {},
+				.position = {0.0f, -10.0f},
+				.rotation = 0.0f,
+			}),
+			.material = material,
+			.density = 1.0f,
+		}, &boxHulls[0]);
+
+		// Box
+		createShape(simulation, {
+			.type = ShapeType2D::CONVEX_HULL,
+			.rigidBodyId = createRigidBody(simulation, {
+				.type = RigidBodyType::DYNAMIC,
+				.flags = {},
+				.position = {0.0f, 4.0f},
+				.rotation = 0.0f,
+			}),
+			.material = material,
+			.density = 200.0f,
+		}, &boxHulls[1]);
+	}
+}

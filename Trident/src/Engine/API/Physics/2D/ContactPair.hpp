@@ -12,7 +12,7 @@ namespace Trident {
 		// TODO(physics/2d): Differentiate static and dynamic friction.
 		float32 combinedFriction;
 
-		// TODO(physics/2d): Store combined restitution.
+		// TODO(physics/2d/restitution)
 		// float32 combinedRestitution;
 	};
 }

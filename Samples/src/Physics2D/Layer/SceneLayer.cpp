@@ -8,26 +8,27 @@
 
 namespace Trident {
 	void Physics2DSceneLayer::initialize() {
-		rendererOptions.hulls = sequence<PhysicsRendererBuildHull2D>(2);
-		rendererOptions.maxCircleInstanceCount = 128;
 		rendererOptions.sampleCount = ImageSampleCount::x1;
 
 		PhysicsSimulation2DDescriptor simulationDescriptor;
 		simulationDescriptor.deltaTime = static_cast<float32>(getApplication()->getFixedDeltaTime());
 		simulationDescriptor.gravity = {0.0f, -9.80665f};
 		simulationDescriptor.impulseIterationCount = 10;
-		simulationDescriptor.maxStaticRigidBodyCount = 128;
-		simulationDescriptor.maxKinematicAndDynamicRigidBodyCount = 128;
-		simulationDescriptor.maxStaticShapeCount = 16;
-		simulationDescriptor.maxKinematicAndDynamicShapeCount = 16;
 
-		simulation = createSimulation(simulationDescriptor);
+		const view<char8> SampleName = getApplication()->getPropertyFile()->getProperty<view<char8>>("SampleName");
 
-		floorHull = createBoxHull({50.0f, 10.0f});
-		boxHull = createBoxHull({0.5f, 0.5f});
-
-		registerHullForRender(&floorHull.header);
-		registerHullForRender(&boxHull.header);
+		if (SampleName == "box") {
+			LoadBoxSample(simulationDescriptor);
+		}
+		else if (SampleName == "boxstacking") {
+			LoadBoxStackingSample(simulationDescriptor);
+		}
+		else if (SampleName == "circle") {
+			LoadCircleSample(simulationDescriptor);
+		}
+		else {
+			ENGINE_ASSERT(false, "Unknown sample \"[]\".", SampleName);
+		}
 
 		renderer.setLayer(this);
 		renderer.build(rendererOptions);
@@ -40,42 +41,6 @@ namespace Trident {
 	void Physics2DSceneLayer::postConstruct() {
 		renderer.postBuild();
 		renderer.encodeOneTimeCommands();
-
-		PhysicsMaterial material;
-		material.friction = 0.2f;
-		material.restitution = 0.0f;
-
-		{
-			const RigidBodyID2D rigidBodyId = createRigidBody(simulation, {
-				.type = RigidBodyType::STATIC,
-				.flags = {},
-				.position = {0.0f, -10.0f},
-				.rotation = 0.0f,
-			});
-
-			createShape(simulation, {
-				.type = ShapeType2D::CONVEX_HULL,
-				.rigidBodyId = rigidBodyId,
-				.material = material,
-				.density = 1.0f,
-			}, &floorHull);
-		}
-
-		{
-			const RigidBodyID2D rigidBodyId = createRigidBody(simulation, {
-				.type = RigidBodyType::DYNAMIC,
-				.flags = {},
-				.position = {0.0f, 4.0f},
-				.rotation = 0.0f,
-			});
-
-			createShape(simulation, {
-				.type = ShapeType2D::CONVEX_HULL,
-				.rigidBodyId = rigidBodyId,
-				.material = material,
-				.density = 200.0f,
-			}, &boxHull);
-		}
 	}
 
 	void Physics2DSceneLayer::preRender() {
