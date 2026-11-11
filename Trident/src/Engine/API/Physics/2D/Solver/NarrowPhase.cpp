@@ -3,11 +3,8 @@
 
 #include "pch.hpp"
 
-#include "Engine/API/Geometry/Hull2DType.hpp"
 #include "Engine/API/Physics/2D/Collider/Collider2D.hpp"
-#include "Engine/API/Physics/2D/Constraint/Constraint2D.hpp"
 #include "Engine/API/Physics/2D/Simulation.hpp"
-#include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 
 namespace Trident {
 	static void mergeContactManifolds(ContactPair2D& contactPair, const ContactManifold2D& newContactManifold) {
@@ -17,8 +14,8 @@ namespace Trident {
 		while (contactIndex < newContactManifold.contactCount) {
 			const Contact2D& cNew = newContactManifold.contacts[contactIndex];
 
-			int k = -1;
-			int j = 0;
+			sint32 k = -1;
+			sint32 j = 0;
 
 			while (j < contactPair.manifold.contactCount) {
 				const Contact2D& cOld = contactPair.manifold.contacts[j];

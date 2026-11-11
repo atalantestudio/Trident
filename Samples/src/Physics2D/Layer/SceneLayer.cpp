@@ -9,6 +9,9 @@
 namespace Trident {
 	void Physics2DSceneLayer::initialize() {
 		rendererOptions.sampleCount = ImageSampleCount::x1;
+		rendererOptions.cameraPosition = {0.0f, 8.0f};
+		rendererOptions.zoomLevel = 36.0f;
+		rendererOptions.maxContactCount = 2048;
 
 		PhysicsSimulation2DDescriptor simulationDescriptor;
 		simulationDescriptor.deltaTime = static_cast<float32>(getApplication()->getFixedDeltaTime());
@@ -60,14 +63,9 @@ namespace Trident {
 			const Shape2D& shape = simulation.shapes[shapeIndex];
 			const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 
-			Transform2D transform;
-			transform.position = rigidBody.position;
-			transform.centroid = rigidBody.centroid;
-			transform.rotation = rotationAngle<mat2x2<float32>>(-rigidBody.rotation);
-
 			switch (shape.type) {
 				case ShapeType2D::CIRCLE: {
-					renderer.setInstance(0, transform, color);
+					renderer.setInstance(0, rigidBody, color, shapeIndex);
 
 					break;
 				}
@@ -77,7 +75,7 @@ namespace Trident {
 					break;
 				}
 				case ShapeType2D::CONVEX_HULL: {
-					renderer.setInstance(shape.hull->userIndex, transform, color);
+					renderer.setInstance(shape.hull->userIndex, rigidBody, color, shapeIndex);
 
 					break;
 				}
@@ -89,6 +87,24 @@ namespace Trident {
 			}
 
 			shapeIndex += 1;
+		}
+
+		uint32 contactCount = 0;
+
+		for (const std::pair<const CollisionPair2D, ContactPair2D>& pair : simulation.contactPairs) {
+			const ContactManifold2D& contactManifold = pair.second.manifold;
+
+			if (contactCount + contactManifold.contactCount >= rendererOptions.maxContactCount) {
+				break;
+			}
+
+			uint32 contactIndex = 0;
+
+			while (contactIndex < contactManifold.contactCount) {
+				renderer.setContact(contactManifold.contacts[contactIndex].position);
+
+				contactIndex += 1;
+			}
 		}
 
 		/* renderer.selectEntity(selectedEntity);

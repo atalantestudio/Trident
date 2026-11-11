@@ -3,28 +3,31 @@
 
 #pragma once
 
-#include "Engine/API/Geometry/Hull2D.hpp"
 #include "Engine/API/Physics/2D/RigidBody.hpp"
 #include "Engine/API/Physics/2D/Shape.hpp"
-#include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 
 namespace Trident {
-	struct SAT2DOutput {
-		/// The separation between the two bodies.
-		/// The shapes overlap if the separation is negative or 0.
+	struct SATEdgeQuery2D {
+		/// The separation value between the two bodies.
+		/// A negative separation indicates overlap.
 		float32 separation;
 
-		/// The separating axis (the normal of the reference edge).
-		vec2<float32> axis;
+		/// The separating plane on the reference body, in the local space of the incident body.
+		Plane2D referencePlane;
 
-		/// Index of the reference edge in the geometry vertex array.
-		uint32 referenceEdgeIndex;
+		/// The indices of the vertices composing the separating edge.
+		uint32 referenceEdgeIndexA;
+		uint32 referenceEdgeIndexB;
 
-		const RigidBody2D* referenceBody;
-		const RigidBody2D* incidentBody;
+		/// The vertices composing the separating edge.
+		vec2<float32> referenceEdgeA;
+		vec2<float32> referenceEdgeB;
+	};
 
-		const Shape2D* referenceShape;
-		const Shape2D* incidentShape;
+	struct SATOutput2D {
+		bool overlap;
+		SATEdgeQuery2D edgeQueryA;
+		SATEdgeQuery2D edgeQueryB;
 	};
 
 	struct SATCircleConvexHullOutput2D {
@@ -47,7 +50,7 @@ namespace Trident {
 	// - Don't test parallel axes (https://dyn4j.org/2010/01/sat).
 	// - Reuse the separation axis from the last run to make the algorithm O(1) in non-intersection cases.
 	//   But what if the separation axis changes e.g. due to rotation?
-	SAT2DOutput SAT2D(const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, const Shape2D& shapeA, const Shape2D& shapeB);
+	SATOutput2D SAT2D(const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, const Shape2D& shapeA, const Shape2D& shapeB);
 
 	/// The Separating Axis Theorem algorithm in 2D.
 	/// A has a circle geometry and B has a convex hull geometry.

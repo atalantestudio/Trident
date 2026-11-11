@@ -46,6 +46,8 @@ namespace Trident {
 	struct PhysicsSimulation2D {
 		float32 deltaTime;
 		float32 inverseDeltaTime;
+
+		/// Gravity acceleration.
 		vec2<float32> gravity;
 
 		uint32 impulseIterationCount;
@@ -83,9 +85,6 @@ namespace Trident {
 
 	BoxHull2D createBoxHull(vec2<float32> halfSize);
 
-	/// Applies a linear force to the body.
-	void applyForce(PhysicsSimulation2D& simulation, RigidBodyID2D rigidBodyId, vec2<float32> F);
-
 	/// Applies linear and angular impulses to the body.
 	void applyImpulse(
 		RigidBody2D& rigidBody,
@@ -96,8 +95,6 @@ namespace Trident {
 		/// The vector from the body's position to the contact.
 		vec2<float32> r
 	);
-
-	mat3x3<float32> computeWorld(const PhysicsSimulation2D& simulation, RigidBodyID2D rigidBodyId);
 
 	void updateMassAndInertia(PhysicsSimulation2D& simulation, RigidBodyID2D rigidBodyId);
 }

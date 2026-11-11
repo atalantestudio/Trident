@@ -7,7 +7,7 @@
 
 namespace Trident {
 	inline static vec2<float32> calculateRelativeVelocity(const RigidBody2D& A, const RigidBody2D& B, vec2<float32> rA, vec2<float32> rB) {
-		return B.linearVelocity + perpendicularRight(rB) * B.angularVelocity - A.linearVelocity - perpendicularRight(rA) * A.angularVelocity;
+		return B.linearVelocity + perpendicularLeft(rB) * B.angularVelocity - A.linearVelocity - perpendicularLeft(rA) * A.angularVelocity;
 	}
 
 	void applyImpulses(PhysicsSimulation2D& simulation) {
@@ -17,7 +17,6 @@ namespace Trident {
 		// TODO(physics/2d/joint): Restore joints.
 		// const ComponentPool<Joint2D>& jointPool = scene->ecs.getComponentPool<Joint2D>();
 
-		vec2<float32> relativeVelocity;
 		uint32 iteration = 0;
 
 		// TODO(physics/2d/constraint): Restore constraints.
@@ -41,8 +40,7 @@ namespace Trident {
 				while (contactIndex < contactPair.manifold.contactCount) {
 					Contact2D& contact = contactPair.manifold.contacts[contactIndex];
 
-					relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, contact.rA, contact.rB);
-
+					vec2<float32> relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, contact.rA, contact.rB);
 					float32 normalImpulseLength;
 
 					// Apply normal impulse.

@@ -5,6 +5,9 @@
 
 #include "Engine/API/Physics/2D/Simulation.hpp"
 
+// TODO(physics/2d): Debug only.
+// #define TEST_FIX_MASS_PRECISION
+
 namespace Trident {
 	PhysicsSimulation2D createSimulation(const PhysicsSimulation2DDescriptor& descriptor) {
 		PhysicsSimulation2D simulation;
@@ -44,14 +47,14 @@ namespace Trident {
 		DEBUG_ASSERT(!std::isinf(descriptor.position.x) && !std::isnan(descriptor.position.x) && !std::isinf(descriptor.position.y) && !std::isnan(descriptor.position.y));
 		DEBUG_ASSERT(!std::isinf(descriptor.rotation) && !std::isnan(descriptor.rotation));
 
-		ENGINE_ASSERT(simulation.usedRigidBodyCount + 1 < simulation.rigidBodies.count(), "Rigid body count limit already reached.");
+		ENGINE_ASSERT(simulation.usedRigidBodyCount < simulation.rigidBodies.count(), "Rigid body count limit already reached.");
 
 		RigidBody2D& rigidBody = simulation.rigidBodies[simulation.usedRigidBodyCount];
 		rigidBody.type = descriptor.type;
 		rigidBody.flags = descriptor.flags;
-		rigidBody.position = descriptor.position;
+		rigidBody.transform.position = descriptor.position;
+		rigidBody.transform.rotation.setAngle(descriptor.rotation);
 		rigidBody.centroid = {0.0_m, 0.0_m};
-		rigidBody.rotation = descriptor.rotation;
 		rigidBody.inverseMass = 0.0_kg;
 		rigidBody.inverseInertia = 0.0f;
 		rigidBody.linearVelocity = descriptor.linearVelocity;
@@ -70,7 +73,7 @@ namespace Trident {
 		DEBUG_ASSERT(!std::isinf(descriptor.density) && !std::isnan(descriptor.density) && descriptor.density >= 0.0f);
 		DEBUG_ASSERT(!std::isinf(descriptor.material.friction) && !std::isnan(descriptor.material.friction) && descriptor.material.friction >= 0.0f);
 
-		ENGINE_ASSERT(simulation.usedShapeCount + 1 < simulation.shapes.count(), "Shape count limit already reached.");
+		ENGINE_ASSERT(simulation.usedShapeCount < simulation.shapes.count(), "Shape count limit already reached.");
 		ENGINE_ASSERT(descriptor.rigidBodyId < simulation.usedRigidBodyCount, "Invalid rigid body ID.");
 
 		Shape2D& shape = simulation.shapes[simulation.usedShapeCount];
@@ -149,6 +152,11 @@ namespace Trident {
 		boxHull.header.area = x * y;
 		boxHull.header.radius = length(halfSize);
 		boxHull.header.inertia = (x * x + y * y) / 12.0f;
+
+		#if defined(TEST_FIX_MASS_PRECISION)
+			boxHull.header.inertia = 200.0f * (x * x + y * y) / 12.0f;
+		#endif
+
 		boxHull.header.vertexCount = 4;
 		boxHull.header.vertexOffset = offsetof(BoxHull2D, vertices);
 		boxHull.header.userIndex = userIndex;
@@ -191,6 +199,11 @@ namespace Trident {
 			case ShapeType2D::CONVEX_HULL: {
 				m = shape.hull->area * shape.density;
 				I = shape.hull->inertia * shape.density;
+
+				#if defined(TEST_FIX_MASS_PRECISION)
+					m = 200.0f;
+					I = shape.hull->inertia;
+				#endif
 
 				break;
 			}

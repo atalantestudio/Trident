@@ -10,8 +10,8 @@ namespace Trident {
 		DEBUG_ASSERT(shapeA.type == ShapeType2D::CIRCLE);
 		DEBUG_ASSERT(shapeB.type == ShapeType2D::CIRCLE);
 
-		const vec2<float32> a = rigidBodyA.position;
-		const vec2<float32> b = rigidBodyB.position;
+		const vec2<float32> a = rigidBodyA.transform.position;
+		const vec2<float32> b = rigidBodyB.transform.position;
 		const vec2<float32> ab = b - a;
 
 		const float32 rA = shapeA.circle.radius;

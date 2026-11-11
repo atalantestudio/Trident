@@ -32,8 +32,8 @@ namespace Trident {
 				rigidBody.angularVelocity = 0.0f;
 			}
 
-			rigidBody.position += rigidBody.linearVelocity * simulation.deltaTime;
-			rigidBody.rotation += rigidBody.angularVelocity * simulation.deltaTime;
+			rigidBody.transform.position += rigidBody.linearVelocity * simulation.deltaTime;
+			rigidBody.transform.rotation = integrateRotation(rigidBody.transform.rotation, rigidBody.angularVelocity * simulation.deltaTime);
 
 			shapeIdIndex += 1;
 		}

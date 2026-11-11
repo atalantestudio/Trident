@@ -418,10 +418,15 @@ namespace Trident {
 		updateCameraProjection();
 	}
 
-	void Physics2DRenderer::setInstance(uint32 hullIndex, const Transform2D& transform, vec3<float32> color) {
+	void Physics2DRenderer::setInstance(uint32 hullIndex, const RigidBody2D& rigidBody, vec3<float32> color, ShapeID2D shapeId) {
 		if (hullIndex == 0) {
-			instanceMappedRanges[0][circleInstanceCount].transform = transform;
-			instanceMappedRanges[0][circleInstanceCount].color = color;
+			PhysicsRendererInstance2D& instance = instanceMappedRanges[0][circleInstanceCount];
+			instance.position = rigidBody.transform.position;
+			instance.centroid = rigidBody.centroid;
+			instance.rotation = rotationAngle<mat2x2<float32>>(rigidBody.transform.rotation.getAngle());
+			instance.color = color;
+			instance.shapeId = shapeId;
+
 			circleInstanceCount += 1;
 
 			return;
@@ -429,10 +434,21 @@ namespace Trident {
 
 		PhysicsRendererBuildHull2D& hull = hulls[hullIndex - 1];
 
-		instanceMappedRanges[hullIndex][hull.instanceCount].transform = transform;
-		instanceMappedRanges[hullIndex][hull.instanceCount].color = color;
+		PhysicsRendererInstance2D& instance = instanceMappedRanges[hullIndex][hull.instanceCount];
+		instance.position = rigidBody.transform.position;
+		instance.centroid = rigidBody.centroid;
+		instance.rotation = rotationAngle<mat2x2<float32>>(rigidBody.transform.rotation.getAngle());
+		instance.color = color;
+		instance.shapeId = shapeId;
 
 		hull.instanceCount += 1;
+	}
+
+	void Physics2DRenderer::setContact(vec2<float32> contact) {
+		DEBUG_ASSERT(contactCount < maxContactCount);
+
+		contactMappedRange[contactCount] = contact;
+		contactCount += 1;
 	}
 
 	void Physics2DRenderer::render(ref<CommandEncoder> commandEncoder) const {
@@ -442,7 +458,7 @@ namespace Trident {
 
 		// TODO(physics/2d/renderer): Store the clear values inside the renderer.
 		sequence<ClearValue> clearValues(2 + (sampleCount != ImageSampleCount::x1));
-		clearValues[0] = {1.0f, 1.0f, 1.0f, 1.0f};
+		clearValues[0] = {0.0f, 0.0f, 0.0f, 1.0f};
 		clearValues[1] = {
 			.depth = 0.0f,
 			.stencil = 0,
@@ -460,11 +476,11 @@ namespace Trident {
 		commandEncoder->setScissor(0, 0, swapchainExtent);
 
 		// Grid
-		{
+		/* {
 			commandEncoder->bindGraphicsPipeline(gridPipeline);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
 			commandEncoder->draw(3, 1, 0, 0);
-		}
+		} */
 
 		// Draw circle shapes.
 		if (circleInstanceCount > 0) {
@@ -481,7 +497,7 @@ namespace Trident {
 		uint32 indexOffset = 6;
 
 		// Draw hull shape.
-		{
+		/* {
 			commandEncoder->bindGraphicsPipeline(shapeFillPipeline);
 			commandEncoder->bindVertexBuffer(1, instanceBuffer, 0);
 			commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(indexBuffer, 0);
@@ -502,7 +518,7 @@ namespace Trident {
 				indexOffset += hull.hullHeader->vertexCount;
 				shapeIndex += 1;
 			}
-		}
+		} */
 
 		vertexOffset = 4 * sizeof(vec2<float32>);
 		instanceOffset = maxCircleInstanceCount;
@@ -528,6 +544,14 @@ namespace Trident {
 				instanceOffset += hull.maxInstanceCount;
 				shapeIndex += 1;
 			}
+		}
+
+		// Draw contacts.
+		if (contactCount > 0) {
+			commandEncoder->bindGraphicsPipeline(contactPipeline);
+			commandEncoder->bindVertexBuffer(0, contactBuffer, 0);
+			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
+			commandEncoder->draw(contactCount, 1, 0, 0);
 		}
 
 		// Center of mass
@@ -644,5 +668,7 @@ namespace Trident {
 		for (PhysicsRendererBuildHull2D& hull : hulls) {
 			hull.instanceCount = 0;
 		}
+
+		contactCount = 0;
 	}
 }

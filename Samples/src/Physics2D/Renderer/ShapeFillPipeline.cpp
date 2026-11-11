@@ -13,11 +13,11 @@ namespace Trident {
 		};
 
 		vertexInputBindings[0].registerAttribute<vec2<float32>>();
-		vertexInputBindings[1].registerAttribute<decltype(PhysicsRendererInstance2D::transform.position)>();
-		vertexInputBindings[1].registerAttribute<decltype(PhysicsRendererInstance2D::transform.centroid)>();
-		vertexInputBindings[1].registerAttribute<decltype(PhysicsRendererInstance2D::transform.rotation)>();
+		vertexInputBindings[1].registerAttribute<decltype(PhysicsRendererInstance2D::position)>();
+		vertexInputBindings[1].registerAttribute<decltype(PhysicsRendererInstance2D::centroid)>();
+		vertexInputBindings[1].registerAttribute<decltype(PhysicsRendererInstance2D::rotation)>();
 		vertexInputBindings[1].registerAttribute<decltype(PhysicsRendererInstance2D::color)>();
-		vertexInputBindings[1].registerAttribute<decltype(PhysicsRendererInstance2D::index)>();
+		vertexInputBindings[1].registerAttribute<decltype(PhysicsRendererInstance2D::shapeId)>();
 
 		// TODO(physics/2d/renderer): Restore depth and fill/stroke colors.
 		// vertexInputBindings[1].registerAttribute<decltype(RigidBody::fillColor)>();
@@ -51,7 +51,7 @@ namespace Trident {
 						.name = "Shape fill fragment",
 					#endif
 				},
-				"Physics2D/FragmentRGBA.frag"
+				"Physics2D/FragmentRGB.frag"
 			),
 			.primitiveTopology = PrimitiveTopology::TRIANGLE_STRIP,
 			.polygonMode = PolygonMode::FILL,

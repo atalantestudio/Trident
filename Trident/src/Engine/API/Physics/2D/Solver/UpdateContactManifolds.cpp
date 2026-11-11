@@ -45,8 +45,8 @@ namespace Trident {
 
 			while (contactIndex < contactPair.manifold.contactCount) {
 				Contact2D& contact = contactPair.manifold.contacts[contactIndex];
-				contact.rA = contact.position - rigidBodyA.position;
-				contact.rB = contact.position - rigidBodyB.position;
+				contact.rA = contact.position - rigidBodyA.transform.position;
+				contact.rB = contact.position - rigidBodyB.transform.position;
 
 				const float32 inverseMassSum = rigidBodyA.inverseMass + rigidBodyB.inverseMass;
 				const float32 rArA = dot(contact.rA, contact.rA);

@@ -17,7 +17,10 @@ namespace Trident {
 
 	struct PhysicsRendererBuildOptions2D {
 		ImageSampleCount sampleCount;
+		vec2<float32> cameraPosition;
+		float32 zoomLevel;
 		sequence<PhysicsRendererBuildHull2D> hulls;
 		uint16 maxCircleInstanceCount;
+		uint32 maxContactCount;
 	};
 }

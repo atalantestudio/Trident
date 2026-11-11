@@ -13,8 +13,8 @@ namespace Trident {
 		};
 
 		vertexInputBindings[0].registerAttribute<vec2<float32>>();
-		vertexInputBindings[1].registerAttribute<decltype(Transform2D::position)>();
-		vertexInputBindings[1].stride = sizeof(Transform2D);
+		vertexInputBindings[1].registerAttribute<decltype(PhysicsRendererInstance2D::position)>();
+		vertexInputBindings[1].stride = sizeof(PhysicsRendererInstance2D);
 
 		const ColorBlendAttachment colorBlendAttachments[] = {
 			{

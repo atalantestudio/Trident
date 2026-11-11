@@ -6,46 +6,6 @@
 #include "Engine/API/Physics/2D/GJK2D.hpp"
 
 namespace Trident {
-	static mat3x3<float32> world(const RigidBody2D& rigidBody) {
-		return (
-			translation<mat3x3<float32>>(-rigidBody.centroid) *
-			rotationAngle<mat3x3<float32>>(rigidBody.rotation) *
-			translation<mat3x3<float32>>(rigidBody.position)
-		);
-	}
-
-	static vec2<float32> shapeVertex(const Shape2D& shape, uint32 index) {
-		DEBUG_ASSERT(shape.type == ShapeType2D::CONVEX_HULL);
-
-		return pointer_cast<const vec2<float32>*>(pointer_cast<const uint8*>(shape.hull) + shape.hull->vertexOffset)[index];
-	}
-
-	// TODO: Some geometries (e.g. CircleGeometry2D) don't implement `supportIndex`. Use `supportVertex` instead.
-	// Returns the index of the farthest point on `A` along `d`, in local space.
-	static uint32 supportIndex(const RigidBody2D& rigidBody, const Shape2D& shape, vec2<float32> d) {
-		const vec2<float32>* vertices = pointer_cast<const vec2<float32>*>(pointer_cast<const uint8*>(shape.hull) + shape.hull->vertexOffset);
-		const mat2x2<float32> inverseRotation = rotationAngle<mat2x2<float32>>(-rigidBody.rotation);
-
-		d *= inverseRotation;
-
-		float32 maxValue = dot(vertices[0], d);
-		uint32 maxVertexIndex = 0;
-		uint32 vertexIndex = 1;
-
-		while (vertexIndex < shape.hull->vertexCount) {
-			const float32 value = dot(vertices[vertexIndex], d);
-
-			if (value > maxValue) {
-				maxValue = value;
-				maxVertexIndex = vertexIndex;
-			}
-
-			vertexIndex += 1;
-		}
-
-		return maxVertexIndex;
-	}
-
 	// Calculates the closest point to the origin on a line formed by the simplex s.
 	static void ClosestPointLineOrigin(Simplex2& s) {
 		const vec2<float32> a = s[0].v;
@@ -194,13 +154,13 @@ namespace Trident {
 		DEBUG_ASSERT(shapeB.type == ShapeType2D::CONVEX_HULL);
 		DEBUG_ASSERT(shapeB.hull->vertexCount < max<uint8>());
 
-		vec2<float32> d = B.position - A.position;
+		vec2<float32> d = B.transform.position - A.transform.position;
 
 		Simplex2Vertex vertex;
 		vertex.iA = 0;
 		vertex.iB = 0;
-		vertex.vA = A.position;
-		vertex.vB = shapeVertex(shapeB, vertex.iB) * world(B);
+		vertex.vA = A.transform.position;
+		vertex.vB = shapeB.hull->getVertices()[vertex.iB] * B.transform;
 		vertex.v = vertex.vB - vertex.vA;
 
 		Simplex2 s = {vertex};
@@ -277,7 +237,7 @@ namespace Trident {
 
 			Simplex2Vertex vertex;
 			vertex.iA = 0;
-			vertex.iB = supportIndex(B, shapeB, d);
+			vertex.iB = indexSupport(shapeB, d * B.transform.rotation);
 
 			bool duplicate = false;
 			uint8 j = 0;
@@ -296,8 +256,8 @@ namespace Trident {
 				break;
 			}
 
-			vertex.vA = A.position;
-			vertex.vB = shapeVertex(shapeB, vertex.iB) * world(B);
+			vertex.vA = A.transform.position;
+			vertex.vB = shapeB.hull->getVertices()[vertex.iB] * B.transform;
 			vertex.v = vertex.vB - vertex.vA;
 
 			s[s.count] = vertex;

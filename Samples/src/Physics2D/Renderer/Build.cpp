@@ -8,9 +8,13 @@
 namespace Trident {
 	void Physics2DRenderer::build(const PhysicsRendererBuildOptions2D& options) {
 		sampleCount = options.sampleCount;
+		cameraPosition = options.cameraPosition;
+		zoomLevel = options.zoomLevel;
 		maxCircleInstanceCount = options.maxCircleInstanceCount;
 		circleInstanceCount = 0;
 		hulls = options.hulls;
+		contactCount = 0;
+		maxContactCount = options.maxContactCount;
 
 		build();
 
@@ -31,6 +35,7 @@ namespace Trident {
 		vertexBuffer = createVertexBuffer(vertexCount);
 		instanceBuffer = createInstanceBuffer(instanceCount);
 		indexBuffer = createIndexBuffer(triangleStripIndexCount + lineStripIndexCount);
+		contactBuffer = createContactBuffer(maxContactCount);
 	}
 
 	void Physics2DRenderer::build() {
@@ -81,6 +86,7 @@ namespace Trident {
 		circlePipeline = createCirclePipeline();
 		shapeFillPipeline = createShapeFillPipeline();
 		shapeStrokePipeline = createShapeStrokePipeline();
+		contactPipeline = createContactPipeline();
 		// centerOfMassPipeline = createCenterOfMassPipeline();
 		// rigidBodyPlaceholderFillPipeline = createRigidBodyPlaceholderFillPipeline();
 		// rigidBodyPlaceholderStrokePipeline = createRigidBodyPlaceholderStrokePipeline();
@@ -98,7 +104,7 @@ namespace Trident {
 
 	StaticMemoryDescriptor Physics2DRenderer::getStaticMemoryDescriptor() const {
 		return {
-			.buffers = view<ref<Buffer>>(&vertexBuffer, 4),
+			.buffers = view<ref<Buffer>>(&vertexBuffer, 5),
 			.images = {},
 		};
 	}
@@ -123,9 +129,12 @@ namespace Trident {
 			hullIndex += 1;
 		}
 
+		contactBufferView = contactBuffer->createView<vec2<float32>>(0, contactBuffer->getSize());
+		contactMappedRange = contactBufferView.map();
+
 		cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
 		cameraMappedRange = cameraView.map();
-		cameraMappedRange->projection.m[2].w = DEFAULT_ZOOM_LEVEL;
+		cameraMappedRange->projection.m[2].w = zoomLevel;
 
 		updateCameraViewDescriptorSet();
 		// updatePlaceholderDescriptorSet();

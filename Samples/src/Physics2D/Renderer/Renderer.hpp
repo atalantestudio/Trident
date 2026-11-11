@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Engine/API/Physics/2D/RigidBody.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 #include "Physics2D/Renderer/BuildOptions.hpp"
@@ -45,17 +46,16 @@ namespace Trident {
 			};
 
 			struct PhysicsRendererInstance2D {
-				Transform2D transform;
+				vec2<float32> position;
+				vec2<float32> centroid;
+				mat2x2<float32> rotation;
 				vec3<float32> color;
-
-				// The rigid body index.
-				uint32 index;
+				ShapeID2D shapeId;
 			};
 
 		private:
 			static constexpr float32 MIN_ZOOM_LEVEL = 1.0f;
 			static constexpr float32 MAX_ZOOM_LEVEL = 64.0f;
-			static constexpr float32 DEFAULT_ZOOM_LEVEL = 32.0f;
 
 		public:
 			void build(const PhysicsRendererBuildOptions2D& options);
@@ -82,7 +82,9 @@ namespace Trident {
 
 			// void selectEntity(Entity entity);
 
-			void setInstance(uint32 hullIndex, const Transform2D& transform, vec3<float32> color);
+			void setInstance(uint32 hullIndex, const RigidBody2D& rigidBody, vec3<float32> color, ShapeID2D shapeId);
+
+			void setContact(vec2<float32> contact);
 
 			void render(ref<CommandEncoder> commandEncoder) const override;
 
@@ -110,6 +112,7 @@ namespace Trident {
 			ref<Buffer> createVertexBuffer(uint32 vertexCount) const;
 			ref<Buffer> createInstanceBuffer(uint32 instanceCount) const;
 			ref<Buffer> createIndexBuffer(uint32 indexCount) const;
+			ref<Buffer> createContactBuffer(uint32 contactCount) const;
 			ref<Buffer> createCameraBuffer() const;
 			void createViewBuffer();
 			// void createPlaceholderBuffer();
@@ -132,6 +135,7 @@ namespace Trident {
 			ref<GraphicsPipeline> createCirclePipeline() const;
 			ref<GraphicsPipeline> createShapeFillPipeline() const;
 			ref<GraphicsPipeline> createShapeStrokePipeline() const;
+			ref<GraphicsPipeline> createContactPipeline() const;
 			// ref<GraphicsPipeline> createCenterOfMassPipeline() const;
 			// ref<GraphicsPipeline> createRigidBodyPlaceholderFillPipeline() const;
 			// ref<GraphicsPipeline> createRigidBodyPlaceholderStrokePipeline() const;
@@ -163,6 +167,15 @@ namespace Trident {
 			vec2<float32> cameraPosition = {0.0_m, 0.0_m};
 
 		private:
+			ImageSampleCount sampleCount;
+			float32 zoomLevel;
+			uint32 maxCircleInstanceCount;
+			uint32 circleInstanceCount;
+			sequence<PhysicsRendererBuildHull2D> hulls;
+			uint64 lineStripIndexOffset;
+			uint32 contactCount;
+			uint32 maxContactCount;
+
 			ref<RenderPass> renderPass;
 
 			ref<Image> colorImage;
@@ -186,6 +199,7 @@ namespace Trident {
 			ref<GraphicsPipeline> circlePipeline;
 			ref<GraphicsPipeline> shapeFillPipeline;
 			ref<GraphicsPipeline> shapeStrokePipeline;
+			ref<GraphicsPipeline> contactPipeline;
 			// ref<GraphicsPipeline> centerOfMassPipeline;
 			// ref<GraphicsPipeline> rigidBodyPlaceholderFillPipeline;
 			// ref<GraphicsPipeline> rigidBodyPlaceholderStrokePipeline;
@@ -203,6 +217,7 @@ namespace Trident {
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> instanceBuffer;
 			ref<Buffer> indexBuffer;
+			ref<Buffer> contactBuffer;
 			ref<Buffer> cameraBuffer;
 			ref<Buffer> viewBuffer;
 			ref<Buffer> placeholderBuffer;
@@ -234,21 +249,20 @@ namespace Trident {
 
 			CenterOfMass* centerOfMassMappedRange = nullptr;
 
-			// One mapped range per unique hull shape + 1 for circle shapes.
-			sequence<PhysicsRendererInstance2D*> instanceMappedRanges;
-
 			#if defined(SHOW_FEATURES)
 				uint32 vertexFeatureCount = 0;
 				uint32 edgeFeatureCount = 0;
 			#endif
 
 			BufferView<PhysicsRendererInstance2D> instanceBufferView;
+			BufferView<vec2<float32>> contactBufferView;
 			BufferView<Camera> cameraView;
 
-			ImageSampleCount sampleCount;
-			uint32 maxCircleInstanceCount;
-			uint32 circleInstanceCount;
-			sequence<PhysicsRendererBuildHull2D> hulls;
-			uint64 lineStripIndexOffset;
+			// One mapped range per unique hull shape + 1 for circle shapes.
+			sequence<PhysicsRendererInstance2D*> instanceMappedRanges;
+
+			vec2<float32>* contactMappedRange;
+
+			ShapeID2D selectedShapeId;
 	};
 }

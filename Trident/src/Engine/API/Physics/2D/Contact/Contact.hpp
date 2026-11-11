@@ -4,8 +4,17 @@
 #pragma once
 
 namespace Trident {
-	struct Contact2DID {
+	struct ContactID2D {
 		static constexpr uint16 NULL_EDGE_INDEX = max<uint16>();
+
+		inline bool operator==(const ContactID2D& other) const {
+			return *pointer_cast<const uint64*>(this) == *pointer_cast<const uint64*>(&other);
+		}
+
+		inline void flip() {
+			std::swap(referenceEdgeAIndex, referenceEdgeBIndex);
+			std::swap(incidentEdgeAIndex, incidentEdgeBIndex);
+		}
 
 		// The edge is represented in a clockwise order, so the normal is pointing left (outside of the body).
 		uint16 referenceEdgeAIndex = NULL_EDGE_INDEX;
@@ -14,34 +23,26 @@ namespace Trident {
 		// The edge is represented in a clockwise order, so the normal is pointing left (outside of the body).
 		uint16 incidentEdgeAIndex = NULL_EDGE_INDEX;
 		uint16 incidentEdgeBIndex = NULL_EDGE_INDEX;
-
-		inline bool operator==(const Contact2DID& other) const {
-			return *pointer_cast<const uint64*>(this) == *pointer_cast<const uint64*>(&other);
-		}
-
-		inline void flip() {
-			std::swap(referenceEdgeAIndex, referenceEdgeBIndex);
-			std::swap(incidentEdgeAIndex, incidentEdgeBIndex);
-		}
 	};
 
 	struct Contact2D {
+		// Position of the contact in world space.
 		vec2<float32> position;
 
-		// Distance to the reference edge.
+		// Distance to the reference edge. Always negative.
 		float32 separation;
 
-		// A's position to the contact.
+		// Vector from A's position to the contact in world space.
 		vec2<float32> rA;
 
-		// B's position to the contact.
+		// Vector from B's position to the contact in world space.
 		vec2<float32> rB;
 
 		float32 massNormal;
 		float32 massTangent;
 		float32 bias;
 
-		Contact2DID id;
+		ContactID2D id;
 
 		float32 accumulatedNormalImpulse;
 		float32 accumulatedTangentImpulse;
