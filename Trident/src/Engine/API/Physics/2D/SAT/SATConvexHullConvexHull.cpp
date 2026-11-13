@@ -6,7 +6,7 @@
 #include "Engine/API/Physics/2D/SAT/SATConvexHullConvexHull.hpp"
 
 namespace Trident {
-	static void queryEdgeDirections(const RigidBody2DComponent& referenceBody, const RigidBody2DComponent& incidentBody, const Hull2D& referenceHull, const Hull2D& incidentHull, SATConvexHullConvexHullOutput2D& output) {
+	static void queryEdgeDirections(const RigidBody2DComponent& referenceBody, const RigidBody2DComponent& incidentBody, const Hull2D& referenceHull, const Hull2D& incidentHull, SATConvexHullConvexHullOutput2D& output, bool referenceIsA) {
 		const mat2x2<float32> RA = rotationAngle<mat2x2<float32>>(referenceBody.rotation);
 		const mat2x2<float32> RBA = rotationAngle<mat2x2<float32>>(referenceBody.rotation - incidentBody.rotation);
 
@@ -30,10 +30,7 @@ namespace Trident {
 				output.separation = separation;
 				output.axis = d;
 				output.referenceEdgeIndex = edgeIndex;
-				output.referenceBody = &referenceBody;
-				output.incidentBody = &incidentBody;
-				output.referenceHull = &referenceHull;
-				output.incidentHull = &incidentHull;
+				output.referenceIsA = referenceIsA;
 			}
 
 			if (separation > 0.0f) {
@@ -51,19 +48,17 @@ namespace Trident {
 		SATConvexHullConvexHullOutput2D output{};
 		output.separation = min<float32>();
 
-		queryEdgeDirections(A, B, hullA, hullB, output);
+		queryEdgeDirections(A, B, hullA, hullB, output, true);
 
 		if (output.separation > 0.0f) {
 			return output;
 		}
 
-		queryEdgeDirections(B, A, hullB, hullA, output);
+		queryEdgeDirections(B, A, hullB, hullA, output, false);
 
 		if (output.separation > 0.0f) {
 			return output;
 		}
-
-		output.axis *= rotationAngle<mat2x2<float32>>(output.referenceBody->rotation);
 
 		return output;
 	}

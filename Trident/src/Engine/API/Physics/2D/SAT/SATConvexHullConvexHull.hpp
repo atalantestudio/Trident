@@ -13,16 +13,13 @@ namespace Trident {
 		float32 separation;
 
 		// The separating axis (the normal of the reference edge).
+		// Local to the reference shape.
 		vec2<float32> axis;
 
 		// Index of the reference edge in the geometry vertex array.
 		uint32 referenceEdgeIndex;
 
-		const RigidBody2DComponent* referenceBody;
-		const RigidBody2DComponent* incidentBody;
-
-		const Hull2D* referenceHull;
-		const Hull2D* incidentHull;
+		bool referenceIsA;
 	};
 
 	/// The Separating Axis Theorem algorithm in 2D.
