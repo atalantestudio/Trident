@@ -3,10 +3,10 @@
 
 #include "pch.hpp"
 
-#include "Engine/API/Physics/SAT2D.hpp"
+#include "Engine/API/Physics/2D/SAT/SATCircleConvexHull.hpp"
 
 namespace Trident {
-	static void queryEdgeDirections(const RigidBody2DComponent& referenceBody, const RigidBody2DComponent& incidentBody, const Hull2D& referenceHull, const Hull2D& incidentHull, SAT2DOutput& output) {
+	static void queryEdgeDirections(const RigidBody2DComponent& referenceBody, const RigidBody2DComponent& incidentBody, const Hull2D& referenceHull, const Hull2D& incidentHull, SATCircleConvexHullOutput2D& output) {
 		const mat2x2<float32> RA = rotationAngle<mat2x2<float32>>(referenceBody.rotation);
 		const mat2x2<float32> RBA = rotationAngle<mat2x2<float32>>(referenceBody.rotation - incidentBody.rotation);
 
@@ -29,12 +29,7 @@ namespace Trident {
 			if (separation > output.separation) {
 				output.separation = separation;
 				output.axis = d;
-				output.referenceEdgeIndex = edgeIndex;
 				output.incidentSupportPoint = sT;
-				output.referenceBody = &referenceBody;
-				output.incidentBody = &incidentBody;
-				output.referenceHull = &referenceHull;
-				output.incidentHull = &incidentHull;
 			}
 
 			if (separation > 0.0f) {
@@ -45,32 +40,8 @@ namespace Trident {
 		}
 	}
 
-	// TODO(ci/debugger/undefined-identifier)
-	// `output` cannot be debugged because "an unspecified error occurs".
-	// See https://developercommunity.visualstudio.com/t/When-a-custom-function-returns-a-custom-/10422600.
-	SAT2DOutput SAT2D(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB) {
-		SAT2DOutput output{};
-		output.separation = min<float32>();
-
-		queryEdgeDirections(A, B, hullA, hullB, output);
-
-		if (output.separation > 0.0f) {
-			return output;
-		}
-
-		queryEdgeDirections(B, A, hullB, hullA, output);
-
-		if (output.separation > 0.0f) {
-			return output;
-		}
-
-		output.axis *= rotationAngle<mat2x2<float32>>(output.referenceBody->rotation);
-
-		return output;
-	}
-
-	SAT2DOutput SATCircleConvexHull2D(const RigidBody2DComponent& circleBody, const RigidBody2DComponent& convexHullBody, const Hull2D& circleHull, const Hull2D& convexHullGeometry) {
-		SAT2DOutput output{};
+	SATCircleConvexHullOutput2D SATCircleConvexHull2D(const RigidBody2DComponent& circleBody, const RigidBody2DComponent& convexHullBody, const Hull2D& circleHull, const Hull2D& convexHullGeometry) {
+		SATCircleConvexHullOutput2D output{};
 		output.separation = min<float32>();
 
 		queryEdgeDirections(convexHullBody, circleBody, convexHullGeometry, circleHull, output);
@@ -80,7 +51,7 @@ namespace Trident {
 		}
 
 		// TODO(physics/2d/sat-circle-convex-hull): Since the incident body is always the circle, does the axis need to be corrected?
-		output.axis *= rotationAngle<mat2x2<float32>>(output.referenceBody->rotation);
+		output.axis *= rotationAngle<mat2x2<float32>>(convexHullBody.rotation);
 
 		return output;
 	}

@@ -4,9 +4,9 @@
 #include "pch.hpp"
 
 #include "Engine/API/Physics/2D/Collider/Collider.hpp"
+#include "Engine/API/Physics/2D/SAT/SATCircleConvexHull.hpp"
 #include "Engine/API/Physics/Contact/ContactManifold.hpp"
 #include "Engine/API/Physics/GJK2D.hpp"
-#include "Engine/API/Physics/SAT2D.hpp"
 
 namespace Trident {
 	bool CircleConvexHull2D(const Hull2D& shapeA, const Hull2D& shapeB, const RigidBody2DComponent& rigidBodyA, const RigidBody2DComponent& rigidBodyB, ContactManifold2D* manifold) {
@@ -31,7 +31,7 @@ namespace Trident {
 			return true;
 		}
 
-		const SAT2DOutput satOutput = SATCircleConvexHull2D(rigidBodyA, rigidBodyB, shapeA, shapeB);
+		const SATCircleConvexHullOutput2D satOutput = SATCircleConvexHull2D(rigidBodyA, rigidBodyB, shapeA, shapeB);
 
 		manifold->normal = -satOutput.axis;
 		manifold->contactCount = 1;

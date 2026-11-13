@@ -1,0 +1,70 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
+#include "pch.hpp"
+
+#include "Engine/API/Physics/2D/SAT/SATConvexHullConvexHull.hpp"
+
+namespace Trident {
+	static void queryEdgeDirections(const RigidBody2DComponent& referenceBody, const RigidBody2DComponent& incidentBody, const Hull2D& referenceHull, const Hull2D& incidentHull, SATConvexHullConvexHullOutput2D& output) {
+		const mat2x2<float32> RA = rotationAngle<mat2x2<float32>>(referenceBody.rotation);
+		const mat2x2<float32> RBA = rotationAngle<mat2x2<float32>>(referenceBody.rotation - incidentBody.rotation);
+
+		uint32 edgeIndex = 0;
+
+		while (edgeIndex < referenceHull.edges.count()) {
+			const Edge2D edge = referenceHull.edges[edgeIndex];
+			const vec2<float32> a = referenceHull.vertices[edge.indexA];
+			const vec2<float32> b = referenceHull.vertices[edge.indexB];
+			const vec2<float32> d = edgeNormalClockwise(a, b);
+			const vec2<float32> s = incidentHull.support(-d * RBA);
+			const vec2<float32> sT = s * incidentBody.world;
+
+			// The centroid is not involved when calculating the edge distance because it is applied when multiplying by the world matrix.
+			const float32 edgeDistance = abs(signedDistanceLPAB(a, b, {0.0f, 0.0f}));
+			const vec2<float32> offset = edgeDistance * d * referenceBody.world;
+
+			const float32 separation = signedDistanceLP(d * RA, offset, sT);
+
+			if (separation > output.separation) {
+				output.separation = separation;
+				output.axis = d;
+				output.referenceEdgeIndex = edgeIndex;
+				output.referenceBody = &referenceBody;
+				output.incidentBody = &incidentBody;
+				output.referenceHull = &referenceHull;
+				output.incidentHull = &incidentHull;
+			}
+
+			if (separation > 0.0f) {
+				break;
+			}
+
+			edgeIndex += 1;
+		}
+	}
+
+	// TODO(ci/debugger/undefined-identifier)
+	// `output` cannot be debugged because "an unspecified error occurs".
+	// See https://developercommunity.visualstudio.com/t/When-a-custom-function-returns-a-custom-/10422600.
+	SATConvexHullConvexHullOutput2D SATConvexHullConvexHull2D(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB) {
+		SATConvexHullConvexHullOutput2D output{};
+		output.separation = min<float32>();
+
+		queryEdgeDirections(A, B, hullA, hullB, output);
+
+		if (output.separation > 0.0f) {
+			return output;
+		}
+
+		queryEdgeDirections(B, A, hullB, hullA, output);
+
+		if (output.separation > 0.0f) {
+			return output;
+		}
+
+		output.axis *= rotationAngle<mat2x2<float32>>(output.referenceBody->rotation);
+
+		return output;
+	}
+}
