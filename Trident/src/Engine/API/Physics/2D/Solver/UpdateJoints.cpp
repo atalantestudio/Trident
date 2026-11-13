@@ -3,9 +3,7 @@
 
 #include "pch.hpp"
 
-#include "Engine/API/Physics/2D/Joint2D.hpp"
 #include "Engine/API/Physics/2D/Simulation.hpp"
-#include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 
 namespace Trident {
 	void updateJoints(PhysicsSimulation2D& simulation) {

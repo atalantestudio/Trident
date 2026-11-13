@@ -23,11 +23,26 @@ namespace Trident {
 		if (SampleName == "box") {
 			LoadBoxSample(simulationDescriptor);
 		}
+		else if (SampleName == "boxpyramid") {
+			LoadBoxPyramidSample(simulationDescriptor);
+		}
 		else if (SampleName == "boxstacking") {
 			LoadBoxStackingSample(simulationDescriptor);
 		}
 		else if (SampleName == "circle") {
+			// TODO(physics/2d): Fix circle demo.
 			LoadCircleSample(simulationDescriptor);
+		}
+		// TODO(physics/2d): Add circlesliding demo.
+		else if (SampleName == "domino") {
+			LoadDominoSample(simulationDescriptor);
+		}
+		else if (SampleName == "friction") {
+			LoadFrictionSample(simulationDescriptor);
+		}
+		// TODO(physics/2d): Add polygon demo.
+		else if (SampleName == "swing") {
+			LoadSwingSample(simulationDescriptor);
 		}
 		else {
 			ENGINE_ASSERT(false, "Unknown sample \"[]\".", SampleName);

@@ -41,6 +41,9 @@ namespace Trident {
 		// TODO(physics/2d): Use delta position and rotation.
 		Transform2D transform;
 
+		// TODO(physics/2d): Debug only.
+		float32 rotation;
+
 		/// Position of the centroid in local space.
 		vec2<float32> centroid;
 

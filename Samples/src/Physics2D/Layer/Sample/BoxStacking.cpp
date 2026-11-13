@@ -33,30 +33,26 @@ namespace Trident {
 			.type = ShapeType2D::CONVEX_HULL,
 			.rigidBodyId = createRigidBody(simulation, {
 				.type = RigidBodyType::STATIC,
-				.flags = {},
 				.position = {0.0f, -10.0f},
-				.rotation = 0.0f,
 			}),
 			.material = material,
 			.density = 1.0f,
 		}, &boxHulls[0]);
 
-		uint32 boxIndex = 0;
+		uint32 i = 0;
 
-		while (boxIndex < 10) {
+		while (i < 10) {
 			createShape(simulation, {
 				.type = ShapeType2D::CONVEX_HULL,
 				.rigidBodyId = createRigidBody(simulation, {
 					.type = RigidBodyType::DYNAMIC,
-					.flags = {},
-					.position = {0.0f, boxIndex * 1.05f + 0.51f},
-					.rotation = 0.0f,
+					.position = {0.0f, 1.05f * i + 0.51f},
 				}),
 				.material = material,
 				.density = 1.0f,
 			}, &boxHulls[1]);
 
-			boxIndex += 1;
+			i += 1;
 		}
 	}
 }

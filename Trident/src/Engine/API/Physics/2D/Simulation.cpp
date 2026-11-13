@@ -41,6 +41,8 @@ namespace Trident {
 		applyImpulses(simulation);
 		integratePositions(simulation);
 		resetForces(simulation);
+
+		simulation.tick += 1;
 	}
 
 	RigidBodyID2D createRigidBody(PhysicsSimulation2D& simulation, const RigidBodyDescriptor2D& descriptor) {
@@ -54,6 +56,7 @@ namespace Trident {
 		rigidBody.flags = descriptor.flags;
 		rigidBody.transform.position = descriptor.position;
 		rigidBody.transform.rotation.setAngle(descriptor.rotation);
+		rigidBody.rotation = descriptor.rotation;
 		rigidBody.centroid = {0.0_m, 0.0_m};
 		rigidBody.inverseMass = 0.0_kg;
 		rigidBody.inverseInertia = 0.0f;

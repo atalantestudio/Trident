@@ -17,12 +17,13 @@ namespace Trident {
 	struct PhysicsSimulation2DDescriptor {
 		float32 deltaTime;
 
-		/// Left-handed.
+		/// Left-handed gravity acceleration.
 		vec2<float32> gravity;
 
 		/// Number of iterations in the sequential solver.
 		uint32 impulseIterationCount;
 
+		// TODO(physics/2d): Merge shape and rigid body count for now.
 		// TODO(physics/2d): Ensure that x > 0.
 		uint32 maxStaticRigidBodyCount;
 		uint32 maxKinematicAndDynamicRigidBodyCount;
@@ -50,6 +51,7 @@ namespace Trident {
 		/// Gravity acceleration.
 		vec2<float32> gravity;
 
+		uint32 tick;
 		uint32 impulseIterationCount;
 
 		// TODO(physics/2d/delta-time): Need half delta-time too?
