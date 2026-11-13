@@ -6,59 +6,64 @@
 #include "Engine/API/Physics/2D/SAT/SATConvexHullConvexHull.hpp"
 
 namespace Trident {
-	static void queryEdgeDirections(const RigidBody2DComponent& referenceBody, const RigidBody2DComponent& incidentBody, const Hull2D& referenceHull, const Hull2D& incidentHull, SATConvexHullConvexHullOutput2D& output, bool referenceIsA) {
+	// TODO(ci/debugger/undefined-identifier)
+	// The returned object cannot be debugged because "an unspecified error occurs".
+	// See https://developercommunity.visualstudio.com/t/When-a-custom-function-returns-a-custom-/10422600.
+	static SATEdgeQuery2D queryEdgeDirections(const RigidBody2DComponent& referenceBody, const RigidBody2DComponent& incidentBody, const Hull2D& referenceShape, const Hull2D& incidentShape) {
+		SATEdgeQuery2D query;
+		query.separation = min<float32>();
+
 		const mat2x2<float32> RA = rotationAngle<mat2x2<float32>>(referenceBody.rotation);
 		const mat2x2<float32> RBA = rotationAngle<mat2x2<float32>>(referenceBody.rotation - incidentBody.rotation);
 
-		uint32 edgeIndex = 0;
+		uint16 indexA = 0;
 
-		while (edgeIndex < referenceHull.edges.count()) {
-			const Edge2D edge = referenceHull.edges[edgeIndex];
-			const vec2<float32> a = referenceHull.vertices[edge.indexA];
-			const vec2<float32> b = referenceHull.vertices[edge.indexB];
+		while (indexA < referenceShape.vertices.count()) {
+			const uint16 indexB = (indexA + 1) % referenceShape.vertices.count();
+			const vec2<float32> a = referenceShape.vertices[indexA];
+			const vec2<float32> b = referenceShape.vertices[indexB];
 			const vec2<float32> d = edgeNormalClockwise(a, b);
-			const vec2<float32> s = incidentHull.support(-d * RBA);
-			const vec2<float32> sT = s * incidentBody.world;
+			const vec2<float32> s = incidentShape.support(-d * RBA);
 
-			// The centroid is not involved when calculating the edge distance because it is applied when multiplying by the world matrix.
 			const float32 edgeDistance = abs(signedDistanceLPAB(a, b, {0.0f, 0.0f}));
 			const vec2<float32> offset = edgeDistance * d * referenceBody.world;
+			const float32 separation = signedDistanceLP(d * RA, offset, s * incidentBody.world);
 
-			const float32 separation = signedDistanceLP(d * RA, offset, sT);
-
-			if (separation > output.separation) {
-				output.separation = separation;
-				output.axis = d;
-				output.referenceEdgeIndex = edgeIndex;
-				output.referenceIsA = referenceIsA;
+			if (separation > query.separation) {
+				query.separation = separation;
+				query.axis = d;
+				query.referenceEdgeIndex = indexA;
 			}
 
 			if (separation > 0.0f) {
 				break;
 			}
 
-			edgeIndex += 1;
+			indexA += 1;
 		}
+
+		return query;
 	}
 
 	// TODO(ci/debugger/undefined-identifier)
-	// `output` cannot be debugged because "an unspecified error occurs".
+	// The returned object cannot be debugged because "an unspecified error occurs".
 	// See https://developercommunity.visualstudio.com/t/When-a-custom-function-returns-a-custom-/10422600.
-	SATConvexHullConvexHullOutput2D SATConvexHullConvexHull2D(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB) {
-		SATConvexHullConvexHullOutput2D output{};
-		output.separation = min<float32>();
+	SATConvexHullConvexHullOutput2D SATConvexHullConvexHull2D(const RigidBody2DComponent& rigidBodyA, const RigidBody2DComponent& rigidBodyB, const Hull2D& shapeA, const Hull2D& shapeB) {
+		SATConvexHullConvexHullOutput2D output;
+		output.overlap = false;
+		output.edgeQueryA = queryEdgeDirections(rigidBodyA, rigidBodyB, shapeA, shapeB);
 
-		queryEdgeDirections(A, B, hullA, hullB, output, true);
-
-		if (output.separation > 0.0f) {
+		if (output.edgeQueryA.separation > 0.0f) {
 			return output;
 		}
 
-		queryEdgeDirections(B, A, hullB, hullA, output, false);
+		output.edgeQueryB = queryEdgeDirections(rigidBodyB, rigidBodyA, shapeB, shapeA);
 
-		if (output.separation > 0.0f) {
+		if (output.edgeQueryB.separation > 0.0f) {
 			return output;
 		}
+
+		output.overlap = true;
 
 		return output;
 	}

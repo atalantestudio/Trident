@@ -7,19 +7,25 @@
 #include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 
 namespace Trident {
-	struct SATConvexHullConvexHullOutput2D {
-		/// The separation between the two bodies.
-		/// The shapes overlap if the separation is negative or 0.
+	struct SATEdgeQuery2D {
+		/// The separation value between the two bodies.
+		/// A negative separation indicates overlap.
 		float32 separation;
 
-		// The separating axis (the normal of the reference edge).
-		// Local to the reference shape.
+		/// The separating plane on the reference body, in the local space of the incident body.
+		// Plane2D referencePlane;
 		vec2<float32> axis;
 
-		// Index of the reference edge in the geometry vertex array.
+		/// The indices of the vertices composing the separating edge.
+		// uint32 referenceEdgeIndexA;
+		// uint32 referenceEdgeIndexB;
 		uint32 referenceEdgeIndex;
+	};
 
-		bool referenceIsA;
+	struct SATConvexHullConvexHullOutput2D {
+		bool overlap;
+		SATEdgeQuery2D edgeQueryA;
+		SATEdgeQuery2D edgeQueryB;
 	};
 
 	/// The Separating Axis Theorem algorithm in 2D.
@@ -29,5 +35,5 @@ namespace Trident {
 	// - Don't test parallel axes (https://dyn4j.org/2010/01/sat).
 	// - Reuse the separation axis from the last run to make the algorithm O(1) in non-intersection cases.
 	//   But what if the separation axis changes e.g. due to rotation?
-	SATConvexHullConvexHullOutput2D SATConvexHullConvexHull2D(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB);
+	SATConvexHullConvexHullOutput2D SATConvexHullConvexHull2D(const RigidBody2DComponent& rigidBodyA, const RigidBody2DComponent& rigidBodyB, const Hull2D& shapeA, const Hull2D& shapeB);
 }

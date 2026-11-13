@@ -9,57 +9,46 @@
 
 namespace Trident {
 	/// Finds and returns the incident edge on the provided rigid body.
-	static ClipFeature2D findIncidentEdge(
-		/// The rigid body owning the incident edge.
-		const RigidBody2DComponent& incidentBody,
-
-		/// The hull used by the rigid body.
-		const Hull2D& incidentHull,
-
-		/// The reference edge normal, rotated by (Reference - Incident).
-		vec2<float32> referenceEdgeNormal
-	) {
+	static ClipFeature2D findIncidentEdge(const RigidBody2DComponent& incidentBody, const Hull2D& incidentShape, vec2<float32> referenceEdgeNormal) {
 		ClipFeature2D incidentEdge{};
 		incidentEdge.vertexCount = 2;
 
-		const uint16 edgeCount = static_cast<uint16>(incidentHull.edges.count());
-
 		float32 minAngle = max<float32>();
-		uint32 incidentEdgeIndex = 0;
-		uint16 edgeIndex = 0;
+		uint16 vertexIndex = 0;
+		uint16 indexA = 0;
 
-		while (edgeIndex < edgeCount) {
-			const Edge2D edge = incidentHull.edges[edgeIndex];
-			const vec2<float32> a = incidentHull.vertices[edge.indexA];
-			const vec2<float32> b = incidentHull.vertices[edge.indexB];
+		while (indexA < incidentShape.vertices.count()) {
+			const uint16 indexB = (indexA + 1) % incidentShape.vertices.count();
+			const vec2<float32> a = incidentShape.vertices[indexA];
+			const vec2<float32> b = incidentShape.vertices[indexB];
 			const vec2<float32> d = perpendicularLeft(b - a);
 			const float32 angle = dot(d, referenceEdgeNormal);
 
 			if (angle < minAngle) {
 				minAngle = angle;
-				incidentEdgeIndex = edgeIndex;
+				vertexIndex = indexA;
 
 				// TODO(physics/2d/incident-edge-vertex-order): Why is the simulation unstable when a and b are inverted?
 				incidentEdge.edge[0].position = b;
 				incidentEdge.edge[1].position = a;
 			}
 
-			edgeIndex += 1;
+			indexA += 1;
 		}
 
 		ClipVertex2D& a = incidentEdge.edge[0];
 		a.position = a.position * incidentBody.world;
 		a.id.referenceEdgeAIndex = Contact2DID::NULL_EDGE_INDEX;
 		a.id.referenceEdgeBIndex = Contact2DID::NULL_EDGE_INDEX;
-		a.id.incidentEdgeAIndex = (incidentEdgeIndex + 1) % edgeCount;
-		a.id.incidentEdgeBIndex = incidentEdgeIndex;
+		a.id.incidentEdgeAIndex = (vertexIndex + 1) % incidentShape.vertices.count();
+		a.id.incidentEdgeBIndex = vertexIndex;
 
 		ClipVertex2D& b = incidentEdge.edge[1];
 		b.position = b.position * incidentBody.world;
 		b.id.referenceEdgeAIndex = Contact2DID::NULL_EDGE_INDEX;
 		b.id.referenceEdgeBIndex = Contact2DID::NULL_EDGE_INDEX;
-		b.id.incidentEdgeAIndex = incidentEdgeIndex;
-		b.id.incidentEdgeBIndex = (static_cast<sint16>(incidentEdgeIndex) - 1) % edgeCount;
+		b.id.incidentEdgeAIndex = vertexIndex;
+		b.id.incidentEdgeBIndex = (static_cast<sint16>(vertexIndex) - 1) % incidentShape.vertices.count();
 
 		return incidentEdge;
 	}
@@ -115,7 +104,7 @@ namespace Trident {
 		return clippedEdge;
 	}
 
-	static bool createEdgeContact(const SATConvexHullConvexHullOutput2D& query, const Hull2D& referenceShape, const Hull2D& incidentShape, const RigidBody2DComponent& referenceBody, const RigidBody2DComponent& incidentBody, ContactManifold2D* manifold) {
+	static bool createEdgeContact(const SATEdgeQuery2D& query, const RigidBody2DComponent& referenceBody, const RigidBody2DComponent& incidentBody, const Hull2D& referenceShape, const Hull2D& incidentShape, ContactManifold2D* manifold) {
 		const uint32 referenceLeftEdgeIndex = (static_cast<sint32>(query.referenceEdgeIndex) - 1) % referenceShape.edges.count();
 		const uint32 referenceRightEdgeIndex = (query.referenceEdgeIndex + 1) % referenceShape.edges.count();
 
@@ -183,19 +172,19 @@ namespace Trident {
 
 		SATConvexHullConvexHullOutput2D output = SATConvexHullConvexHull2D(rigidBodyA, rigidBodyB, shapeA, shapeB);
 
-		if (output.separation > 0.0f) {
+		if (!output.overlap) {
 			return false;
 		}
 
-		if (output.referenceIsA) {
-			output.axis *= rotationAngle<mat2x2<float32>>(rigidBodyA.rotation);
+		if (output.edgeQueryA.separation >= output.edgeQueryB.separation) {
+			output.edgeQueryA.axis *= rotationAngle<mat2x2<float32>>(rigidBodyA.rotation);
 
-			return createEdgeContact(output, shapeA, shapeB, rigidBodyA, rigidBodyB, manifold);
+			return createEdgeContact(output.edgeQueryA, rigidBodyA, rigidBodyB, shapeA, shapeB, manifold);
 		}
 
-		output.axis *= rotationAngle<mat2x2<float32>>(rigidBodyB.rotation);
+		output.edgeQueryB.axis *= rotationAngle<mat2x2<float32>>(rigidBodyB.rotation);
 
-		const bool result = createEdgeContact(output, shapeB, shapeA, rigidBodyB, rigidBodyA, manifold);
+		const bool result = createEdgeContact(output.edgeQueryB, rigidBodyB, rigidBodyA, shapeB, shapeA, manifold);
 
 		manifold->normal *= -1.0f;
 
