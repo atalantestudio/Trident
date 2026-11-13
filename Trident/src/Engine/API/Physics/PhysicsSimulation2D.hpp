@@ -3,7 +3,8 @@
 
 #pragma once
 
-#include "Engine/API/Physics/2D/ContactPair2D.hpp"
+#include "Engine/API/Physics/2D/CollisionPair.hpp"
+#include "Engine/API/Physics/2D/ContactPair.hpp"
 #include "Engine/API/Physics/2D/RigidBody.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 #include "Engine/ECS/EntityPair.hpp"
@@ -37,22 +38,21 @@ namespace Trident {
 		private:
 			const Hull2D& getHull(Entity entity) const;
 
+			void clearPairs();
 			void broadPhase();
 			void narrowPhase();
-			void applyForces();
+			void integrateVelocities();
 			void updateContactManifolds();
-			void updateJoints();
+			// void updateJoints();
 			void applyImpulses();
-
-			/// NOTE: Uses Semi-Implicit Euler.
-			void integrate();
+			void integratePositions();
 
 		private:
 			Scene2D* scene;
 			std::vector<RigidBody2D> rigidBodies;
 			float32 deltaTime;
 			float32 inverseDeltaTime;
-			std::vector<EntityPair> entityPairs;
-			std::map<EntityPair, ContactPair2D> contactPairs;
+			std::vector<CollisionPair2D> collisionPairs;
+			std::map<CollisionPair2D, ContactPair2D> contactPairs;
 	};
 }

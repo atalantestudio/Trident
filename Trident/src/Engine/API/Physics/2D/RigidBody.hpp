@@ -5,6 +5,6 @@
 
 namespace Trident {
 	struct RigidBody2D {
-		//
+		// TODO(physics/2d)
 	};
 }
