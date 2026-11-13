@@ -30,14 +30,13 @@ namespace Trident {
 
 	void updateContactManifolds(PhysicsSimulation2D& simulation) {
 		for (std::pair<const CollisionPair2D, ContactPair2D>& pair : simulation.contactPairs) {
-			ContactPair2D& contactPair = pair.second;
-
 			const Shape2D& shapeA = simulation.shapes[pair.first.shapeIdA];
 			const Shape2D& shapeB = simulation.shapes[pair.first.shapeIdB];
 
 			RigidBody2D& rigidBodyA = simulation.rigidBodies[shapeA.rigidBodyId];
 			RigidBody2D& rigidBodyB = simulation.rigidBodies[shapeB.rigidBodyId];
 
+			ContactPair2D& contactPair = pair.second;
 			contactPair.manifold.tangent = perpendicularRight(contactPair.manifold.normal);
 			contactPair.combinedFriction = sqrt(shapeA.material.friction * shapeB.material.friction);
 

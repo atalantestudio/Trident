@@ -7,58 +7,66 @@
 #include "Engine/API/Physics/2D/Simulation.hpp"
 
 namespace Trident {
-	static void mergeContactManifolds(ContactPair2D& contactPair, const ContactManifold2D& newContactManifold) {
-		ContactManifold2D mergedContactManifold{};
+	static void mergeContactManifolds(ContactManifold2D& manifold, const ContactManifold2D& newManifold) {
+		#if defined(ENABLE_PHYSICS_2D_WARM_STARTING)
+			Contact2D mergedContacts[2];
+		#endif
+
 		uint32 contactIndex = 0;
 
-		while (contactIndex < newContactManifold.contactCount) {
-			const Contact2D& cNew = newContactManifold.contacts[contactIndex];
-
-			sint32 k = -1;
-			sint32 j = 0;
-
-			while (j < contactPair.manifold.contactCount) {
-				const Contact2D& cOld = contactPair.manifold.contacts[j];
-
-				if (cNew.id == cOld.id) {
-					k = j;
-
-					break;
-				}
-
-				j += 1;
-			}
-
-			if (k == -1) {
-				mergedContactManifold.contacts[contactIndex] = newContactManifold.contacts[contactIndex];
-
-				contactIndex += 1;
-
-				continue;
-			}
-
-			mergedContactManifold.contacts[contactIndex] = cNew;
+		while (contactIndex < newManifold.contactCount) {
+			const Contact2D& cNew = newManifold.contacts[contactIndex];
 
 			#if defined(ENABLE_PHYSICS_2D_WARM_STARTING)
-				const Contact2D& cOld = contactPair.manifold.contacts[k];
+				uint32 k = max<uint32>();
+				uint32 j = 0;
 
-				mergedContactManifold.contacts[contactIndex].accumulatedNormalImpulse = cOld.accumulatedNormalImpulse;
-				mergedContactManifold.contacts[contactIndex].accumulatedTangentImpulse = cOld.accumulatedTangentImpulse;
+				while (j < manifold.contactCount) {
+					const Contact2D& cOld = manifold.contacts[j];
+
+					if (cNew.id == cOld.id) {
+						k = j;
+
+						break;
+					}
+
+					j += 1;
+				}
+
+				Contact2D& c = mergedContacts[contactIndex];
+			#else
+				Contact2D& c = manifold.contacts[contactIndex];
+			#endif
+
+			c = cNew;
+
+			#if defined(ENABLE_PHYSICS_2D_WARM_STARTING)
+				if (k != max<uint32>()) {
+					const Contact2D& cOld = manifold.contacts[k];
+
+					c.accumulatedNormalImpulse = cOld.accumulatedNormalImpulse;
+					c.accumulatedTangentImpulse = cOld.accumulatedTangentImpulse;
+				}
+			#else
+				c.accumulatedNormalImpulse = 0.0f;
+				c.accumulatedTangentImpulse = 0.0f;
 			#endif
 
 			contactIndex += 1;
 		}
 
-		contactIndex = 0;
+		#if defined(ENABLE_PHYSICS_2D_WARM_STARTING)
+			contactIndex = 0;
 
-		while (contactIndex < newContactManifold.contactCount) {
-			contactPair.manifold.contacts[contactIndex] = mergedContactManifold.contacts[contactIndex];
+			while (contactIndex < newManifold.contactCount) {
+				manifold.contacts[contactIndex] = mergedContacts[contactIndex];
 
-			contactIndex += 1;
-		}
+				contactIndex += 1;
+			}
+		#endif
 
-		contactPair.manifold.contactCount = newContactManifold.contactCount;
-		contactPair.manifold.normal = newContactManifold.normal;
+		manifold.contactCount = newManifold.contactCount;
+		manifold.normal = newManifold.normal;
 	}
 
 	void narrowPhase(PhysicsSimulation2D& simulation) {
@@ -68,8 +76,6 @@ namespace Trident {
 			{nullptr,        CapsuleCapsule2D, CapsuleConvexHull2D   },
 			{nullptr,        nullptr,          ConvexHullConvexHull2D},
 		};
-
-		ContactPair2D contactPair;
 
 		for (const CollisionPair2D collisionPair : simulation.collisionPairs) {
 			const Shape2D& shapeA = simulation.shapes[collisionPair.shapeIdA];
@@ -98,7 +104,7 @@ namespace Trident {
 				continue;
 			}
 
-			mergeContactManifolds(contactPairIterator->second, contactPair.manifold);
+			mergeContactManifolds(contactPairIterator->second.manifold, contactPair.manifold);
 		}
 	}
 }

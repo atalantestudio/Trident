@@ -84,9 +84,9 @@ namespace Trident {
 	}
 
 	// CCW
-	inline vec2<float32> operator*(vec2<float32> v, Transform2D T) {
-		const float32 x = (T.rotation.c * v.x - T.rotation.s * v.y) + T.position.x;
-		const float32 y = (T.rotation.s * v.x + T.rotation.c * v.y) + T.position.y;
+	inline vec2<float32> operator*(vec2<float32> a, Transform2D t) {
+		const float32 x = (t.rotation.c * a.x - t.rotation.s * a.y) + t.position.x;
+		const float32 y = (t.rotation.s * a.x + t.rotation.c * a.y) + t.position.y;
 
 		return {x, y};
 	}

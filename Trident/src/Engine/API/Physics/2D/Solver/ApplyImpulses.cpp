@@ -27,13 +27,13 @@ namespace Trident {
 
 		while (iteration < simulation.impulseIterationCount) {
 			for (std::pair<const CollisionPair2D, ContactPair2D>& pair : simulation.contactPairs) {
-				ContactPair2D& contactPair = pair.second;
-
 				const Shape2D& shapeA = simulation.shapes[pair.first.shapeIdA];
 				const Shape2D& shapeB = simulation.shapes[pair.first.shapeIdB];
 
 				RigidBody2D& rigidBodyA = simulation.rigidBodies[shapeA.rigidBodyId];
 				RigidBody2D& rigidBodyB = simulation.rigidBodies[shapeB.rigidBodyId];
+
+				ContactPair2D& contactPair = pair.second;
 
 				uint8 contactIndex = 0;
 
