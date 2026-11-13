@@ -6,7 +6,6 @@
 #include "Engine/API/Physics/Constraint/RotationConstraint2D.hpp"
 #include "Engine/API/Physics/Joint2D.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
-#include "Engine/ECS/Tag.hpp"
 
 #include "../../SampleApplication.hpp"
 #include "SceneLayer.hpp"
@@ -14,7 +13,6 @@
 namespace Trident {
 	Physics2DSceneLayer::~Physics2DSceneLayer() {
 		delete scene;
-		delete physicsSimulation;
 	}
 
 	void Physics2DSceneLayer::loadScene() {
@@ -28,10 +26,14 @@ namespace Trident {
 	void Physics2DSceneLayer::postConstruct() {
 		loadScene();
 
-		physicsSimulation = new PhysicsSimulation2D({
-			.scene = scene,
-			.deltaTime = getApplication()->getFixedDeltaTime(),
-		});
+		PhysicsSimulationDescriptor2D simulationDescriptor;
+		simulationDescriptor.scene = scene;
+		simulationDescriptor.deltaTime = getApplication()->getFixedDeltaTime();
+		simulationDescriptor.gravity = {0.0f, -9.80665f};
+		simulationDescriptor.impulseIterationCount = 10;
+		simulationDescriptor.allowedPenetration = 0.01f;
+
+		simulation = createSimulation(simulationDescriptor);
 
 		renderer.layerInput = input;
 		renderer.setLayer(this);
@@ -40,7 +42,7 @@ namespace Trident {
 	}
 
 	void Physics2DSceneLayer::preRender() {
-		physicsSimulation->tick();
+		tick(simulation);
 
 		checkHover();
 

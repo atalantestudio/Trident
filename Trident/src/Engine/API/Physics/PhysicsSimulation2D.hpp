@@ -5,54 +5,52 @@
 
 #include "Engine/API/Physics/2D/CollisionPair.hpp"
 #include "Engine/API/Physics/2D/ContactPair.hpp"
-#include "Engine/API/Physics/2D/RigidBody.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
-#include "Engine/ECS/EntityPair.hpp"
 
 namespace Trident {
 	#define ENABLE_PHYSICS_2D_IMPULSE_ACCUMULATION
 	#define ENABLE_PHYSICS_2D_WARM_STARTING
 
-	struct PhysicsSimulation2DDescriptor {
+	struct PhysicsSimulationDescriptor2D {
 		Scene2D* scene;
 		float64 deltaTime;
+
+		/// Left-handed gravity acceleration.
+		vec2<float32> gravity;
+
+		/// Number of iterations in the sequential solver.
+		uint32 impulseIterationCount;
+
+		float32 allowedPenetration;
 	};
 
-	/// A simulated physics world.
-	class PhysicsSimulation2D {
-		private:
-			static constexpr uint32 SEQUENTIAL_IMPULSE_ITERATION_COUNT = 10;
-			static constexpr float32 ALLOWED_PENETRATION = 0.01f;
-			static constexpr vec2<float32> G = {0.0f, -9.80665f};
+	/// A simulated 2D physics world.
+	struct PhysicsSimulation2D {
+		float32 deltaTime;
+		float32 inverseDeltaTime;
+		vec2<float32> gravity;
 
-		private:
-			static void mergeContactManifolds(ContactPair2D& contactPair, const ContactManifold2D& newContactManifold);
+		// Index of the current tick since world creation.
+		uint32 tick;
 
-		public:
-			/// Constructs a physics simulation for the provided scene.
-			explicit PhysicsSimulation2D(const PhysicsSimulation2DDescriptor& descriptor);
+		uint32 impulseIterationCount;
+		float32 allowedPenetration;
 
-			/// Advances the simulation by a single tick.
-			void tick();
+		Scene2D* scene;
 
-		private:
-			const Hull2D& getHull(Entity entity) const;
-
-			void clearPairs();
-			void broadPhase();
-			void narrowPhase();
-			void integrateVelocities();
-			void updateContactManifolds();
-			// void updateJoints();
-			void applyImpulses();
-			void integratePositions();
-
-		private:
-			Scene2D* scene;
-			std::vector<RigidBody2D> rigidBodies;
-			float32 deltaTime;
-			float32 inverseDeltaTime;
-			std::vector<CollisionPair2D> collisionPairs;
-			std::map<CollisionPair2D, ContactPair2D> contactPairs;
+		std::vector<CollisionPair2D> collisionPairs;
+		std::map<CollisionPair2D, ContactPair2D> contactPairs;
 	};
+
+	PhysicsSimulation2D createSimulation(const PhysicsSimulationDescriptor2D& descriptor);
+
+	void tick(PhysicsSimulation2D& simulation);
+
+	void broadPhase(PhysicsSimulation2D& simulation);
+	void narrowPhase(PhysicsSimulation2D& simulation);
+	void integrateVelocities(PhysicsSimulation2D& simulation);
+	void updateContactManifolds(PhysicsSimulation2D& simulation);
+	// void updateJoints(PhysicsSimulation2D& simulation);
+	void applyImpulses(PhysicsSimulation2D& simulation);
+	void integratePositions(PhysicsSimulation2D& simulation);
 }
