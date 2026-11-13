@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Physics/2D/ContactPair2D.hpp"
+#include "Engine/API/Physics/2D/RigidBody.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 #include "Engine/ECS/EntityPair.hpp"
 
@@ -48,13 +49,9 @@ namespace Trident {
 
 		private:
 			Scene2D* scene;
-
+			std::vector<RigidBody2D> rigidBodies;
 			float32 deltaTime;
 			float32 inverseDeltaTime;
-
-			// TODO: Use.
-			// float32 halfDeltaTime;
-
 			std::vector<EntityPair> entityPairs;
 			std::map<EntityPair, ContactPair2D> contactPairs;
 	};

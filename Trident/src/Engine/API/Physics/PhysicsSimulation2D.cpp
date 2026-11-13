@@ -3,7 +3,7 @@
 
 #include "pch.hpp"
 
-#include "Engine/API/Physics/Collider/Collider2DTable.hpp"
+#include "Engine/API/Physics/2D/Collider/Collider.hpp"
 #include "Engine/API/Physics/Constraint/Constraint2D.hpp"
 #include "Engine/API/Physics/Joint2D.hpp"
 #include "Engine/API/Physics/PhysicsSimulation2D.hpp"
@@ -74,9 +74,6 @@ namespace Trident {
 		scene(descriptor.scene),
 		deltaTime(static_cast<float32>(descriptor.deltaTime)),
 		inverseDeltaTime(static_cast<float32>(1.0 / descriptor.deltaTime))
-
-		// TODO(physics/2d/delta-time): Use half delta-time.
-		// halfDeltaTime(static_cast<float32>(descriptor.deltaTime * 0.5))
 	{}
 
 	void PhysicsSimulation2D::tick() {
@@ -116,17 +113,6 @@ namespace Trident {
 		while (indexA < dynamicPool.tagCount) {
 			entityPair.A = dynamicPool.tagIndexToEntity[indexA];
 
-			indexB = indexA + 1;
-
-			// Register all dynamic-dynamic entity pairs.
-			while (indexB < dynamicPool.tagCount) {
-				entityPair.B = dynamicPool.tagIndexToEntity[indexB];
-
-				entityPairs.emplace_back(entityPair);
-
-				indexB += 1;
-			}
-
 			indexB = 0;
 
 			// Register all dynamic-static entity pairs.
@@ -138,11 +124,28 @@ namespace Trident {
 				indexB += 1;
 			}
 
+			indexB = indexA + 1;
+
+			// Register all dynamic-dynamic entity pairs.
+			while (indexB < dynamicPool.tagCount) {
+				entityPair.B = dynamicPool.tagIndexToEntity[indexB];
+
+				entityPairs.emplace_back(entityPair);
+
+				indexB += 1;
+			}
+
 			indexA += 1;
 		}
 	}
 
 	void PhysicsSimulation2D::narrowPhase() {
+		static constexpr Collider2D COLLIDER_2D_TABLE[static_cast<uint32>(Hull2DType::count)][static_cast<uint32>(Hull2DType::count)] = {
+			{nullptr, nullptr, nullptr},
+			{nullptr, CircleCircle2D, CircleConvexHull2D},
+			{nullptr, nullptr, ConvexHullConvexHull2D},
+		};
+
 		ContactPair2D contactPair;
 
 		for (const EntityPair entityPair : entityPairs) {
@@ -157,7 +160,7 @@ namespace Trident {
 
 			DEBUG_ASSERT(collider != nullptr);
 
-			if (!collider(rigidBodyA, rigidBodyB, hullA, hullB, &contactPair.manifold)) {
+			if (!collider(hullA, hullB, rigidBodyA, rigidBodyB, &contactPair.manifold)) {
 				// Either a degenerate case, or the entities are not overlapping.
 				contactPairs.erase(entityPair);
 
@@ -220,8 +223,8 @@ namespace Trident {
 			const Hull2D& hullA = getHull(contactPair.A);
 			const Hull2D& hullB = getHull(contactPair.B);
 
+			contactPair.friction = sqrt(rigidBodyA.friction * rigidBodyB.friction);
 			contactPair.manifold.tangent = perpendicularRight(contactPair.manifold.normal);
-			contactPair.combinedFriction = sqrt(rigidBodyA.friction * rigidBodyB.friction);
 
 			uint8 contactIndex = 0;
 
@@ -377,14 +380,14 @@ namespace Trident {
 						float32 tangentImpulseLength = -relativeVelocityTowardsTangent * contact.massTangent;
 
 						#if defined(ENABLE_PHYSICS_2D_IMPULSE_ACCUMULATION)
-							const float32 maxTangentImpulseLength = contactPair.combinedFriction * contact.accumulatedNormalImpulse;
+							const float32 maxTangentImpulseLength = contactPair.friction * contact.accumulatedNormalImpulse;
 							const float32 oldTangentValue = contact.accumulatedTangentImpulse;
 
 							contact.accumulatedTangentImpulse = clamp(oldTangentValue + tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
 
 							tangentImpulseLength = contact.accumulatedTangentImpulse - oldTangentValue;
 						#else
-							const float32 maxTangentImpulseLength = contactPair.combinedFriction * normalImpulseLength;
+							const float32 maxTangentImpulseLength = contactPair.friction * normalImpulseLength;
 
 							tangentImpulseLength = clamp(tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
 						#endif
@@ -459,10 +462,6 @@ namespace Trident {
 			rigidBodyComponent.position += rigidBodyComponent.linearVelocity * deltaTime;
 			rigidBodyComponent.rotation += rigidBodyComponent.angularVelocity * deltaTime;
 			rigidBodyComponent.updateWorld(hull.centroid);
-
-			// TODO(physics/2d/integration)
-			// rigidBodyComponent.linearVelocity += (rigidBodyComponent.force * rigidBodyComponent.inverseMass + vec2<float32>(0.0f, G)) * halfDeltaTime;
-			// rigidBodyComponent.angularVelocity += rigidBodyComponent.inverseInertia * halfDeltaTime;
 
 			rigidBodyComponent.force = {0.0_N, 0.0_N};
 
