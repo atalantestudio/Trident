@@ -3,7 +3,7 @@
 
 #include "pch.hpp"
 
-#include "Engine/API/Physics/GJK2DConditional.hpp"
+#include "Engine/API/Physics/2D/GJK/GJKConditional.hpp"
 
 namespace Trident {
 	// Returns the farthest point on `A` along `d`, in world-space.

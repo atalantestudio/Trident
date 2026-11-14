@@ -4,9 +4,9 @@
 #include "pch.hpp"
 
 #include "Engine/API/Physics/2D/Collider/Collider.hpp"
-#include "Engine/API/Physics/Constraint/Constraint2D.hpp"
-#include "Engine/API/Physics/Joint2D.hpp"
-#include "Engine/API/Physics/PhysicsSimulation2D.hpp"
+#include "Engine/API/Physics/2D/Constraint/Constraint.hpp"
+#include "Engine/API/Physics/2D/Joint.hpp"
+#include "Engine/API/Physics/2D/Simulation.hpp"
 #include "Engine/ECS/Component/Geometry2DComponent.hpp"
 #include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 #include "Engine/ECS/Tag.hpp"

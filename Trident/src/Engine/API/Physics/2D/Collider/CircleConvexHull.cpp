@@ -4,9 +4,9 @@
 #include "pch.hpp"
 
 #include "Engine/API/Physics/2D/Collider/Collider.hpp"
+#include "Engine/API/Physics/2D/Contact/ContactManifold.hpp"
+#include "Engine/API/Physics/2D/GJK/GJK.hpp"
 #include "Engine/API/Physics/2D/SAT/SATCircleConvexHull.hpp"
-#include "Engine/API/Physics/Contact/ContactManifold.hpp"
-#include "Engine/API/Physics/GJK2D.hpp"
 
 namespace Trident {
 	bool CircleConvexHull2D(const Hull2D& shapeA, const Hull2D& shapeB, const RigidBody2DComponent& rigidBodyA, const RigidBody2DComponent& rigidBodyB, ContactManifold2D* manifold) {

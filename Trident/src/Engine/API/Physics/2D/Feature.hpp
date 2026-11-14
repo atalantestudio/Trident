@@ -1,13 +1,11 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
 
-#include "Engine/API/Physics/Contact/Contact.hpp"
+#include "Engine/API/Physics/2D/Contact/Contact.hpp"
 
 namespace Trident {
-	struct Contact2DID;
-
 	struct ClipVertex2D {
 		vec2<float32> position;
 		Contact2DID id;

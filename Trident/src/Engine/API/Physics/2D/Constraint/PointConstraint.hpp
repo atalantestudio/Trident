@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Physics/Constraint/Constraint2D.hpp"
+#include "Engine/API/Physics/2D/Constraint/Constraint.hpp"
 #include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 
 namespace Trident {

@@ -3,7 +3,7 @@
 
 #include "pch.hpp"
 
-#include "Engine/API/Physics/GJK2D.hpp"
+#include "Engine/API/Physics/2D/GJK/GJK.hpp"
 
 namespace Trident {
 	// TODO: Some geometries (e.g. CircleGeometry2D) don't implement `supportIndex`. Use `supportVertex` instead.

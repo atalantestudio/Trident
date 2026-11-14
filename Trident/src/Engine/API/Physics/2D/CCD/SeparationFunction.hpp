@@ -1,14 +1,14 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
 
-#include "Engine/API/Physics/CCD/MinSeparationOutput.hpp"
-#include "Engine/API/Physics/Feature2D.hpp"
+/* #include "Engine/API/Physics/2D/CCD/MinSeparationOutput.hpp"
+#include "Engine/API/Physics/2D/Feature.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 
 namespace Trident {
-	/* struct PhysicalObjectCopy2D {
+	struct PhysicalObjectCopy2D {
 		Entity entity;
 
 		mat3x3<float32> transform;
@@ -212,5 +212,5 @@ namespace Trident {
 		const vec2<float32> separatingAxis = separationFunction.separatingAxis * rotationAngle<mat3x3<float32>>(edgeObject.rotation);
 
 		return dot(b - a, separatingAxis);
-	} */
-}
+	}
+} */

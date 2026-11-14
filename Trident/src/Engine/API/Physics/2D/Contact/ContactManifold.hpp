@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Physics/Contact/Contact.hpp"
+#include "Engine/API/Physics/2D/Contact/Contact.hpp"
 
 namespace Trident {
 	struct ContactManifold2D {

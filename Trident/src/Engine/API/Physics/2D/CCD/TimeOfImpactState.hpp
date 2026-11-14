@@ -1,9 +1,9 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
 
-namespace Trident {
+/* namespace Trident {
 	enum class TimeOfImpactState : uint8 {
 		UNDETERMINED = 0,
 		SEPARATED = 1,
@@ -13,4 +13,4 @@ namespace Trident {
 	};
 
 	AS_PRINTABLE(TimeOfImpactState);
-}
+} */

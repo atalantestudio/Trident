@@ -1,15 +1,15 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
 
-#include "Engine/API/Physics/CCD/SeparationFunction.hpp"
-#include "Engine/API/Physics/CCD/TimeOfImpactState.hpp"
-#include "Engine/API/Physics/GJK2D.hpp"
+/* #include "Engine/API/Physics/2D/CCD/SeparationFunction.hpp"
+#include "Engine/API/Physics/2D/CCD/TimeOfImpactState.hpp"
+#include "Engine/API/Physics/2D/GJK/GJK.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 
 namespace Trident {
-	/* struct TimeOfImpact {
+	struct TimeOfImpact {
 		TimeOfImpactState state;
 
 		// Time in between 2 frames at which point the objects collide.
@@ -179,5 +179,5 @@ namespace Trident {
 		BREAKPOINT();
 
 		return output;
-	} */
-}
+	}
+} */

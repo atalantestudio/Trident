@@ -4,7 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/API/Physics/2D/Collider/Collider.hpp"
-#include "Engine/API/Physics/Feature2D.hpp"
+#include "Engine/API/Physics/2D/Feature.hpp"
 #include "Engine/API/Physics/2D/SAT/SATConvexHullConvexHull.hpp"
 
 namespace Trident {

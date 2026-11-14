@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Physics/Feature2D.hpp"
+#include "Engine/API/Physics/2D/Feature.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 

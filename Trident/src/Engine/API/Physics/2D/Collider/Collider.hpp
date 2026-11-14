@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Geometry/Hull2D.hpp"
-#include "Engine/API/Physics/Contact/ContactManifold.hpp"
+#include "Engine/API/Physics/2D/Contact/ContactManifold.hpp"
 #include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 
 namespace Trident {

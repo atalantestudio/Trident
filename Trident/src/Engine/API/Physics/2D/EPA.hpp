@@ -1,9 +1,9 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
 
-#include "Engine/API/Object/PhysicalObject.hpp"
+/* #include "Engine/API/Object/PhysicalObject.hpp"
 #include "Engine/API/Physics/Simplex.hpp"
 
 namespace Trident {
@@ -72,4 +72,4 @@ namespace Trident {
 
 		return result;
 	}
-}
+} */

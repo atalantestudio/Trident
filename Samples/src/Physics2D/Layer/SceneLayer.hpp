@@ -5,6 +5,8 @@
 
 #include "Trident.hpp"
 
+#include "Engine/API/Physics/2D/Simulation.hpp"
+
 #include "../Renderer/Physics2DRenderer.hpp"
 
 namespace Trident {

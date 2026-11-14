@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include "Engine/API/Physics/Contact/ContactManifold.hpp"
+#include "Engine/API/Physics/2D/Contact/ContactManifold.hpp"
 
 namespace Trident {
 	struct ContactPair2D {
-		float32 friction;
 		ContactManifold2D manifold;
+		float32 friction;
 	};
 }

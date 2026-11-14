@@ -4,8 +4,8 @@
 #pragma once
 
 #include "Engine/API/Geometry/Hull2D.hpp"
-#include "Engine/API/Physics/Feature2D.hpp"
-#include "Engine/API/Physics/Simplex.hpp"
+#include "Engine/API/Physics/2D/Feature.hpp"
+#include "Engine/API/Physics/2D/Simplex.hpp"
 #include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 
 namespace Trident {
