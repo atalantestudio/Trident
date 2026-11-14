@@ -6,14 +6,6 @@
 #include "Engine/API/Physics/2D/GJK/GJKPoint.hpp"
 
 namespace Trident {
-	// TODO: Some geometries (e.g. CircleGeometry2D) don't implement `supportIndex`. Use `supportVertex` instead.
-	// Returns the index of the farthest point on `A` along `d`, in local space.
-	inline static uint32 supportIndex(const RigidBody2D& A, const Hull2D& hull, vec2<float32> d) {
-		const mat2x2<float32> inverseRotation = rotationAngle<mat2x2<float32>>(-A.rotation);
-
-		return hull.supportIndex(d * inverseRotation);
-	}
-
 	// Calculates the closest point to the origin on a line formed by the simplex s.
 	static void ClosestPointLineOrigin(Simplex2& s) {
 		const vec2<float32> a = s[0].v;
@@ -160,6 +152,8 @@ namespace Trident {
 
 		DEBUG_ASSERT(shapeA.vertices.count() < max<uint8>());
 
+		const mat2x2<float32> inverseRotationA = rotationAngle<mat2x2<float32>>(-A.rotation);
+
 		vec2<float32> d = p - A.position;
 
 		Simplex2Vertex vertex;
@@ -244,7 +238,7 @@ namespace Trident {
 			}
 
 			Simplex2Vertex vertex;
-			vertex.iA = supportIndex(A, shapeA, -d);
+			vertex.iA = shapeA.indexSupport(-d * inverseRotationA);
 			vertex.iB = 0;
 
 			bool duplicate = false;

@@ -25,8 +25,8 @@ namespace Trident {
 			return false;
 		}
 
-		const vec2<float32> sA = rigidBodyA.position + shapeA.support(AB) * scaleA;
-		const vec2<float32> sB = rigidBodyB.position + shapeB.support(-AB) * scaleB;
+		const vec2<float32> sA = rigidBodyA.position + shapeA.vertexSupport(AB) * scaleA;
+		const vec2<float32> sB = rigidBodyB.position + shapeB.vertexSupport(-AB) * scaleB;
 
 		manifold->normal = normalized(AB);
 		manifold->contactCount = 1;

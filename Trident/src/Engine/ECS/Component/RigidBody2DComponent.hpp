@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include "Engine/API/Physics/RigidBodyType.hpp"
-
 namespace Trident {
 	struct RigidBody2DComponent {
 		void updateWorld(vec2<float32> centroid) {
@@ -38,6 +36,7 @@ namespace Trident {
 		/// Position of the center of mass in world-space.
 		vec2<float32> position;
 
+		// Clockwise order.
 		float32 rotation;
 
 		// This isn't meant to be dynamically updated.
@@ -61,7 +60,5 @@ namespace Trident {
 
 		// TODO: Keep inside the rigid body?
 		vec2<float32> force;
-
-		RigidBodyType type;
 	};
 }

@@ -30,11 +30,6 @@ namespace Trident {
 	}
 
 	template<>
-	Hull2D createHull<Hull2DType::POINT>(const Geometry2D& geometry, std::vector<float32>& vertexComponentBuffer, std::vector<uint32>& indexBuffer) {
-		return Hull2D::point();
-	}
-
-	template<>
 	Hull2D createHull<Hull2DType::POLYGON>(const Geometry2D& geometry, std::vector<float32>& vertexComponentBuffer, std::vector<uint32>& indexBuffer) {
 		const uint32 indexOffset = static_cast<uint32>(indexBuffer.size());
 		const range<uint32, uint32> vertexPositionComponentRange = geometry.getVertexPositionComponentRange();

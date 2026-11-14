@@ -22,6 +22,9 @@ namespace Trident {
 
 		/// Initial angular velocity.
 		float32 angularVelocity;
+
+		// TODO(wip)
+		vec2<float32> scale = {1.0f, 1.0f};
 	};
 
 	struct RigidBody2D {

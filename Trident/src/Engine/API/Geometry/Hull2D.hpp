@@ -11,49 +11,28 @@
 namespace Trident {
 	/// A convex hull wrapping a 2D geometry.
 	struct Hull2D {
-		private:
-			// Point hulls need to have 1 vertex for GJK to work.
-			inline static constexpr vec2<float32> pointHullVertices[] = {{0.0f, 0.0f}};
-
-		public:
-			/// Creates and returns a point hull.
-			/// When coupled with a rigid body, point hulls can represent the position of a 2D point (e.g. the pointer's position).
-			inline static Hull2D point() {
-				return {
-					.type = Hull2DType::POINT,
-					.centroid = {0.0_m, 0.0_m},
-					.radius = 0.0_m,
-					.vertices = pointHullVertices,
-					.lineIndexRange = {0, 0},
-					.edges = {},
-				};
-			}
-
 		public:
 			/// Returns the farthest point on the hull along `d`.
-			inline vec2<float32> support(vec2<float32> d) const {
+			inline vec2<float32> vertexSupport(vec2<float32> d) const {
 				// TODO(physics/2d/hull/support): Replace with LUT.
 				switch (type) {
-					case Hull2DType::POINT: {
-						return {0.0_m, 0.0_m};
-					}
 					case Hull2DType::CIRCLE: {
 						return normalized(d) * radius;
 					}
 					case Hull2DType::POLYGON: {
-						return vertices[supportIndex(d)];
+						return vertices[indexSupport(d)];
 					}
 					default: {
 						DEBUG_ASSERT(false);
 
-						return {0.0_m, 0.0_m};
+						return {0.0f, 0.0f};
 					}
 				}
 			}
 
 			// Some geometries like CircleGeometry2D return more precise support points. In these cases `support` must be used.
 			/// Returns the index of the farthest point on the hull along `d`.
-			inline uint32 supportIndex(vec2<float32> d) const {
+			inline uint32 indexSupport(vec2<float32> d) const {
 				DEBUG_ASSERT(type == Hull2DType::POLYGON);
 
 				float32 maxValue = dot(vertices[0], d);

@@ -70,7 +70,6 @@ namespace Trident {
 
 	PhysicsSimulation2D createSimulation(const PhysicsSimulationDescriptor2D& descriptor);
 
-	RigidBodyID2D createRigidBodyFromScene(PhysicsSimulation2D& simulation, const RigidBody2DComponent& descriptor);
 	RigidBodyID2D createRigidBody(PhysicsSimulation2D& simulation, const RigidBodyDescriptor2D& descriptor);
 
 	ShapeID2D createShapeFromScene(PhysicsSimulation2D& simulation, const Hull2D& descriptor, const void* typeDescriptor);

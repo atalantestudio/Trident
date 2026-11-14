@@ -57,7 +57,7 @@ namespace Trident {
 			return true;
 		}
 
-		vec2<float32> a = shapeA.support(d * inverseRotationA) * A.getWorld() - p;
+		vec2<float32> a = shapeA.vertexSupport(d * inverseRotationA) * A.getWorld() - p;
 
 		if (dot(a, d) < 0.0f) {
 			return false;
@@ -70,7 +70,7 @@ namespace Trident {
 		uint8 iteration = 0;
 
 		while (iteration < GJK_2D_CONDITIONAL_ITERATION_LIMIT) {
-			a = shapeA.support(d * inverseRotationA) * A.getWorld() - p;
+			a = shapeA.vertexSupport(d * inverseRotationA) * A.getWorld() - p;
 
 			if (dot(a, d) < 0.0f) {
 				return false;

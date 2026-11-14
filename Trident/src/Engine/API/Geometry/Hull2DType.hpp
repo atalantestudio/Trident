@@ -5,7 +5,6 @@
 
 namespace Trident {
 	enum class Hull2DType : uint8 {
-		POINT,
 		CIRCLE,
 		POLYGON,
 

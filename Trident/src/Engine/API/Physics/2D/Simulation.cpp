@@ -47,15 +47,19 @@ namespace Trident {
 
 		while (tagIndex < staticPool.tagCount) {
 			const Entity entity = staticPool.tagIndexToEntity[tagIndex];
+			const RigidBody2DComponent rigidBodyComponent = descriptor.scene->ecs.getComponent<RigidBody2DComponent>(entity);
 
-			RigidBody2DComponent rigidBodyDescriptor = descriptor.scene->ecs.getComponent<RigidBody2DComponent>(entity);
+			RigidBodyDescriptor2D rigidBodyDescriptor{};
 			rigidBodyDescriptor.type = RigidBodyType::STATIC;
+			rigidBodyDescriptor.position = rigidBodyComponent.position;
+			rigidBodyDescriptor.rotation = rigidBodyComponent.rotation;
+			rigidBodyDescriptor.scale = rigidBodyComponent.scale;
 
-			const RigidBodyID2D rigidBodyId = createRigidBodyFromScene(simulation, rigidBodyDescriptor);
+			const RigidBodyID2D rigidBodyId = createRigidBody(simulation, rigidBodyDescriptor);
 
 			Hull2D shapeDescriptor = getHull(descriptor.scene, rigidBodyId);
 			shapeDescriptor.rigidBodyId = rigidBodyId;
-			shapeDescriptor.material.friction = rigidBodyDescriptor.friction;
+			shapeDescriptor.material.friction = rigidBodyComponent.friction;
 
 			createShapeFromScene(simulation, shapeDescriptor, nullptr);
 
@@ -66,15 +70,21 @@ namespace Trident {
 
 		while (tagIndex < dynamicPool.tagCount) {
 			const Entity entity = dynamicPool.tagIndexToEntity[tagIndex];
+			const RigidBody2DComponent rigidBodyComponent = descriptor.scene->ecs.getComponent<RigidBody2DComponent>(entity);
 
-			RigidBody2DComponent rigidBodyDescriptor = descriptor.scene->ecs.getComponent<RigidBody2DComponent>(entity);
+			RigidBodyDescriptor2D rigidBodyDescriptor{};
 			rigidBodyDescriptor.type = RigidBodyType::DYNAMIC;
+			rigidBodyDescriptor.position = rigidBodyComponent.position;
+			rigidBodyDescriptor.rotation = rigidBodyComponent.rotation;
+			rigidBodyDescriptor.linearVelocity = rigidBodyComponent.linearVelocity;
+			rigidBodyDescriptor.angularVelocity = rigidBodyComponent.angularVelocity;
+			rigidBodyDescriptor.scale = rigidBodyComponent.scale;
 
-			const RigidBodyID2D rigidBodyId = createRigidBodyFromScene(simulation, rigidBodyDescriptor);
+			const RigidBodyID2D rigidBodyId = createRigidBody(simulation, rigidBodyDescriptor);
 
 			Hull2D shapeDescriptor = getHull(descriptor.scene, entity);
 			shapeDescriptor.rigidBodyId = rigidBodyId;
-			shapeDescriptor.material.friction = rigidBodyDescriptor.friction;
+			shapeDescriptor.material.friction = rigidBodyComponent.friction;
 
 			createShapeFromScene(simulation, shapeDescriptor, nullptr);
 
@@ -87,7 +97,7 @@ namespace Trident {
 		return simulation;
 	}
 
-	RigidBodyID2D createRigidBodyFromScene(PhysicsSimulation2D& simulation, const RigidBody2DComponent& descriptor) {
+	RigidBodyID2D createRigidBody(PhysicsSimulation2D& simulation, const RigidBodyDescriptor2D& descriptor) {
 		DEBUG_ASSERT(!std::isinf(descriptor.position.x) && !std::isnan(descriptor.position.x) && !std::isinf(descriptor.position.y) && !std::isnan(descriptor.position.y));
 		DEBUG_ASSERT(!std::isinf(descriptor.rotation) && !std::isnan(descriptor.rotation));
 
@@ -95,10 +105,7 @@ namespace Trident {
 
 		RigidBody2D& rigidBody = simulation.rigidBodies[simulation.usedRigidBodyCount];
 		rigidBody.type = descriptor.type;
-
-		// TODO(wip)
-		// rigidBody.flags = {};
-
+		rigidBody.flags = descriptor.flags;
 		rigidBody.position = descriptor.position;
 		rigidBody.rotation = descriptor.rotation;
 		rigidBody.scale = descriptor.scale;
@@ -110,22 +117,11 @@ namespace Trident {
 		rigidBody.force = {0.0f, 0.0f};
 		rigidBody.torque = 0.0_Nm;
 
-		// TODO(wip)
-		rigidBody.inverseMass = descriptor.inverseMass;
-		rigidBody.inverseInertia = descriptor.inverseInertia;
-
 		const uint32 id = simulation.usedRigidBodyCount;
 
 		simulation.usedRigidBodyCount += 1;
 
 		return id;
-	}
-
-	RigidBodyID2D createRigidBody(PhysicsSimulation2D& simulation, const RigidBodyDescriptor2D& descriptor) {
-		// TODO(wip)
-		ENGINE_ERROR_UNIMPLEMENTED();
-
-		return 0;
 	}
 
 	ShapeID2D createShapeFromScene(PhysicsSimulation2D& simulation, const Hull2D& descriptor, const void* typeDescriptor) {
@@ -137,12 +133,19 @@ namespace Trident {
 		ENGINE_ASSERT(simulation.usedShapeCount < simulation.shapes.count(), "Shape count limit already reached.");
 		ENGINE_ASSERT(descriptor.rigidBodyId < simulation.usedRigidBodyCount, "Invalid rigid body ID.");
 
-		simulation.shapes[simulation.usedShapeCount] = descriptor;
+		Hull2D& shape = simulation.shapes[simulation.usedShapeCount];
+		shape = descriptor;
 
 		RigidBody2D& rigidBody = simulation.rigidBodies[descriptor.rigidBodyId];
 		rigidBody.centroid = descriptor.centroid;
 
 		const uint32 id = simulation.usedShapeCount;
+
+		// TODO(physics/2d): Update mass and inertia.
+		if (rigidBody.type != RigidBodyType::STATIC) {
+			rigidBody.inverseMass = 1.0f;
+			rigidBody.inverseInertia = 6.0f;
+		}
 
 		switch (rigidBody.type) {
 			case RigidBodyType::STATIC: {
