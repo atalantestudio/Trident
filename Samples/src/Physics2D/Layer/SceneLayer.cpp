@@ -10,20 +10,12 @@
 #include "SceneLayer.hpp"
 
 namespace Trident {
-	Physics2DSceneLayer::~Physics2DSceneLayer() {
-		delete scene;
-	}
-
-	void Physics2DSceneLayer::loadScene() {
+	void Physics2DSceneLayer::postConstruct() {
 		const Application* application = getApplication();
 		const view<char8> sceneAssetName = application->getPropertyFile()->getProperty<view<char8>>("AssetName");
 		const ref<Scene2DAsset> sceneAsset = application->getAssetLibrary()->getAsset<Scene2DAsset>(sceneAssetName);
 
-		scene = new Scene2D(sceneAsset);
-	}
-
-	void Physics2DSceneLayer::postConstruct() {
-		loadScene();
+		scene = allocateRef<Scene2D>(sceneAsset);
 
 		PhysicsSimulationDescriptor2D simulationDescriptor;
 		simulationDescriptor.scene = scene;

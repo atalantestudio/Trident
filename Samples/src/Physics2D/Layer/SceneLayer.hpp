@@ -12,8 +12,6 @@
 namespace Trident {
 	class Physics2DSceneLayer : public Layer {
 		public:
-			~Physics2DSceneLayer();
-
 			void initialize() override {}
 
 			void postConstruct() override;
@@ -40,7 +38,7 @@ namespace Trident {
 			bool onEvent(WindowResizeEvent& event);
 
 		private:
-			Scene2D* scene;
+			ref<Scene2D> scene;
 			PhysicsSimulation2D simulation;
 			Physics2DRenderer renderer;
 
