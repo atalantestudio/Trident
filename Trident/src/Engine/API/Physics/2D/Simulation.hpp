@@ -6,6 +6,8 @@
 #include "Engine/API/Physics/2D/CollisionPair.hpp"
 #include "Engine/API/Physics/2D/ContactPair.hpp"
 #include "Engine/API/Physics/2D/RigidBody.hpp"
+#include "Engine/API/Physics/2D/Shape/Hull/BoxHull.hpp"
+#include "Engine/API/Physics/2D/Shape/Shape.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 
 namespace Trident {
@@ -22,6 +24,13 @@ namespace Trident {
 
 		/// Number of iterations in the sequential solver.
 		uint32 impulseIterationCount;
+
+
+		// TODO(physics/2d): Ensure that x > 0.
+		uint32 maxStaticRigidBodyCount;
+		uint32 maxKinematicAndDynamicRigidBodyCount;
+		uint32 maxStaticShapeCount;
+		uint32 maxKinematicAndDynamicShapeCount;
 
 		const Scene2D* scene;
 	};
@@ -61,9 +70,13 @@ namespace Trident {
 
 	PhysicsSimulation2D createSimulation(const PhysicsSimulationDescriptor2D& descriptor);
 
-	RigidBodyID2D createRigidBody(PhysicsSimulation2D& simulation, const RigidBody2DComponent& descriptor);
+	RigidBodyID2D createRigidBodyFromScene(PhysicsSimulation2D& simulation, const RigidBody2DComponent& descriptor);
+	RigidBodyID2D createRigidBody(PhysicsSimulation2D& simulation, const RigidBodyDescriptor2D& descriptor);
 
-	ShapeID2D createShape(PhysicsSimulation2D& simulation, const Hull2D& descriptor);
+	ShapeID2D createShapeFromScene(PhysicsSimulation2D& simulation, const Hull2D& descriptor, const void* typeDescriptor);
+	ShapeID2D createShape(PhysicsSimulation2D& simulation, const ShapeDescriptor2D& descriptor, const void* typeDescriptor);
+
+	BoxHull2D createBoxHull(vec2<float32> halfSize);
 
 	void broadPhase(PhysicsSimulation2D& simulation);
 	void narrowPhase(PhysicsSimulation2D& simulation);

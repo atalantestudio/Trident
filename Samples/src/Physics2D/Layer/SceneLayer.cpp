@@ -90,6 +90,10 @@ namespace Trident {
 		}
 	}
 
+	void Physics2DSceneLayer::registerHullForRender(const HullHeader2D* hullHeader) {
+		// TODO(wip)
+	}
+
 	void Physics2DSceneLayer::onEvent(Event& event) {
 		EventDispatcher eventDispatcher(event);
 		eventDispatcher.dispatch<KeyDownEvent>(BIND(onEvent));

@@ -51,13 +51,13 @@ namespace Trident {
 			RigidBody2DComponent rigidBodyDescriptor = descriptor.scene->ecs.getComponent<RigidBody2DComponent>(entity);
 			rigidBodyDescriptor.type = RigidBodyType::STATIC;
 
-			const RigidBodyID2D rigidBodyId = createRigidBody(simulation, rigidBodyDescriptor);
+			const RigidBodyID2D rigidBodyId = createRigidBodyFromScene(simulation, rigidBodyDescriptor);
 
 			Hull2D shapeDescriptor = getHull(descriptor.scene, rigidBodyId);
 			shapeDescriptor.rigidBodyId = rigidBodyId;
 			shapeDescriptor.material.friction = rigidBodyDescriptor.friction;
 
-			createShape(simulation, shapeDescriptor);
+			createShapeFromScene(simulation, shapeDescriptor, nullptr);
 
 			tagIndex += 1;
 		}
@@ -70,13 +70,13 @@ namespace Trident {
 			RigidBody2DComponent rigidBodyDescriptor = descriptor.scene->ecs.getComponent<RigidBody2DComponent>(entity);
 			rigidBodyDescriptor.type = RigidBodyType::DYNAMIC;
 
-			const RigidBodyID2D rigidBodyId = createRigidBody(simulation, rigidBodyDescriptor);
+			const RigidBodyID2D rigidBodyId = createRigidBodyFromScene(simulation, rigidBodyDescriptor);
 
 			Hull2D shapeDescriptor = getHull(descriptor.scene, entity);
 			shapeDescriptor.rigidBodyId = rigidBodyId;
 			shapeDescriptor.material.friction = rigidBodyDescriptor.friction;
 
-			createShape(simulation, shapeDescriptor);
+			createShapeFromScene(simulation, shapeDescriptor, nullptr);
 
 			tagIndex += 1;
 		}
@@ -87,7 +87,7 @@ namespace Trident {
 		return simulation;
 	}
 
-	RigidBodyID2D createRigidBody(PhysicsSimulation2D& simulation, const RigidBody2DComponent& descriptor) {
+	RigidBodyID2D createRigidBodyFromScene(PhysicsSimulation2D& simulation, const RigidBody2DComponent& descriptor) {
 		DEBUG_ASSERT(!std::isinf(descriptor.position.x) && !std::isnan(descriptor.position.x) && !std::isinf(descriptor.position.y) && !std::isnan(descriptor.position.y));
 		DEBUG_ASSERT(!std::isinf(descriptor.rotation) && !std::isnan(descriptor.rotation));
 
@@ -121,7 +121,14 @@ namespace Trident {
 		return id;
 	}
 
-	ShapeID2D createShape(PhysicsSimulation2D& simulation, const Hull2D& descriptor) {
+	RigidBodyID2D createRigidBody(PhysicsSimulation2D& simulation, const RigidBodyDescriptor2D& descriptor) {
+		// TODO(wip)
+		ENGINE_ERROR_UNIMPLEMENTED();
+
+		return 0;
+	}
+
+	ShapeID2D createShapeFromScene(PhysicsSimulation2D& simulation, const Hull2D& descriptor, const void* typeDescriptor) {
 		// TODO(wip)
 		// DEBUG_ASSERT(!std::isinf(descriptor.density) && !std::isnan(descriptor.density) && descriptor.density >= 0.0f);
 
@@ -161,6 +168,20 @@ namespace Trident {
 		simulation.usedShapeCount += 1;
 
 		return id;
+	}
+
+	ShapeID2D createShape(PhysicsSimulation2D& simulation, const ShapeDescriptor2D& descriptor, const void* typeDescriptor) {
+		// TODO(wip)
+		ENGINE_ERROR_UNIMPLEMENTED();
+
+		return 0;
+	}
+
+	BoxHull2D createBoxHull(vec2<float32> halfSize) {
+		// TODO(wip)
+		ENGINE_ERROR_UNIMPLEMENTED();
+
+		return {};
 	}
 
 	void tick(PhysicsSimulation2D& simulation) {
