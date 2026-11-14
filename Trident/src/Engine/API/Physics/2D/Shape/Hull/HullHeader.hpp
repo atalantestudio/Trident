@@ -7,7 +7,9 @@ namespace Trident {
 	struct HullHeader2D {
 		inline const vec2<float32>* getVertices() const {
 			// return pointer_cast<const vec2<float32>*>(pointer_cast<const uint8*>(this) + vertexOffset);
-			return (const vec2<float32>*) vertexOffset;
+			const vec2<float32>* vertices = (const vec2<float32>*) vertexOffset;
+
+			return vertices;
 		}
 
 		/// The local centroid.

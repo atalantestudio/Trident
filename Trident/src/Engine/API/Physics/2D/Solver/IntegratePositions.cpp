@@ -10,7 +10,7 @@ namespace Trident {
 		uint32 shapeIdIndex = 0;
 
 		while (shapeIdIndex < shapeIds.count()) {
-			const Hull2D& shape = simulation.shapes[shapeIds[shapeIdIndex]];
+			const Shape2D& shape = simulation.shapes[shapeIds[shapeIdIndex]];
 
 			RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 

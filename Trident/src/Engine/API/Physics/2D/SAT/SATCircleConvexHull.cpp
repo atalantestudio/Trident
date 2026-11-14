@@ -6,18 +6,18 @@
 #include "Engine/API/Physics/2D/SAT/SATCircleConvexHull.hpp"
 
 namespace Trident {
-	static void queryEdgeDirections(const RigidBody2D& referenceBody, const RigidBody2D& incidentBody, const Hull2D& referenceHull, const Hull2D& incidentHull, SATCircleConvexHullOutput2D& output) {
+	static void queryEdgeDirections(const RigidBody2D& referenceBody, const RigidBody2D& incidentBody, const Shape2D& referenceShape, const Shape2D& incidentShape, SATCircleConvexHullOutput2D& output) {
 		const mat2x2<float32> RA = rotationAngle<mat2x2<float32>>(referenceBody.rotation);
 		const mat2x2<float32> RBA = rotationAngle<mat2x2<float32>>(referenceBody.rotation - incidentBody.rotation);
 
 		uint16 indexA = 0;
 
-		while (indexA < referenceHull.vertices.count()) {
-			const uint16 indexB = (indexA + 1) % referenceHull.vertices.count();
-			const vec2<float32> a = referenceHull.vertices[indexA];
-			const vec2<float32> b = referenceHull.vertices[indexB];
+		while (indexA < referenceShape.hull->vertexCount) {
+			const uint16 indexB = (indexA + 1) % referenceShape.hull->vertexCount;
+			const vec2<float32> a = referenceShape.hull->getVertices()[indexA];
+			const vec2<float32> b = referenceShape.hull->getVertices()[indexB];
 			const vec2<float32> d = edgeNormalClockwise(a, b);
-			const vec2<float32> s = incidentHull.vertexSupport(-d * RBA) * incidentBody.getWorld();
+			const vec2<float32> s = vertexSupport(incidentShape, -d * RBA) * incidentBody.getWorld();
 
 			// The centroid is not involved when calculating the edge distance because it is applied when multiplying by the world matrix.
 			const float32 edgeDistance = abs(signedDistanceLPAB(a, b, {0.0f, 0.0f}));
@@ -39,11 +39,11 @@ namespace Trident {
 		}
 	}
 
-	SATCircleConvexHullOutput2D SATCircleConvexHull2D(const RigidBody2D& circleBody, const RigidBody2D& convexHullBody, const Hull2D& circleHull, const Hull2D& convexHullGeometry) {
+	SATCircleConvexHullOutput2D SATCircleConvexHull2D(const RigidBody2D& circleBody, const RigidBody2D& convexHullBody, const Shape2D& circleShape, const Shape2D& convexHullShape) {
 		SATCircleConvexHullOutput2D output{};
 		output.separation = min<float32>();
 
-		queryEdgeDirections(convexHullBody, circleBody, convexHullGeometry, circleHull, output);
+		queryEdgeDirections(convexHullBody, circleBody, convexHullShape, circleShape, output);
 
 		if (output.separation > 0.0f) {
 			return output;

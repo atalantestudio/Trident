@@ -6,12 +6,12 @@
 #include "Engine/API/Physics/2D/Simulation.hpp"
 
 namespace Trident {
-	static float32 getPenetrationBias(const Hull2D& shape) {
+	static float32 getPenetrationBias(const Shape2D& shape) {
 		switch (shape.type) {
-			case Hull2DType::CIRCLE: {
+			case ShapeType2D::CIRCLE: {
 				return 0.01f;
 			}
-			case Hull2DType::POLYGON: {
+			case ShapeType2D::CONVEX_HULL: {
 				return 0.2f;
 			}
 			default: {
@@ -24,8 +24,8 @@ namespace Trident {
 
 	void updateContactManifolds(PhysicsSimulation2D& simulation) {
 		for (std::pair<const CollisionPair2D, ContactPair2D>& pair : simulation.contactPairs) {
-			const Hull2D& shapeA = simulation.shapes[pair.first.shapeIdA];
-			const Hull2D& shapeB = simulation.shapes[pair.first.shapeIdB];
+			const Shape2D& shapeA = simulation.shapes[pair.first.shapeIdA];
+			const Shape2D& shapeB = simulation.shapes[pair.first.shapeIdB];
 
 			const float32 penetrationBias = (getPenetrationBias(shapeA) + getPenetrationBias(shapeB)) * 0.5f;
 

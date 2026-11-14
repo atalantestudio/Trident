@@ -42,10 +42,7 @@ namespace Trident {
 		return true;
 	}
 
-	// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
-	// Returns true if the Minkowski difference of A and B contains the origin, and false otherwise.
-	// NOTE: In this implementation, `a` is the name of the most recent vertex added to the simplex.
-	bool GJKConditional2D(const RigidBody2D& A, vec2<float32> p, const Hull2D& shapeA) {
+	bool GJKConditional2D(const RigidBody2D& A, vec2<float32> p, const Shape2D& shapeA) {
 		constexpr uint8 GJK_2D_CONDITIONAL_ITERATION_LIMIT = 8;
 
 		const mat2x2<float32> inverseRotationA = rotationAngle<mat2x2<float32>>(-A.rotation);
@@ -57,7 +54,7 @@ namespace Trident {
 			return true;
 		}
 
-		vec2<float32> a = shapeA.vertexSupport(d * inverseRotationA) * A.getWorld() - p;
+		vec2<float32> a = vertexSupport(shapeA, d * inverseRotationA) * A.getWorld() - p;
 
 		if (dot(a, d) < 0.0f) {
 			return false;
@@ -70,7 +67,7 @@ namespace Trident {
 		uint8 iteration = 0;
 
 		while (iteration < GJK_2D_CONDITIONAL_ITERATION_LIMIT) {
-			a = shapeA.vertexSupport(d * inverseRotationA) * A.getWorld() - p;
+			a = vertexSupport(shapeA, d * inverseRotationA) * A.getWorld() - p;
 
 			if (dot(a, d) < 0.0f) {
 				return false;

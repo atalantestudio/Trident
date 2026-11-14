@@ -9,7 +9,7 @@
 
 namespace Trident {
 	/// Finds and returns the incident edge on the provided rigid body.
-	static ClipFeature2D findIncidentEdge(const RigidBody2D& incidentBody, const Hull2D& incidentShape, vec2<float32> referenceEdgeNormal) {
+	static ClipFeature2D findIncidentEdge(const RigidBody2D& incidentBody, const Shape2D& incidentShape, vec2<float32> referenceEdgeNormal) {
 		ClipFeature2D incidentEdge{};
 		incidentEdge.vertexCount = 2;
 
@@ -17,10 +17,10 @@ namespace Trident {
 		uint16 vertexIndex = 0;
 		uint16 indexA = 0;
 
-		while (indexA < incidentShape.vertices.count()) {
-			const uint16 indexB = (indexA + 1) % incidentShape.vertices.count();
-			const vec2<float32> a = incidentShape.vertices[indexA];
-			const vec2<float32> b = incidentShape.vertices[indexB];
+		while (indexA < incidentShape.hull->vertexCount) {
+			const uint16 indexB = (indexA + 1) % incidentShape.hull->vertexCount;
+			const vec2<float32> a = incidentShape.hull->getVertices()[indexA];
+			const vec2<float32> b = incidentShape.hull->getVertices()[indexB];
 			const vec2<float32> d = perpendicularLeft(b - a);
 			const float32 angle = dot(d, referenceEdgeNormal);
 
@@ -40,7 +40,7 @@ namespace Trident {
 		a.position = a.position * incidentBody.getWorld();
 		a.id.referenceEdgeAIndex = Contact2DID::NULL_EDGE_INDEX;
 		a.id.referenceEdgeBIndex = Contact2DID::NULL_EDGE_INDEX;
-		a.id.incidentEdgeAIndex = (vertexIndex + 1) % incidentShape.vertices.count();
+		a.id.incidentEdgeAIndex = (vertexIndex + 1) % incidentShape.hull->vertexCount;
 		a.id.incidentEdgeBIndex = vertexIndex;
 
 		ClipVertex2D& b = incidentEdge.edge[1];
@@ -48,7 +48,7 @@ namespace Trident {
 		b.id.referenceEdgeAIndex = Contact2DID::NULL_EDGE_INDEX;
 		b.id.referenceEdgeBIndex = Contact2DID::NULL_EDGE_INDEX;
 		b.id.incidentEdgeAIndex = vertexIndex;
-		b.id.incidentEdgeBIndex = (static_cast<sint16>(vertexIndex) - 1) % incidentShape.vertices.count();
+		b.id.incidentEdgeBIndex = (static_cast<sint16>(vertexIndex) - 1) % incidentShape.hull->vertexCount;
 
 		return incidentEdge;
 	}
@@ -104,19 +104,19 @@ namespace Trident {
 		return clippedEdge;
 	}
 
-	static bool createEdgeContact(const SATEdgeQuery2D& query, const RigidBody2D& referenceBody, const RigidBody2D& incidentBody, const Hull2D& referenceShape, const Hull2D& incidentShape, ContactManifold2D* manifold) {
-		const uint32 referenceLeftEdgeIndex = (static_cast<sint32>(query.referenceEdgeIndex) - 1) % referenceShape.vertices.count();
-		const uint32 referenceRightEdgeIndex = (query.referenceEdgeIndex + 1) % referenceShape.vertices.count();
+	static bool createEdgeContact(const SATEdgeQuery2D& query, const RigidBody2D& referenceBody, const RigidBody2D& incidentBody, const Shape2D& referenceShape, const Shape2D& incidentShape, ContactManifold2D* manifold) {
+		const uint32 referenceLeftEdgeIndex = (static_cast<sint32>(query.referenceEdgeIndex) - 1) % referenceShape.hull->vertexCount;
+		const uint32 referenceRightEdgeIndex = (query.referenceEdgeIndex + 1) % referenceShape.hull->vertexCount;
 
-		const vec2<float32> localA = referenceShape.vertices[query.referenceEdgeIndex];
-		const vec2<float32> localB = referenceShape.vertices[referenceRightEdgeIndex];
+		const vec2<float32> localA = referenceShape.hull->getVertices()[query.referenceEdgeIndex];
+		const vec2<float32> localB = referenceShape.hull->getVertices()[referenceRightEdgeIndex];
 		const vec2<float32> a = localA * referenceBody.getWorld();
 		const vec2<float32> b = localB * referenceBody.getWorld();
 
 		Plane2D referencePlane;
 		referencePlane.normal = query.axis;
 		referencePlane.offset = (
-			signedDistanceLPAB(localB * referenceBody.scale, localA * referenceBody.scale, referenceShape.centroid) +
+			signedDistanceLPAB(localB * referenceBody.scale, localA * referenceBody.scale, referenceBody.centroid) +
 			dot(referenceBody.position, referencePlane.normal)
 		);
 
@@ -167,7 +167,7 @@ namespace Trident {
 		return manifold->contactCount > 0;
 	}
 
-	bool ConvexHullConvexHull2D(const Hull2D& shapeA, const Hull2D& shapeB, const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, ContactManifold2D* manifold) {
+	bool ConvexHullConvexHull2D(const Shape2D& shapeA, const Shape2D& shapeB, const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, ContactManifold2D* manifold) {
 		manifold->contactCount = 0;
 
 		SATConvexHullConvexHullOutput2D output = SATConvexHullConvexHull2D(rigidBodyA, rigidBodyB, shapeA, shapeB);

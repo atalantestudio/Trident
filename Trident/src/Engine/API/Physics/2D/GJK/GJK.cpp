@@ -146,12 +146,13 @@ namespace Trident {
 		s.count = 3;
 	}
 
-	// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
-	GJK2DOutput GJK2D(const RigidBody2D& A, const RigidBody2D& B, const Hull2D& hullA, const Hull2D& hullB) {
+	GJK2DOutput GJK2D(const RigidBody2D& A, const RigidBody2D& B, const Shape2D& hullA, const Shape2D& hullB) {
 		constexpr uint8 GJK_2D_ITERATION_LIMIT = 8;
 
-		DEBUG_ASSERT(hullA.vertices.count() < max<uint8>());
-		DEBUG_ASSERT(hullB.vertices.count() < max<uint8>());
+		DEBUG_ASSERT(hullA.type == ShapeType2D::CONVEX_HULL);
+		DEBUG_ASSERT(hullB.type == ShapeType2D::CONVEX_HULL);
+		DEBUG_ASSERT(hullA.hull->vertexCount < max<uint8>());
+		DEBUG_ASSERT(hullB.hull->vertexCount < max<uint8>());
 
 		const mat2x2<float32> inverseRotationA = rotationAngle<mat2x2<float32>>(-A.rotation);
 		const mat2x2<float32> inverseRotationB = rotationAngle<mat2x2<float32>>(-B.rotation);
@@ -161,8 +162,8 @@ namespace Trident {
 		Simplex2Vertex vertex;
 		vertex.iA = 0;
 		vertex.iB = 0;
-		vertex.vA = hullA.vertices[vertex.iA] * A.getWorld();
-		vertex.vB = hullB.vertices[vertex.iB] * B.getWorld();
+		vertex.vA = hullA.hull->getVertices()[vertex.iA] * A.getWorld();
+		vertex.vB = hullB.hull->getVertices()[vertex.iB] * B.getWorld();
 		vertex.v = vertex.vB - vertex.vA;
 
 		Simplex2 s = {vertex};
@@ -242,8 +243,8 @@ namespace Trident {
 			}
 
 			Simplex2Vertex vertex;
-			vertex.iA = hullA.indexSupport(-d * inverseRotationA);
-			vertex.iB = hullB.indexSupport(d * inverseRotationB);
+			vertex.iA = indexSupport(hullA, -d * inverseRotationA);
+			vertex.iB = indexSupport(hullB, d * inverseRotationB);
 
 			bool duplicate = false;
 			uint8 j = 0;
@@ -262,8 +263,8 @@ namespace Trident {
 				break;
 			}
 
-			vertex.vA = hullA.vertices[vertex.iA] * A.getWorld();
-			vertex.vB = hullB.vertices[vertex.iB] * B.getWorld();
+			vertex.vA = hullA.hull->getVertices()[vertex.iA] * A.getWorld();
+			vertex.vB = hullB.hull->getVertices()[vertex.iB] * B.getWorld();
 			vertex.v = vertex.vB - vertex.vA;
 
 			s[s.count] = vertex;

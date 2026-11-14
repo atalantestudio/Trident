@@ -40,7 +40,7 @@ namespace Trident {
 		uint32 shapeIndex = 0;
 
 		while (shapeIndex < simulation.usedShapeCount) {
-			const Hull2D& shape = simulation.shapes[shapeIndex];
+			const Shape2D& shape = simulation.shapes[shapeIndex];
 			const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 
 			renderer.setWorld(shapeIndex, rigidBody.getWorld());
@@ -77,7 +77,7 @@ namespace Trident {
 		sint32 shapeIndex = static_cast<sint32>(simulation.usedShapeCount) - 1;
 
 		while (shapeIndex >= 0) {
-			const Hull2D& shape = simulation.shapes[shapeIndex];
+			const Shape2D& shape = simulation.shapes[shapeIndex];
 			const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 
 			if (GJKConditional2D(rigidBody, p, shape)) {
@@ -161,7 +161,7 @@ namespace Trident {
 		}
 
 		if (event.getButton() == MouseButton::LEFT && selectedEntity != max<Entity>()) {
-			const Hull2D shape = simulation.shapes[selectedEntity];
+			const Shape2D& shape = simulation.shapes[selectedEntity];
 
 			RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 			rigidBody.position += placeholderOffset;

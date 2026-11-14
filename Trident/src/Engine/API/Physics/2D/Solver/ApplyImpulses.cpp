@@ -21,8 +21,8 @@ namespace Trident {
 
 		while (iteration < simulation.impulseIterationCount) {
 			for (std::pair<const CollisionPair2D, ContactPair2D>& pair : simulation.contactPairs) {
-				const Hull2D& shapeA = simulation.shapes[pair.first.shapeIdA];
-				const Hull2D& shapeB = simulation.shapes[pair.first.shapeIdB];
+				const Shape2D& shapeA = simulation.shapes[pair.first.shapeIdA];
+				const Shape2D& shapeB = simulation.shapes[pair.first.shapeIdB];
 
 				RigidBody2D& rigidBodyA = simulation.rigidBodies[shapeA.rigidBodyId];
 				RigidBody2D& rigidBodyB = simulation.rigidBodies[shapeB.rigidBodyId];

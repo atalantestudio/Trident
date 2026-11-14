@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "Engine/API/Geometry/Hull2D.hpp"
 #include "Engine/API/Physics/2D/RigidBody.hpp"
+#include "Engine/API/Physics/2D/Shape/Shape.hpp"
 #include "Engine/API/Physics/2D/Simplex.hpp"
 
 namespace Trident {
@@ -26,5 +26,5 @@ namespace Trident {
 	};
 
 	// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
-	GJKPointOutput2D GJKPoint2D(const RigidBody2D& A, vec2<float32> p, const Hull2D& shapeA);
+	GJKPointOutput2D GJKPoint2D(const RigidBody2D& A, vec2<float32> p, const Shape2D& shapeA);
 }

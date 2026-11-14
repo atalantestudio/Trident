@@ -6,7 +6,7 @@
 #include "Engine/API/Physics/2D/Collider/Collider.hpp"
 
 namespace Trident {
-	bool CircleCircle2D(const Hull2D& shapeA, const Hull2D& shapeB, const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, ContactManifold2D* manifold) {
+	bool CircleCircle2D(const Shape2D& shapeA, const Shape2D& shapeB, const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, ContactManifold2D* manifold) {
 		const vec2<float32> AB = rigidBodyB.position - rigidBodyA.position;
 		const float32 lengthAB = lengthSquared(AB);
 
@@ -19,14 +19,14 @@ namespace Trident {
 		const float32 scaleA = rigidBodyA.scale[0];
 		const float32 scaleB = rigidBodyB.scale[0];
 
-		const float32 d = lengthAB - pow(shapeA.radius * scaleA + shapeB.radius * scaleB, 2.0f);
+		const float32 d = lengthAB - pow(shapeA.circle.radius * scaleA + shapeB.circle.radius * scaleB, 2.0f);
 
 		if (d > 0.0f) {
 			return false;
 		}
 
-		const vec2<float32> sA = rigidBodyA.position + shapeA.vertexSupport(AB) * scaleA;
-		const vec2<float32> sB = rigidBodyB.position + shapeB.vertexSupport(-AB) * scaleB;
+		const vec2<float32> sA = rigidBodyA.position + vertexSupport(shapeA, AB) * scaleA;
+		const vec2<float32> sB = rigidBodyB.position + vertexSupport(shapeB, -AB) * scaleB;
 
 		manifold->normal = normalized(AB);
 		manifold->contactCount = 1;

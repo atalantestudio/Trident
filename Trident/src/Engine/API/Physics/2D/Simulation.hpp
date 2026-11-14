@@ -32,7 +32,7 @@ namespace Trident {
 		uint32 maxStaticShapeCount;
 		uint32 maxKinematicAndDynamicShapeCount;
 
-		const Scene2D* scene;
+		const Scene2D* scene = nullptr;
 	};
 
 	struct BroadPhase2D {
@@ -57,7 +57,7 @@ namespace Trident {
 		uint32 tick;
 
 		sequence<RigidBody2D> rigidBodies;
-		sequence<Hull2D> shapes;
+		sequence<Shape2D> shapes;
 
 		uint32 usedRigidBodyCount;
 		uint32 usedShapeCount;
@@ -67,6 +67,9 @@ namespace Trident {
 		std::vector<CollisionPair2D> collisionPairs;
 		std::map<CollisionPair2D, ContactPair2D> contactPairs;
 	};
+
+	// TODO(wip)
+	extern HullHeader2D importedHullHeaders[100];
 
 	PhysicsSimulation2D createSimulation(const PhysicsSimulationDescriptor2D& descriptor);
 

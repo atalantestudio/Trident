@@ -9,8 +9,8 @@
 #include "Engine/API/Physics/2D/SAT/SATCircleConvexHull.hpp"
 
 namespace Trident {
-	bool CircleConvexHull2D(const Hull2D& shapeA, const Hull2D& shapeB, const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, ContactManifold2D* manifold) {
-		// The scaling factor is assumed to be the same in both axes.
+	bool CircleConvexHull2D(const Shape2D& shapeA, const Shape2D& shapeB, const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, ContactManifold2D* manifold) {
+		/* // The scaling factor is assumed to be the same in both axes.
 		const float32 scaleA = rigidBodyA.scale[0];
 
 		const GJKPointOutput2D gjkOutput = GJKPoint2D(rigidBodyB, rigidBodyA.position, shapeB);
@@ -36,6 +36,7 @@ namespace Trident {
 		manifold->contacts[0].position = satOutput.incidentSupportPoint - satOutput.axis * satOutput.separation;
 		manifold->contacts[0].separation = satOutput.separation - shapeA.radius * scaleA;
 
-		return true;
+		return true; */
+		return false;
 	}
 }

@@ -147,10 +147,11 @@ namespace Trident {
 	}
 
 	// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
-	GJKPointOutput2D GJKPoint2D(const RigidBody2D& A, vec2<float32> p, const Hull2D& shapeA) {
+	GJKPointOutput2D GJKPoint2D(const RigidBody2D& A, vec2<float32> p, const Shape2D& shapeA) {
 		constexpr uint8 GJK_2D_ITERATION_LIMIT = 8;
 
-		DEBUG_ASSERT(shapeA.vertices.count() < max<uint8>());
+		DEBUG_ASSERT(shapeA.type == ShapeType2D::CONVEX_HULL);
+		DEBUG_ASSERT(shapeA.hull->vertexCount < max<uint8>());
 
 		const mat2x2<float32> inverseRotationA = rotationAngle<mat2x2<float32>>(-A.rotation);
 
@@ -159,7 +160,7 @@ namespace Trident {
 		Simplex2Vertex vertex;
 		vertex.iA = 0;
 		vertex.iB = 0;
-		vertex.vA = shapeA.vertices[vertex.iA] * A.getWorld();
+		vertex.vA = shapeA.hull->getVertices()[vertex.iA] * A.getWorld();
 		vertex.vB = p;
 		vertex.v = vertex.vB - vertex.vA;
 
@@ -238,7 +239,7 @@ namespace Trident {
 			}
 
 			Simplex2Vertex vertex;
-			vertex.iA = shapeA.indexSupport(-d * inverseRotationA);
+			vertex.iA = indexSupport(shapeA, -d * inverseRotationA);
 			vertex.iB = 0;
 
 			bool duplicate = false;
@@ -258,7 +259,7 @@ namespace Trident {
 				break;
 			}
 
-			vertex.vA = shapeA.vertices[vertex.iA] * A.getWorld();
+			vertex.vA = shapeA.hull->getVertices()[vertex.iA] * A.getWorld();
 			vertex.vB = p;
 			vertex.v = vertex.vB - vertex.vA;
 

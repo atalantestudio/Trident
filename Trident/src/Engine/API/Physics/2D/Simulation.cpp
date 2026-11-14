@@ -10,6 +10,8 @@
 #include "Engine/ECS/Tag.hpp"
 
 namespace Trident {
+	HullHeader2D importedHullHeaders[];
+
 	template<typename Tag>
 	static void importRigidBodiesAndShapesFromComponentPool(PhysicsSimulation2D& simulation, const Scene2D& scene, const TagPool<Tag>& pool, RigidBodyType rigidBodyType) {
 		const view<Hull2D>& hulls = scene.getHulls();
@@ -18,9 +20,10 @@ namespace Trident {
 
 		while (tagIndex < pool.tagCount) {
 			const Entity entity = pool.tagIndexToEntity[tagIndex];
-			const RigidBody2DComponent rigidBodyComponent = scene.ecs.getComponent<RigidBody2DComponent>(entity);
+			const RigidBody2DComponent& rigidBodyComponent = scene.ecs.getComponent<RigidBody2DComponent>(entity);
 			const Geometry2DComponent geometryComponent = scene.ecs.getComponent<Geometry2DComponent>(entity);
 			const Geometry2D& geometry = scene.getGeometries()[geometryComponent.geometryIndex];
+			const Hull2D& hull = hulls[geometry.hullIndex];
 
 			RigidBodyDescriptor2D rigidBodyDescriptor{};
 			rigidBodyDescriptor.type = rigidBodyType;
@@ -31,10 +34,6 @@ namespace Trident {
 			rigidBodyDescriptor.scale = rigidBodyComponent.scale;
 
 			const RigidBodyID2D rigidBodyId = createRigidBody(simulation, rigidBodyDescriptor);
-
-			Hull2D hull = hulls[geometry.hullIndex];
-			hull.rigidBodyId = rigidBodyId;
-			hull.material.friction = rigidBodyComponent.friction;
 
 			ShapeDescriptor2D shapeDescriptor{};
 			shapeDescriptor.type = static_cast<ShapeType2D>(hull.type);
@@ -47,7 +46,7 @@ namespace Trident {
 			}
 
 			CircleShape2D circleShape{};
-			HullHeader2D hullHeader{};
+			HullHeader2D& hullHeader = importedHullHeaders[rigidBodyId];
 
 			const void* typeDescriptor = nullptr;
 
@@ -66,7 +65,12 @@ namespace Trident {
 					hullHeader.area = 1.0f;
 
 					hullHeader.radius = hull.radius;
-					hullHeader.inertia = 1.0f / rigidBodyComponent.inverseInertia * rigidBodyComponent.inverseMass;
+					hullHeader.inertia = 1.0f;
+
+					if (rigidBodyComponent.inverseMass > 0.0f && rigidBodyComponent.inverseInertia > 0.0f) {
+						hullHeader.inertia = 1.0f / rigidBodyComponent.inverseInertia * rigidBodyComponent.inverseMass;
+					}
+
 					hullHeader.vertexCount = static_cast<uint32>(hull.vertices.count());
 					hullHeader.vertexOffset = (uint64) &hull.vertices[0];
 
@@ -100,7 +104,7 @@ namespace Trident {
 		const TagPool<DynamicEntityTag>& dynamicPool = descriptor.scene->ecs.getTagPool<DynamicEntityTag>();
 
 		simulation.rigidBodies = sequence<RigidBody2D>(staticPool.tagCount + dynamicPool.tagCount);
-		simulation.shapes = sequence<Hull2D>(staticPool.tagCount + dynamicPool.tagCount);
+		simulation.shapes = sequence<Shape2D>(staticPool.tagCount + dynamicPool.tagCount);
 		simulation.usedRigidBodyCount = 0;
 		simulation.usedShapeCount = 0;
 		simulation.broadPhase.staticShapeIds = sequence<uint32>(staticPool.tagCount);
@@ -109,12 +113,13 @@ namespace Trident {
 		simulation.broadPhase.usedStaticShapeIdCount = 0;
 		simulation.broadPhase.usedKinematicShapeIdCount = 0;
 		simulation.broadPhase.usedDynamicShapeIdCount = 0;
-
-		importRigidBodiesAndShapesFromComponentPool(simulation, *descriptor.scene, staticPool, RigidBodyType::STATIC);
-		importRigidBodiesAndShapesFromComponentPool(simulation, *descriptor.scene, dynamicPool, RigidBodyType::DYNAMIC);
-
 		simulation.collisionPairs = {};
 		simulation.contactPairs = {};
+
+		if (descriptor.scene != nullptr) {
+			importRigidBodiesAndShapesFromComponentPool(simulation, *descriptor.scene, staticPool, RigidBodyType::STATIC);
+			importRigidBodiesAndShapesFromComponentPool(simulation, *descriptor.scene, dynamicPool, RigidBodyType::DYNAMIC);
+		}
 
 		return simulation;
 	}
@@ -153,29 +158,20 @@ namespace Trident {
 		ENGINE_ASSERT(simulation.usedShapeCount < simulation.shapes.count(), "Shape count limit already reached.");
 		ENGINE_ASSERT(descriptor.rigidBodyId < simulation.usedRigidBodyCount, "Invalid rigid body ID.");
 
-		Hull2D& shape = simulation.shapes[simulation.usedShapeCount];
-		shape.type = static_cast<Hull2DType>(descriptor.type);
-		shape.centroid = {0.0f, 0.0f};
-		shape.radius = 0.0f;
-		shape.vertices = {};
-		shape.lineIndexRange.offset = 0;
-		shape.lineIndexRange.count = 0;
-		shape.edges = {};
+		Shape2D& shape = simulation.shapes[simulation.usedShapeCount];
+		shape.type = descriptor.type;
 		shape.rigidBodyId = descriptor.rigidBodyId;
 		shape.material = descriptor.material;
+		shape.density = descriptor.density;
 
 		switch (shape.type) {
-			case Hull2DType::CIRCLE: {
-				shape.radius = static_cast<const CircleShape2D*>(typeDescriptor)->radius;
+			case ShapeType2D::CIRCLE: {
+				shape.circle = *static_cast<const CircleShape2D*>(typeDescriptor);
 
 				break;
 			}
-			case Hull2DType::POLYGON: {
-				const HullHeader2D* hullHeader = static_cast<const HullHeader2D*>(typeDescriptor);
-
-				shape.centroid = hullHeader->centroid;
-				shape.radius = hullHeader->radius;
-				shape.vertices = view<vec2<float32>>((const vec2<float32>*) hullHeader->vertexOffset, hullHeader->vertexCount);
+			case ShapeType2D::CONVEX_HULL: {
+				shape.hull = static_cast<const HullHeader2D*>(typeDescriptor);
 
 				break;
 			}
@@ -187,7 +183,8 @@ namespace Trident {
 		}
 
 		RigidBody2D& rigidBody = simulation.rigidBodies[descriptor.rigidBodyId];
-		rigidBody.centroid = shape.centroid;
+
+		// TODO(physics/2d): Set centroid.
 
 		const uint32 id = simulation.usedShapeCount;
 

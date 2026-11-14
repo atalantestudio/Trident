@@ -58,8 +58,8 @@ namespace Trident {
 		};
 
 		for (const CollisionPair2D collisionPair : simulation.collisionPairs) {
-			const Hull2D& shapeA = simulation.shapes[collisionPair.shapeIdA];
-			const Hull2D& shapeB = simulation.shapes[collisionPair.shapeIdB];
+			const Shape2D& shapeA = simulation.shapes[collisionPair.shapeIdA];
+			const Shape2D& shapeB = simulation.shapes[collisionPair.shapeIdB];
 
 			DEBUG_ASSERT(shapeA.type <= shapeB.type);
 
