@@ -5,8 +5,8 @@
 
 #include "Engine/API/Geometry/Hull2D.hpp"
 #include "Engine/API/Physics/2D/Feature.hpp"
+#include "Engine/API/Physics/2D/RigidBody.hpp"
 #include "Engine/API/Physics/2D/Simplex.hpp"
-#include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 
 namespace Trident {
 	// The result of GJK in 2D.
@@ -36,5 +36,5 @@ namespace Trident {
 	};
 
 	// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
-	GJK2DOutput GJK2D(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB);
+	GJK2DOutput GJK2D(const RigidBody2D& A, const RigidBody2D& B, const Hull2D& hullA, const Hull2D& hullB);
 }

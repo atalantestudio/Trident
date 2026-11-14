@@ -6,7 +6,7 @@
 #include "Engine/API/Physics/2D/Collider/Collider.hpp"
 
 namespace Trident {
-	bool CircleCircle2D(const Hull2D& shapeA, const Hull2D& shapeB, const RigidBody2DComponent& rigidBodyA, const RigidBody2DComponent& rigidBodyB, ContactManifold2D* manifold) {
+	bool CircleCircle2D(const Hull2D& shapeA, const Hull2D& shapeB, const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, ContactManifold2D* manifold) {
 		const vec2<float32> AB = rigidBodyB.position - rigidBodyA.position;
 		const float32 lengthAB = lengthSquared(AB);
 

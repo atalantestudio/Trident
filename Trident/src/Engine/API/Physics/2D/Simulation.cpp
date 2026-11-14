@@ -22,7 +22,7 @@ namespace Trident {
 		return hulls[geometry.hullIndex];
 	}
 
-	static vec2<float32> calculateRelativeVelocity(const RigidBody2DComponent& A, const RigidBody2DComponent& B, vec2<float32> rA, vec2<float32> rB) {
+	static vec2<float32> calculateRelativeVelocity(const RigidBody2D& A, const RigidBody2D& B, vec2<float32> rA, vec2<float32> rB) {
 		return B.linearVelocity + perpendicularRight(rB) * B.angularVelocity - A.linearVelocity - perpendicularRight(rA) * A.angularVelocity;
 	}
 
@@ -81,7 +81,7 @@ namespace Trident {
 		const TagPool<StaticEntityTag>& staticPool = descriptor.scene->ecs.getTagPool<StaticEntityTag>();
 		const TagPool<DynamicEntityTag>& dynamicPool = descriptor.scene->ecs.getTagPool<DynamicEntityTag>();
 
-		simulation.rigidBodies = sequence<RigidBody2DComponent>(staticPool.tagCount + dynamicPool.tagCount);
+		simulation.rigidBodies = sequence<RigidBody2D>(staticPool.tagCount + dynamicPool.tagCount);
 		simulation.shapes = sequence<Hull2D>(staticPool.tagCount + dynamicPool.tagCount);
 		simulation.usedRigidBodyCount = 0;
 		simulation.usedShapeCount = 0;
@@ -104,6 +104,7 @@ namespace Trident {
 
 			Hull2D shapeDescriptor = getHull(descriptor.scene, rigidBodyId);
 			shapeDescriptor.rigidBodyId = rigidBodyId;
+			shapeDescriptor.friction = rigidBodyDescriptor.friction;
 
 			createShape(simulation, shapeDescriptor);
 
@@ -120,8 +121,9 @@ namespace Trident {
 
 			const RigidBodyID2D rigidBodyId = createRigidBody(simulation, rigidBodyDescriptor);
 
-			Hull2D shapeDescriptor = getHull(descriptor.scene, rigidBodyId);
+			Hull2D shapeDescriptor = getHull(descriptor.scene, entity);
 			shapeDescriptor.rigidBodyId = rigidBodyId;
+			shapeDescriptor.friction = rigidBodyDescriptor.friction;
 
 			createShape(simulation, shapeDescriptor);
 
@@ -140,7 +142,25 @@ namespace Trident {
 
 		ENGINE_ASSERT(simulation.usedRigidBodyCount < simulation.rigidBodies.count(), "Rigid body count limit already reached.");
 
-		simulation.rigidBodies[simulation.usedRigidBodyCount] = descriptor;
+		RigidBody2D& rigidBody = simulation.rigidBodies[simulation.usedRigidBodyCount];
+		rigidBody.type = descriptor.type;
+
+		// TODO(wip)
+		// rigidBody.flags = {};
+
+		rigidBody.position = descriptor.position;
+		rigidBody.rotation = descriptor.rotation;
+		rigidBody.scale = descriptor.scale;
+		rigidBody.centroid = {0.0_m, 0.0_m};
+		rigidBody.inverseMass = 0.0_kg;
+		rigidBody.inverseInertia = 0.0f;
+		rigidBody.linearVelocity = descriptor.linearVelocity;
+		rigidBody.angularVelocity = descriptor.angularVelocity;
+		rigidBody.force = {0.0f, 0.0f};
+		rigidBody.torque = 0.0_Nm;
+
+		rigidBody.inverseMass = descriptor.inverseMass;
+		rigidBody.inverseInertia = descriptor.inverseInertia;
 
 		const uint32 id = simulation.usedRigidBodyCount;
 
@@ -158,7 +178,9 @@ namespace Trident {
 
 		simulation.shapes[simulation.usedShapeCount] = descriptor;
 
-		const RigidBody2DComponent& rigidBody = simulation.rigidBodies[descriptor.rigidBodyId];
+		RigidBody2D& rigidBody = simulation.rigidBodies[descriptor.rigidBodyId];
+		rigidBody.centroid = descriptor.centroid;
+
 		const uint32 id = simulation.usedShapeCount;
 
 		switch (rigidBody.type) {
@@ -207,13 +229,12 @@ namespace Trident {
 	void broadPhase(PhysicsSimulation2D& simulation) {
 		CollisionPair2D collisionPair;
 		uint32 indexA = 0;
-		uint32 indexB;
 
 		// TODO(physics/2d/broad-phase): Only register potentially overlapping entities.
 		while (indexA < simulation.broadPhase.usedDynamicShapeIdCount) {
 			collisionPair.shapeIdA = simulation.broadPhase.dynamicShapeIds[indexA];
 
-			indexB = 0;
+			uint32 indexB = 0;
 
 			// Register all dynamic-static entity pairs.
 			while (indexB < simulation.broadPhase.usedStaticShapeIdCount) {
@@ -250,8 +271,8 @@ namespace Trident {
 			const Hull2D& shapeA = simulation.shapes[collisionPair.shapeIdA];
 			const Hull2D& shapeB = simulation.shapes[collisionPair.shapeIdB];
 
-			const RigidBody2DComponent& rigidBodyA = simulation.rigidBodies[shapeA.rigidBodyId];
-			const RigidBody2DComponent& rigidBodyB = simulation.rigidBodies[shapeB.rigidBodyId];
+			const RigidBody2D& rigidBodyA = simulation.rigidBodies[shapeA.rigidBodyId];
+			const RigidBody2D& rigidBodyB = simulation.rigidBodies[shapeB.rigidBodyId];
 
 			// The broad phase must ensure that A hull type < B hull type.
 			const Collider2D collider = COLLIDER_2D_TABLE[static_cast<uint32>(shapeA.type)][static_cast<uint32>(shapeB.type)];
@@ -280,21 +301,34 @@ namespace Trident {
 	}
 
 	void integrateVelocities(PhysicsSimulation2D& simulation) {
-		// TODO(physics/2d/apply-forces): Implement torque.
-		constexpr float32 torque = 0.0_Nm;
-
 		uint32 shapeIdIndex = 0;
 
 		// TODO(physics/2d/apply-forces): Integrate velocities on dynamic resting entities (e.g. an object on a moving platform may move due to inertia).
 		while (shapeIdIndex < simulation.broadPhase.usedDynamicShapeIdCount) {
 			const Hull2D& shape = simulation.shapes[simulation.broadPhase.dynamicShapeIds[shapeIdIndex]];
 
-			RigidBody2DComponent& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
+			RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 			rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + simulation.gravity) * simulation.deltaTime;
-			rigidBody.angularVelocity += torque * rigidBody.inverseInertia * simulation.deltaTime;
+			rigidBody.angularVelocity += rigidBody.torque * rigidBody.inverseInertia * simulation.deltaTime;
 
 			shapeIdIndex += 1;
 		}
+	}
+
+	/// Applies linear and angular impulses to the body.
+	inline static void applyImpulse(
+		RigidBody2D& rigidBody,
+
+		/// The impulse vector.
+		vec2<float32> j,
+
+		/// The vector from the body's position to the contact.
+		vec2<float32> r
+	) {
+		rigidBody.linearVelocity += j * rigidBody.inverseMass;
+
+		// Subtract to get a clockwise rotation.
+		rigidBody.angularVelocity -= parallelogramArea(r, j) * rigidBody.inverseInertia;
 	}
 
 	void updateContactManifolds(PhysicsSimulation2D& simulation) {
@@ -302,11 +336,11 @@ namespace Trident {
 			const Hull2D& shapeA = simulation.shapes[pair.first.shapeIdA];
 			const Hull2D& shapeB = simulation.shapes[pair.first.shapeIdB];
 
-			RigidBody2DComponent& rigidBodyA = simulation.rigidBodies[shapeA.rigidBodyId];
-			RigidBody2DComponent& rigidBodyB = simulation.rigidBodies[shapeB.rigidBodyId];
+			RigidBody2D& rigidBodyA = simulation.rigidBodies[shapeA.rigidBodyId];
+			RigidBody2D& rigidBodyB = simulation.rigidBodies[shapeB.rigidBodyId];
 
 			ContactPair2D& contactPair = pair.second;
-			contactPair.friction = sqrt(rigidBodyA.friction * rigidBodyB.friction);
+			contactPair.friction = sqrt(shapeA.friction * shapeB.friction);
 			contactPair.manifold.tangent = perpendicularRight(contactPair.manifold.normal);
 
 			uint8 contactIndex = 0;
@@ -346,8 +380,8 @@ namespace Trident {
 				#if defined(ENABLE_PHYSICS_2D_IMPULSE_ACCUMULATION)
 					const vec2<float32> j = contactPair.manifold.normal * contact.accumulatedNormalImpulse + contactPair.manifold.tangent * contact.accumulatedTangentImpulse;
 
-					rigidBodyA.applyImpulse(-j, contact.rA);
-					rigidBodyB.applyImpulse(j, contact.rB);
+					applyImpulse(rigidBodyA, -j, contact.rA);
+					applyImpulse(rigidBodyB, j, contact.rB);
 				#endif
 
 				contactIndex += 1;
@@ -419,8 +453,8 @@ namespace Trident {
 				const Hull2D& shapeA = simulation.shapes[pair.first.shapeIdA];
 				const Hull2D& shapeB = simulation.shapes[pair.first.shapeIdB];
 
-				RigidBody2DComponent& rigidBodyA = simulation.rigidBodies[shapeA.rigidBodyId];
-				RigidBody2DComponent& rigidBodyB = simulation.rigidBodies[shapeB.rigidBodyId];
+				RigidBody2D& rigidBodyA = simulation.rigidBodies[shapeA.rigidBodyId];
+				RigidBody2D& rigidBodyB = simulation.rigidBodies[shapeB.rigidBodyId];
 
 				ContactPair2D& contactPair = pair.second;
 
@@ -450,8 +484,8 @@ namespace Trident {
 
 						const vec2<float32> j = contactPair.manifold.normal * normalImpulseLength;
 
-						rigidBodyA.applyImpulse(-j, contact.rA);
-						rigidBodyB.applyImpulse(j, contact.rB);
+						applyImpulse(rigidBodyA, -j, contact.rA);
+						applyImpulse(rigidBodyB, j, contact.rB);
 					}
 
 					relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, contact.rA, contact.rB);
@@ -477,8 +511,8 @@ namespace Trident {
 
 						const vec2<float32> j = contactPair.manifold.tangent * tangentImpulseLength;
 
-						rigidBodyA.applyImpulse(-j, contact.rA);
-						rigidBodyB.applyImpulse(j, contact.rB);
+						applyImpulse(rigidBodyA, -j, contact.rA);
+						applyImpulse(rigidBodyB, j, contact.rB);
 					}
 
 					contactIndex += 1;
@@ -530,14 +564,13 @@ namespace Trident {
 		// TODO(physics/2d/integration): Integration for dynamic entities with infinite mass?
 		// TODO(physics/2d/integration): Integration for dynamic resting entities (e.g. an object on a moving platform may move due to inertia)?
 		while (shapeIdIndex < simulation.broadPhase.usedDynamicShapeIdCount) {
-			const Hull2D& hull = simulation.shapes[simulation.broadPhase.dynamicShapeIds[shapeIdIndex]];
+			const Hull2D& shape = simulation.shapes[simulation.broadPhase.dynamicShapeIds[shapeIdIndex]];
 
-			RigidBody2DComponent& rigidBody = simulation.rigidBodies[hull.rigidBodyId];
+			RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 			rigidBody.position += rigidBody.linearVelocity * simulation.deltaTime;
 			rigidBody.rotation += rigidBody.angularVelocity * simulation.deltaTime;
-			rigidBody.updateWorld(hull.centroid);
-
-			rigidBody.force = {0.0_N, 0.0_N};
+			rigidBody.force = {0.0f, 0.0f};
+			rigidBody.torque = 0.0f;
 
 			shapeIdIndex += 1;
 		}

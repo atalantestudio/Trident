@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Geometry/Hull2D.hpp"
-#include "Engine/ECS/Component/RigidBody2DComponent.hpp"
+#include "Engine/API/Physics/2D/RigidBody.hpp"
 
 namespace Trident {
 	struct SATEdgeQuery2D {
@@ -35,5 +35,5 @@ namespace Trident {
 	// - Don't test parallel axes (https://dyn4j.org/2010/01/sat).
 	// - Reuse the separation axis from the last run to make the algorithm O(1) in non-intersection cases.
 	//   But what if the separation axis changes e.g. due to rotation?
-	SATConvexHullConvexHullOutput2D SATConvexHullConvexHull2D(const RigidBody2DComponent& rigidBodyA, const RigidBody2DComponent& rigidBodyB, const Hull2D& shapeA, const Hull2D& shapeB);
+	SATConvexHullConvexHullOutput2D SATConvexHullConvexHull2D(const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, const Hull2D& shapeA, const Hull2D& shapeB);
 }

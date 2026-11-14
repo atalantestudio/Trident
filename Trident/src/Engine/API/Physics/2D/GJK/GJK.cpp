@@ -8,7 +8,7 @@
 namespace Trident {
 	// TODO: Some geometries (e.g. CircleGeometry2D) don't implement `supportIndex`. Use `supportVertex` instead.
 	// Returns the index of the farthest point on `A` along `d`, in local space.
-	inline static uint32 supportIndex(const RigidBody2DComponent& A, const Hull2D& hull, vec2<float32> d) {
+	inline static uint32 supportIndex(const RigidBody2D& A, const Hull2D& hull, vec2<float32> d) {
 		const mat2x2<float32> inverseRotation = rotationAngle<mat2x2<float32>>(-A.rotation);
 
 		return hull.supportIndex(d * inverseRotation);
@@ -155,7 +155,7 @@ namespace Trident {
 	}
 
 	// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
-	GJK2DOutput GJK2D(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB) {
+	GJK2DOutput GJK2D(const RigidBody2D& A, const RigidBody2D& B, const Hull2D& hullA, const Hull2D& hullB) {
 		constexpr uint8 GJK_2D_ITERATION_LIMIT = 8;
 
 		DEBUG_ASSERT(hullA.vertices.count() < max<uint8>());
@@ -166,8 +166,8 @@ namespace Trident {
 		Simplex2Vertex vertex;
 		vertex.iA = 0;
 		vertex.iB = 0;
-		vertex.vA = hullA.vertices[vertex.iA] * A.world;
-		vertex.vB = hullB.vertices[vertex.iB] * B.world;
+		vertex.vA = hullA.vertices[vertex.iA] * A.getWorld();
+		vertex.vB = hullB.vertices[vertex.iB] * B.getWorld();
 		vertex.v = vertex.vB - vertex.vA;
 
 		Simplex2 s = {vertex};
@@ -267,8 +267,8 @@ namespace Trident {
 				break;
 			}
 
-			vertex.vA = hullA.vertices[vertex.iA] * A.world;
-			vertex.vB = hullB.vertices[vertex.iB] * B.world;
+			vertex.vA = hullA.vertices[vertex.iA] * A.getWorld();
+			vertex.vB = hullB.vertices[vertex.iB] * B.getWorld();
 			vertex.v = vertex.vB - vertex.vA;
 
 			s[s.count] = vertex;

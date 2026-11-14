@@ -9,7 +9,7 @@ namespace Trident {
 	// TODO(ci/debugger/undefined-identifier)
 	// The returned object cannot be debugged because "an unspecified error occurs".
 	// See https://developercommunity.visualstudio.com/t/When-a-custom-function-returns-a-custom-/10422600.
-	static SATEdgeQuery2D queryEdgeDirections(const RigidBody2DComponent& referenceBody, const RigidBody2DComponent& incidentBody, const Hull2D& referenceShape, const Hull2D& incidentShape) {
+	static SATEdgeQuery2D queryEdgeDirections(const RigidBody2D& referenceBody, const RigidBody2D& incidentBody, const Hull2D& referenceShape, const Hull2D& incidentShape) {
 		SATEdgeQuery2D query;
 		query.separation = min<float32>();
 
@@ -26,8 +26,8 @@ namespace Trident {
 			const vec2<float32> s = incidentShape.support(-d * RBA);
 
 			const float32 edgeDistance = abs(signedDistanceLPAB(a, b, {0.0f, 0.0f}));
-			const vec2<float32> offset = edgeDistance * d * referenceBody.world;
-			const float32 separation = signedDistanceLP(d * RA, offset, s * incidentBody.world);
+			const vec2<float32> offset = edgeDistance * d * referenceBody.getWorld();
+			const float32 separation = signedDistanceLP(d * RA, offset, s * incidentBody.getWorld());
 
 			if (separation > query.separation) {
 				query.separation = separation;
@@ -48,7 +48,7 @@ namespace Trident {
 	// TODO(ci/debugger/undefined-identifier)
 	// The returned object cannot be debugged because "an unspecified error occurs".
 	// See https://developercommunity.visualstudio.com/t/When-a-custom-function-returns-a-custom-/10422600.
-	SATConvexHullConvexHullOutput2D SATConvexHullConvexHull2D(const RigidBody2DComponent& rigidBodyA, const RigidBody2DComponent& rigidBodyB, const Hull2D& shapeA, const Hull2D& shapeB) {
+	SATConvexHullConvexHullOutput2D SATConvexHullConvexHull2D(const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, const Hull2D& shapeA, const Hull2D& shapeB) {
 		SATConvexHullConvexHullOutput2D output;
 		output.overlap = false;
 		output.edgeQueryA = queryEdgeDirections(rigidBodyA, rigidBodyB, shapeA, shapeB);

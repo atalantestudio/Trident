@@ -41,9 +41,9 @@ namespace Trident {
 
 		while (shapeIndex < simulation.usedShapeCount) {
 			const Hull2D& shape = simulation.shapes[shapeIndex];
-			const RigidBody2DComponent& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
+			const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 
-			renderer.setWorld(shapeIndex, rigidBody.world);
+			renderer.setWorld(shapeIndex, rigidBody.getWorld());
 
 			shapeIndex += 1;
 		}
@@ -74,15 +74,14 @@ namespace Trident {
 
 		const Hull2D mouseShape = Hull2D::point();
 
-		RigidBody2DComponent mouseRigidBody{};
+		RigidBody2D mouseRigidBody{};
 		mouseRigidBody.position = renderer.cameraPosition + mousePosition;
-		mouseRigidBody.updateWorld(mouseShape.centroid);
 
 		sint32 shapeIndex = static_cast<sint32>(simulation.usedShapeCount) - 1;
 
 		while (shapeIndex >= 0) {
 			const Hull2D& shape = simulation.shapes[shapeIndex];
-			const RigidBody2DComponent& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
+			const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 
 			if (GJK2DConditional(rigidBody, mouseRigidBody, shape, mouseShape)) {
 				hoveredEntity = shapeIndex;
@@ -164,9 +163,8 @@ namespace Trident {
 		if (event.getButton() == MouseButton::LEFT && selectedEntity != max<Entity>()) {
 			const Hull2D shape = simulation.shapes[selectedEntity];
 
-			RigidBody2DComponent& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
+			RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 			rigidBody.position += placeholderOffset;
-			rigidBody.updateWorld(shape.centroid);
 
 			selectedEntity = max<Entity>();
 		}

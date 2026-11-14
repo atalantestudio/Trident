@@ -5,6 +5,7 @@
 
 #include "Engine/API/Physics/2D/CollisionPair.hpp"
 #include "Engine/API/Physics/2D/ContactPair.hpp"
+#include "Engine/API/Physics/2D/RigidBody.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 
 namespace Trident {
@@ -46,7 +47,7 @@ namespace Trident {
 		// Index of the current tick since world creation.
 		uint32 tick;
 
-		sequence<RigidBody2DComponent> rigidBodies;
+		sequence<RigidBody2D> rigidBodies;
 		sequence<Hull2D> shapes;
 
 		uint32 usedRigidBodyCount;

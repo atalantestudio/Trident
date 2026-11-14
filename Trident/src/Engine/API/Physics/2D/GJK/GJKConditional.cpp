@@ -7,11 +7,11 @@
 
 namespace Trident {
 	// Returns the farthest point on `A` along `d`, in world-space.
-	inline static vec2<float32> support(const RigidBody2DComponent& A, const Hull2D& hull, vec2<float32> d) {
+	inline static vec2<float32> support(const RigidBody2D& A, const Hull2D& hull, vec2<float32> d) {
 		const mat2x2<float32> inverseRotation = rotationAngle<mat2x2<float32>>(-A.rotation);
 		const vec2<float32> s = hull.support(d * inverseRotation);
 
-		return s * A.world;
+		return s * A.getWorld();
 	}
 
 	static void handleSimplex1(sim2<float32>& s, vec2<float32>& d) {
@@ -53,7 +53,7 @@ namespace Trident {
 	// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
 	// Returns true if the Minkowski difference of A and B contains the origin, and false otherwise.
 	// NOTE: In this implementation, `a` is the name of the most recent vertex added to the simplex.
-	bool GJK2DConditional(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB) {
+	bool GJK2DConditional(const RigidBody2D& A, const RigidBody2D& B, const Hull2D& hullA, const Hull2D& hullB) {
 		constexpr uint8 GJK_2D_CONDITIONAL_ITERATION_LIMIT = 8;
 
 		vec2<float32> d = B.position - A.position;

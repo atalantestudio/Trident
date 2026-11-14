@@ -120,5 +120,7 @@ namespace Trident {
 			sequence<Edge2D> edges;
 
 			RigidBodyID2D rigidBodyId;
+
+			float32 friction;
 	};
 }

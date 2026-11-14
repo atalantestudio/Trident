@@ -29,9 +29,9 @@ namespace Trident {
 		inline mat3x3<float32> getWorld() const {
 			return (
 				translation<mat3x3<float32>>(-centroid) *
-				// rotationAngle<mat3x3<float32>>(transform.rotation.getAngle()) *
-				rotationAngle<mat3x3<float32>>(transform.rotation) *
-				translation<mat3x3<float32>>(transform.position)
+				scaling<mat3x3<float32>>(scale) *
+				rotationAngle<mat3x3<float32>>(rotation) *
+				translation<mat3x3<float32>>(position)
 			);
 		}
 
@@ -44,6 +44,9 @@ namespace Trident {
 
 		// TODO(physics/2d): Debug only.
 		float32 rotation;
+
+		// TODO(wip)
+		vec2<float32> scale;
 
 		/// Position of the centroid in local space.
 		vec2<float32> centroid;

@@ -6,7 +6,7 @@
 #include "Engine/API/Physics/2D/SAT/SATCircleConvexHull.hpp"
 
 namespace Trident {
-	static void queryEdgeDirections(const RigidBody2DComponent& referenceBody, const RigidBody2DComponent& incidentBody, const Hull2D& referenceHull, const Hull2D& incidentHull, SATCircleConvexHullOutput2D& output) {
+	static void queryEdgeDirections(const RigidBody2D& referenceBody, const RigidBody2D& incidentBody, const Hull2D& referenceHull, const Hull2D& incidentHull, SATCircleConvexHullOutput2D& output) {
 		const mat2x2<float32> RA = rotationAngle<mat2x2<float32>>(referenceBody.rotation);
 		const mat2x2<float32> RBA = rotationAngle<mat2x2<float32>>(referenceBody.rotation - incidentBody.rotation);
 
@@ -18,11 +18,11 @@ namespace Trident {
 			const vec2<float32> b = referenceHull.vertices[edge.indexB];
 			const vec2<float32> d = edgeNormalClockwise(a, b);
 			const vec2<float32> s = incidentHull.support(-d * RBA);
-			const vec2<float32> sT = s * incidentBody.world;
+			const vec2<float32> sT = s * incidentBody.getWorld();
 
 			// The centroid is not involved when calculating the edge distance because it is applied when multiplying by the world matrix.
 			const float32 edgeDistance = abs(signedDistanceLPAB(a, b, {0.0f, 0.0f}));
-			const vec2<float32> offset = edgeDistance * d * referenceBody.world;
+			const vec2<float32> offset = edgeDistance * d * referenceBody.getWorld();
 
 			const float32 separation = signedDistanceLP(d * RA, offset, sT);
 
@@ -40,7 +40,7 @@ namespace Trident {
 		}
 	}
 
-	SATCircleConvexHullOutput2D SATCircleConvexHull2D(const RigidBody2DComponent& circleBody, const RigidBody2DComponent& convexHullBody, const Hull2D& circleHull, const Hull2D& convexHullGeometry) {
+	SATCircleConvexHullOutput2D SATCircleConvexHull2D(const RigidBody2D& circleBody, const RigidBody2D& convexHullBody, const Hull2D& circleHull, const Hull2D& convexHullGeometry) {
 		SATCircleConvexHullOutput2D output{};
 		output.separation = min<float32>();
 
