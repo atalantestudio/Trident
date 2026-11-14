@@ -10,12 +10,12 @@ namespace Trident {
 		const mat2x2<float32> RA = rotationAngle<mat2x2<float32>>(referenceBody.rotation);
 		const mat2x2<float32> RBA = rotationAngle<mat2x2<float32>>(referenceBody.rotation - incidentBody.rotation);
 
-		uint32 edgeIndex = 0;
+		uint16 indexA = 0;
 
-		while (edgeIndex < referenceHull.edges.count()) {
-			const Edge2D edge = referenceHull.edges[edgeIndex];
-			const vec2<float32> a = referenceHull.vertices[edge.indexA];
-			const vec2<float32> b = referenceHull.vertices[edge.indexB];
+		while (indexA < referenceHull.vertices.count()) {
+			const uint16 indexB = (indexA + 1) % referenceHull.vertices.count();
+			const vec2<float32> a = referenceHull.vertices[indexA];
+			const vec2<float32> b = referenceHull.vertices[indexB];
 			const vec2<float32> d = edgeNormalClockwise(a, b);
 			const vec2<float32> s = incidentHull.vertexSupport(-d * RBA) * incidentBody.getWorld();
 
@@ -35,7 +35,7 @@ namespace Trident {
 				break;
 			}
 
-			edgeIndex += 1;
+			indexA += 1;
 		}
 	}
 

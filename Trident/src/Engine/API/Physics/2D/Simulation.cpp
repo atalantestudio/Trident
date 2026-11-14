@@ -10,14 +10,87 @@
 #include "Engine/ECS/Tag.hpp"
 
 namespace Trident {
-	static const Hull2D& getHull(const Scene2D* scene, Entity entity) {
-		const view<Hull2D>& hulls = scene->getHulls();
-		const Geometry2DComponent geometryComponent = scene->ecs.getComponent<Geometry2DComponent>(entity);
-		const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
+	static const Hull2D& getHull(const Scene2D& scene, Entity entity) {
+		const view<Hull2D>& hulls = scene.getHulls();
+		const Geometry2DComponent geometryComponent = scene.ecs.getComponent<Geometry2DComponent>(entity);
+		const Geometry2D& geometry = scene.getGeometries()[geometryComponent.geometryIndex];
 
 		ENGINE_ASSERT(geometry.hullIndex < hulls.count(), "The geometry doesn't have a hull.");
 
 		return hulls[geometry.hullIndex];
+	}
+
+	template<typename Tag>
+	static void importRigidBodiesAndShapesFromComponentPool(PhysicsSimulation2D& simulation, const Scene2D& scene, const TagPool<Tag>& pool, RigidBodyType rigidBodyType) {
+		uint32 tagIndex = 0;
+
+		while (tagIndex < pool.tagCount) {
+			const Entity entity = pool.tagIndexToEntity[tagIndex];
+			const RigidBody2DComponent rigidBodyComponent = scene.ecs.getComponent<RigidBody2DComponent>(entity);
+
+			RigidBodyDescriptor2D rigidBodyDescriptor{};
+			rigidBodyDescriptor.type = rigidBodyType;
+			rigidBodyDescriptor.position = rigidBodyComponent.position;
+			rigidBodyDescriptor.rotation = rigidBodyComponent.rotation;
+			rigidBodyDescriptor.linearVelocity = rigidBodyComponent.linearVelocity;
+			rigidBodyDescriptor.angularVelocity = rigidBodyComponent.angularVelocity;
+			rigidBodyDescriptor.scale = rigidBodyComponent.scale;
+
+			const RigidBodyID2D rigidBodyId = createRigidBody(simulation, rigidBodyDescriptor);
+
+			Hull2D hull = getHull(scene, rigidBodyId);
+			hull.rigidBodyId = rigidBodyId;
+			hull.material.friction = rigidBodyComponent.friction;
+
+			ShapeDescriptor2D shapeDescriptor{};
+			shapeDescriptor.type = static_cast<ShapeType2D>(hull.type);
+			shapeDescriptor.rigidBodyId = rigidBodyId;
+			shapeDescriptor.material.friction = rigidBodyComponent.friction;
+			shapeDescriptor.density = 1.0f;
+
+			if (rigidBodyComponent.inverseMass > 0.0f) {
+				shapeDescriptor.density = 1.0f / rigidBodyComponent.inverseMass;
+			}
+
+			CircleShape2D circleShape{};
+			HullHeader2D hullHeader{};
+
+			const void* typeDescriptor = nullptr;
+
+			switch (shapeDescriptor.type) {
+				case ShapeType2D::CIRCLE: {
+					circleShape.radius = hull.radius;
+
+					typeDescriptor = &circleShape;
+
+					break;
+				}
+				case ShapeType2D::CONVEX_HULL: {
+					hullHeader.centroid = hull.centroid;
+
+					// TODO(wip)
+					hullHeader.area = 1.0f;
+
+					hullHeader.radius = hull.radius;
+					hullHeader.inertia = 1.0f / rigidBodyComponent.inverseInertia * rigidBodyComponent.inverseMass;
+					hullHeader.vertexCount = static_cast<uint32>(hull.vertices.count());
+					hullHeader.vertexOffset = (uint64) &hull.vertices[0];
+
+					typeDescriptor = &hullHeader;
+
+					break;
+				}
+				default: {
+					DEBUG_ASSERT(false);
+
+					break;
+				}
+			}
+
+			createShape(simulation, shapeDescriptor, typeDescriptor);
+
+			tagIndex += 1;
+		}
 	}
 
 	PhysicsSimulation2D createSimulation(const PhysicsSimulationDescriptor2D& descriptor) {
@@ -43,53 +116,8 @@ namespace Trident {
 		simulation.broadPhase.usedKinematicShapeIdCount = 0;
 		simulation.broadPhase.usedDynamicShapeIdCount = 0;
 
-		uint32 tagIndex = 0;
-
-		while (tagIndex < staticPool.tagCount) {
-			const Entity entity = staticPool.tagIndexToEntity[tagIndex];
-			const RigidBody2DComponent rigidBodyComponent = descriptor.scene->ecs.getComponent<RigidBody2DComponent>(entity);
-
-			RigidBodyDescriptor2D rigidBodyDescriptor{};
-			rigidBodyDescriptor.type = RigidBodyType::STATIC;
-			rigidBodyDescriptor.position = rigidBodyComponent.position;
-			rigidBodyDescriptor.rotation = rigidBodyComponent.rotation;
-			rigidBodyDescriptor.scale = rigidBodyComponent.scale;
-
-			const RigidBodyID2D rigidBodyId = createRigidBody(simulation, rigidBodyDescriptor);
-
-			Hull2D shapeDescriptor = getHull(descriptor.scene, rigidBodyId);
-			shapeDescriptor.rigidBodyId = rigidBodyId;
-			shapeDescriptor.material.friction = rigidBodyComponent.friction;
-
-			createShapeFromScene(simulation, shapeDescriptor, nullptr);
-
-			tagIndex += 1;
-		}
-
-		tagIndex = 0;
-
-		while (tagIndex < dynamicPool.tagCount) {
-			const Entity entity = dynamicPool.tagIndexToEntity[tagIndex];
-			const RigidBody2DComponent rigidBodyComponent = descriptor.scene->ecs.getComponent<RigidBody2DComponent>(entity);
-
-			RigidBodyDescriptor2D rigidBodyDescriptor{};
-			rigidBodyDescriptor.type = RigidBodyType::DYNAMIC;
-			rigidBodyDescriptor.position = rigidBodyComponent.position;
-			rigidBodyDescriptor.rotation = rigidBodyComponent.rotation;
-			rigidBodyDescriptor.linearVelocity = rigidBodyComponent.linearVelocity;
-			rigidBodyDescriptor.angularVelocity = rigidBodyComponent.angularVelocity;
-			rigidBodyDescriptor.scale = rigidBodyComponent.scale;
-
-			const RigidBodyID2D rigidBodyId = createRigidBody(simulation, rigidBodyDescriptor);
-
-			Hull2D shapeDescriptor = getHull(descriptor.scene, entity);
-			shapeDescriptor.rigidBodyId = rigidBodyId;
-			shapeDescriptor.material.friction = rigidBodyComponent.friction;
-
-			createShapeFromScene(simulation, shapeDescriptor, nullptr);
-
-			tagIndex += 1;
-		}
+		importRigidBodiesAndShapesFromComponentPool(simulation, *descriptor.scene, staticPool, RigidBodyType::STATIC);
+		importRigidBodiesAndShapesFromComponentPool(simulation, *descriptor.scene, dynamicPool, RigidBodyType::DYNAMIC);
 
 		simulation.collisionPairs = {};
 		simulation.contactPairs = {};
@@ -124,20 +152,48 @@ namespace Trident {
 		return id;
 	}
 
-	ShapeID2D createShapeFromScene(PhysicsSimulation2D& simulation, const Hull2D& descriptor, const void* typeDescriptor) {
-		// TODO(wip)
-		// DEBUG_ASSERT(!std::isinf(descriptor.density) && !std::isnan(descriptor.density) && descriptor.density >= 0.0f);
-
+	ShapeID2D createShape(PhysicsSimulation2D& simulation, const ShapeDescriptor2D& descriptor, const void* typeDescriptor) {
+		DEBUG_ASSERT(!std::isinf(descriptor.density) && !std::isnan(descriptor.density) && descriptor.density >= 0.0f);
 		DEBUG_ASSERT(!std::isinf(descriptor.material.friction) && !std::isnan(descriptor.material.friction) && descriptor.material.friction >= 0.0f);
 
 		ENGINE_ASSERT(simulation.usedShapeCount < simulation.shapes.count(), "Shape count limit already reached.");
 		ENGINE_ASSERT(descriptor.rigidBodyId < simulation.usedRigidBodyCount, "Invalid rigid body ID.");
 
 		Hull2D& shape = simulation.shapes[simulation.usedShapeCount];
-		shape = descriptor;
+		shape.type = static_cast<Hull2DType>(descriptor.type);
+		shape.centroid = {0.0f, 0.0f};
+		shape.radius = 0.0f;
+		shape.vertices = {};
+		shape.lineIndexRange.offset = 0;
+		shape.lineIndexRange.count = 0;
+		shape.edges = {};
+		shape.rigidBodyId = descriptor.rigidBodyId;
+		shape.material = descriptor.material;
+
+		switch (shape.type) {
+			case Hull2DType::CIRCLE: {
+				shape.radius = static_cast<const CircleShape2D*>(typeDescriptor)->radius;
+
+				break;
+			}
+			case Hull2DType::POLYGON: {
+				const HullHeader2D* hullHeader = static_cast<const HullHeader2D*>(typeDescriptor);
+
+				shape.centroid = hullHeader->centroid;
+				shape.radius = hullHeader->radius;
+				shape.vertices = view<vec2<float32>>((const vec2<float32>*) hullHeader->vertexOffset, hullHeader->vertexCount);
+
+				break;
+			}
+			default: {
+				DEBUG_ASSERT(false);
+
+				break;
+			}
+		}
 
 		RigidBody2D& rigidBody = simulation.rigidBodies[descriptor.rigidBodyId];
-		rigidBody.centroid = descriptor.centroid;
+		rigidBody.centroid = shape.centroid;
 
 		const uint32 id = simulation.usedShapeCount;
 
@@ -171,13 +227,6 @@ namespace Trident {
 		simulation.usedShapeCount += 1;
 
 		return id;
-	}
-
-	ShapeID2D createShape(PhysicsSimulation2D& simulation, const ShapeDescriptor2D& descriptor, const void* typeDescriptor) {
-		// TODO(wip)
-		ENGINE_ERROR_UNIMPLEMENTED();
-
-		return 0;
 	}
 
 	BoxHull2D createBoxHull(vec2<float32> halfSize) {

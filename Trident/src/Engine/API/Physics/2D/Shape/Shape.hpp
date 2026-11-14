@@ -36,44 +36,24 @@ namespace Trident {
 		};
 	};
 
-	// Returns the index of the farthest vertex along `d` in the local space of the shape.
-	inline uint32 indexSupport(const Shape2D& shape, vec2<float32> d) {
-		DEBUG_ASSERT(shape.type == ShapeType2D::CONVEX_HULL);
+	/// Returns the index of the farthest vertex along `d` in the local space of the shape.
+	uint32 indexSupport(
+		/// The shape to get a vertex support from.
+		/// Must have the CONVEX_HULL type.
+		const Shape2D& shape,
 
-		const vec2<float32>* vertices = shape.hull->getVertices();
+		/// The direction vector.
+		/// Can be unnormalized.
+		vec2<float32> d
+	);
 
-		float32 maxValue = dot(vertices[0], d);
-		uint32 maxVertexIndex = 0;
-		uint32 vertexIndex = 1;
+	/// Returns the farthest vertex along `d` in the local space of the shape.
+	vec2<float32> vertexSupport(
+		/// The shape to get a vertex support from.
+		const Shape2D& shape,
 
-		while (vertexIndex < shape.hull->vertexCount) {
-			const float32 value = dot(vertices[vertexIndex], d);
-
-			if (value > maxValue) {
-				maxValue = value;
-				maxVertexIndex = vertexIndex;
-			}
-
-			vertexIndex += 1;
-		}
-
-		return maxVertexIndex;
-	}
-
-	// Returns the farthest vertex along `d` in the local space of the shape.
-	inline vec2<float32> vertexSupport(const Shape2D& shape, vec2<float32> d) {
-		switch (shape.type) {
-			case ShapeType2D::CIRCLE: {
-				return normalized(d) * shape.circle.radius;
-			}
-			case ShapeType2D::CONVEX_HULL: {
-				return shape.hull->getVertices()[indexSupport(shape, d)];
-			}
-			default: {
-				DEBUG_ASSERT(false);
-
-				return {0.0f, 0.0f};
-			}
-		}
-	}
+		/// The direction vector.
+		/// Can be unnormalized.
+		vec2<float32> d
+	);
 }

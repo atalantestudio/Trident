@@ -6,7 +6,8 @@
 namespace Trident {
 	struct HullHeader2D {
 		inline const vec2<float32>* getVertices() const {
-			return pointer_cast<const vec2<float32>*>(pointer_cast<const uint8*>(this) + vertexOffset);
+			// return pointer_cast<const vec2<float32>*>(pointer_cast<const uint8*>(this) + vertexOffset);
+			return (const vec2<float32>*) vertexOffset;
 		}
 
 		/// The local centroid.
@@ -28,7 +29,7 @@ namespace Trident {
 		uint32 vertexCount;
 
 		/// Byte offset of the vertex array in clockwise order.
-		uint32 vertexOffset;
+		uint64 vertexOffset;
 
 		uint32 userIndex;
 	};

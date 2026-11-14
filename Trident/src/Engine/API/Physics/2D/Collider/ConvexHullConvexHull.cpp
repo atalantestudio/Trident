@@ -105,8 +105,8 @@ namespace Trident {
 	}
 
 	static bool createEdgeContact(const SATEdgeQuery2D& query, const RigidBody2D& referenceBody, const RigidBody2D& incidentBody, const Hull2D& referenceShape, const Hull2D& incidentShape, ContactManifold2D* manifold) {
-		const uint32 referenceLeftEdgeIndex = (static_cast<sint32>(query.referenceEdgeIndex) - 1) % referenceShape.edges.count();
-		const uint32 referenceRightEdgeIndex = (query.referenceEdgeIndex + 1) % referenceShape.edges.count();
+		const uint32 referenceLeftEdgeIndex = (static_cast<sint32>(query.referenceEdgeIndex) - 1) % referenceShape.vertices.count();
+		const uint32 referenceRightEdgeIndex = (query.referenceEdgeIndex + 1) % referenceShape.vertices.count();
 
 		const vec2<float32> localA = referenceShape.vertices[query.referenceEdgeIndex];
 		const vec2<float32> localB = referenceShape.vertices[referenceRightEdgeIndex];

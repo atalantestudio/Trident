@@ -72,7 +72,6 @@ namespace Trident {
 
 	RigidBodyID2D createRigidBody(PhysicsSimulation2D& simulation, const RigidBodyDescriptor2D& descriptor);
 
-	ShapeID2D createShapeFromScene(PhysicsSimulation2D& simulation, const Hull2D& descriptor, const void* typeDescriptor);
 	ShapeID2D createShape(PhysicsSimulation2D& simulation, const ShapeDescriptor2D& descriptor, const void* typeDescriptor);
 
 	BoxHull2D createBoxHull(vec2<float32> halfSize);
