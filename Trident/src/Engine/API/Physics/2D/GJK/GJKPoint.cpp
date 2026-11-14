@@ -1,0 +1,313 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
+#include "pch.hpp"
+
+#include "Engine/API/Physics/2D/GJK/GJKPoint.hpp"
+
+namespace Trident {
+	// TODO: Some geometries (e.g. CircleGeometry2D) don't implement `supportIndex`. Use `supportVertex` instead.
+	// Returns the index of the farthest point on `A` along `d`, in local space.
+	inline static uint32 supportIndex(const RigidBody2D& A, const Hull2D& hull, vec2<float32> d) {
+		const mat2x2<float32> inverseRotation = rotationAngle<mat2x2<float32>>(-A.rotation);
+
+		return hull.supportIndex(d * inverseRotation);
+	}
+
+	// Calculates the closest point to the origin on a line formed by the simplex s.
+	static void ClosestPointLineOrigin(Simplex2& s) {
+		const vec2<float32> a = s[0].v;
+		const vec2<float32> b = s[1].v;
+		const vec2<float32> ab = b - a;
+
+		const float32 uAB = dot(-a, ab);
+
+		if (uAB < 0.0f) {
+			// In region A.
+			s[0].u = uAB;
+			s.divisor = 1.0f;
+			s.count = 1;
+
+			return;
+		}
+
+		const float32 vAB = dot(-b, a - b);
+
+		if (vAB < 0.0f) {
+			// In region B.
+			s[0] = s[1];
+			s[0].u = vAB;
+			s.divisor = 1.0f;
+			s.count = 1;
+
+			return;
+		}
+
+		// In region AB.
+		s[0].u = vAB;
+		s[1].u = uAB;
+		s.divisor = lengthSquared(ab);
+		s.count = 2;
+	}
+
+	// Calculates the closest point to the origin on a triangle formed by the simplex s.
+	static void ClosestPointTriangleOrigin(Simplex2& s) {
+		const vec2<float32> a = s[0].v;
+		const vec2<float32> b = s[1].v;
+		const vec2<float32> c = s[2].v;
+		const vec2<float32> ab = b - a;
+		const vec2<float32> ac = c - a;
+
+		const float32 uAB = dot(-a, ab);
+		const float32 vCA = dot(-a, ac);
+
+		if (vCA <= 0.0f && uAB <= 0.0f) {
+			// In region A.
+			s[0].u = 1.0f;
+			s.divisor = 1.0f;
+			s.count = 1;
+
+			return;
+		}
+
+		const vec2<float32> bc = c - b;
+
+		const float32 vAB = dot(-b, a - b);
+		const float32 uBC = dot(-b, bc);
+
+		if (vAB <= 0.0f && uBC <= 0.0f) {
+			// In region B.
+			s[0] = s[1];
+			s[0].u = 1.0f;
+			s.divisor = 1.0f;
+			s.count = 1;
+
+			return;
+		}
+
+		const vec2<float32> ca = a - c;
+
+		const float32 vBC = dot(-c, b - c);
+		const float32 uCA = dot(-c, ca);
+
+		if (vBC <= 0.0f && uCA <= 0.0f) {
+			// In region C.
+			s[0] = s[2];
+			s[0].u = 1.0f;
+			s.divisor = 1.0f;
+			s.count = 1;
+
+			return;
+		}
+
+		// Compute signed parallelogram area.
+		const float32 S = parallelogramArea(ab, ac);
+
+		// Compute triangle barycentric coordinates (pre-division).
+		const float32 uABC = parallelogramArea(b, c);
+		const float32 vABC = parallelogramArea(c, a);
+		const float32 wABC = parallelogramArea(a, b);
+
+		if (uAB > 0.0f && vAB > 0.0f && wABC * S <= 0.0f) {
+			// In region AB.
+			s[0].u = vAB;
+			s[1].u = uAB;
+			s.divisor = lengthSquared(ab);
+			s.count = 2;
+
+			return;
+		}
+
+		if (uBC > 0.0f && vBC > 0.0f && uABC * S <= 0.0f) {
+			// In region BC.
+			s[0] = s[1];
+			s[1] = s[2];
+			s[0].u = vBC;
+			s[1].u = uBC;
+			s.divisor = lengthSquared(bc);
+			s.count = 2;
+
+			return;
+		}
+
+		if (uCA > 0.0f && vCA > 0.0f && vABC * S <= 0.0f) {
+			// In region CA.
+			s[1] = s[0];
+			s[0] = s[2];
+			s[0].u = vCA;
+			s[1].u = uCA;
+			s.divisor = lengthSquared(ca);
+			s.count = 2;
+
+			return;
+		}
+
+		// Without CCD, this throws when the shapes separate after an intersection.
+		// With CCD, this is never reached since no intersection should ever occur.
+		// DEBUG_ASSERT(uABC > 0.0f && vABC > 0.0f && wABC > 0.0f);
+
+		// In region ABC.
+		s[0].u = uABC;
+		s[1].u = vABC;
+		s[2].u = wABC;
+		s.divisor = S;
+		s.count = 3;
+	}
+
+	// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
+	GJKPointOutput2D GJKPoint2D(const RigidBody2D& A, vec2<float32> p, const Hull2D& shapeA) {
+		constexpr uint8 GJK_2D_ITERATION_LIMIT = 8;
+
+		DEBUG_ASSERT(shapeA.vertices.count() < max<uint8>());
+
+		vec2<float32> d = p - A.position;
+
+		Simplex2Vertex vertex;
+		vertex.iA = 0;
+		vertex.iB = 0;
+		vertex.vA = shapeA.vertices[vertex.iA] * A.getWorld();
+		vertex.vB = p;
+		vertex.v = vertex.vB - vertex.vA;
+
+		Simplex2 s = {vertex};
+
+		uint32 saveA[3];
+
+		uint8 i = 0;
+
+		while (i < GJK_2D_ITERATION_LIMIT) {
+			uint8 index = 0;
+
+			while (index < s.count) {
+				saveA[index] = s[index].iA;
+
+				index += 1;
+			}
+
+			const uint8 countCopy = s.count;
+
+			switch (s.count) {
+				case 1: {
+					break;
+				}
+				case 2: {
+					ClosestPointLineOrigin(s);
+
+					break;
+				}
+				case 3: {
+					ClosestPointTriangleOrigin(s);
+
+					break;
+				}
+				default: {
+					DEBUG_ASSERT(false);
+
+					break;
+				}
+			}
+
+			if (s.count == 3) {
+				break;
+			}
+
+			const vec2<float32> ao = -s[0].v;
+
+			switch (s.count) {
+				case 1: {
+					d = ao;
+
+					break;
+				}
+				case 2: {
+					const vec2<float32> ab = s[1].v + ao;
+
+					d = perpendicularLeft(ab);
+
+					if (parallelogramArea(ab, ao) < 0.0f) {
+						d *= -1.0f;
+					}
+
+					break;
+				}
+				default: {
+					DEBUG_ASSERT(false);
+
+					break;
+				}
+			}
+
+			if (lengthSquared(d) < epsilon<float32>()) {
+				ENGINE_WARNING("GJKPoint2D: Vertex, edge or face overlap.");
+
+				break;
+			}
+
+			Simplex2Vertex vertex;
+			vertex.iA = supportIndex(A, shapeA, -d);
+			vertex.iB = 0;
+
+			bool duplicate = false;
+			uint8 j = 0;
+
+			while (j < countCopy) {
+				if (vertex.iA == saveA[j]) {
+					duplicate = true;
+
+					break;
+				}
+
+				j += 1;
+			}
+
+			if (duplicate) {
+				break;
+			}
+
+			vertex.vA = shapeA.vertices[vertex.iA] * A.getWorld();
+			vertex.vB = p;
+			vertex.v = vertex.vB - vertex.vA;
+
+			s[s.count] = vertex;
+			s.count += 1;
+
+			#if defined(BUILD_MODE_DEBUG)
+				if (i == GJK_2D_ITERATION_LIMIT - 1) {
+					ENGINE_WARNING("GJKPoint2D: Iteration limit reached.");
+				}
+			#endif
+
+			i += 1;
+		}
+
+		GJKPointOutput2D output{};
+
+		switch (s.count) {
+			case 1: {
+				output.closestA = s[0].vA;
+
+				break;
+			}
+			case 2: {
+				output.closestA = (s[0].vA * s[0].u + s[1].vA * s[1].u) / s.divisor;
+
+				break;
+			}
+			case 3: {
+				output.closestA = (s[0].vA * s[0].u + s[1].vA * s[1].u + s[2].vA * s[2].u) / s.divisor;
+
+				break;
+			}
+			default: {
+				DEBUG_ASSERT(false);
+
+				break;
+			}
+		}
+
+		output.distance = distance(output.closestA, p);
+		output.separatingAxis = d;
+
+		return output;
+	}
+}

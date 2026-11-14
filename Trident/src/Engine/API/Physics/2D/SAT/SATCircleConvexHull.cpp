@@ -17,19 +17,18 @@ namespace Trident {
 			const vec2<float32> a = referenceHull.vertices[edge.indexA];
 			const vec2<float32> b = referenceHull.vertices[edge.indexB];
 			const vec2<float32> d = edgeNormalClockwise(a, b);
-			const vec2<float32> s = incidentHull.support(-d * RBA);
-			const vec2<float32> sT = s * incidentBody.getWorld();
+			const vec2<float32> s = incidentHull.support(-d * RBA) * incidentBody.getWorld();
 
 			// The centroid is not involved when calculating the edge distance because it is applied when multiplying by the world matrix.
 			const float32 edgeDistance = abs(signedDistanceLPAB(a, b, {0.0f, 0.0f}));
 			const vec2<float32> offset = edgeDistance * d * referenceBody.getWorld();
 
-			const float32 separation = signedDistanceLP(d * RA, offset, sT);
+			const float32 separation = signedDistanceLP(d * RA, offset, s);
 
 			if (separation > output.separation) {
 				output.separation = separation;
 				output.axis = d;
-				output.incidentSupportPoint = sT;
+				output.incidentSupportPoint = s;
 			}
 
 			if (separation > 0.0f) {

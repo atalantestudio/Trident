@@ -5,17 +5,15 @@
 
 #include "Engine/API/Physics/2D/Collider/Collider.hpp"
 #include "Engine/API/Physics/2D/Contact/ContactManifold.hpp"
-#include "Engine/API/Physics/2D/GJK/GJK.hpp"
+#include "Engine/API/Physics/2D/GJK/GJKPoint.hpp"
 #include "Engine/API/Physics/2D/SAT/SATCircleConvexHull.hpp"
 
 namespace Trident {
 	bool CircleConvexHull2D(const Hull2D& shapeA, const Hull2D& shapeB, const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, ContactManifold2D* manifold) {
-		const Hull2D pointHull = Hull2D::point();
-
 		// The scaling factor is assumed to be the same in both axes.
 		const float32 scaleA = rigidBodyA.scale[0];
 
-		const GJK2DOutput gjkOutput = GJK2D(rigidBodyA, rigidBodyB, pointHull, shapeB);
+		const GJKPointOutput2D gjkOutput = GJKPoint2D(rigidBodyB, rigidBodyA.position, shapeB);
 		const float32 d = gjkOutput.distance - shapeA.radius * scaleA;
 
 		if (d > 0.0f) {
@@ -23,9 +21,9 @@ namespace Trident {
 		}
 
 		if (d > -shapeA.radius * scaleA) {
-			manifold->normal = normalized(gjkOutput.closestB - gjkOutput.closestA);
+			manifold->normal = normalized(gjkOutput.closestA - rigidBodyA.position);
 			manifold->contactCount = 1;
-			manifold->contacts[0].position = gjkOutput.closestB;
+			manifold->contacts[0].position = gjkOutput.closestA;
 			manifold->contacts[0].separation = d;
 
 			return true;

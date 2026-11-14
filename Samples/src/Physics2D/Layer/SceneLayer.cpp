@@ -72,10 +72,7 @@ namespace Trident {
 			return;
 		}
 
-		const Hull2D mouseShape = Hull2D::point();
-
-		RigidBody2D mouseRigidBody{};
-		mouseRigidBody.position = renderer.cameraPosition + mousePosition;
+		const vec2<float32> p = renderer.cameraPosition + mousePosition;
 
 		sint32 shapeIndex = static_cast<sint32>(simulation.usedShapeCount) - 1;
 
@@ -83,7 +80,7 @@ namespace Trident {
 			const Hull2D& shape = simulation.shapes[shapeIndex];
 			const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 
-			if (GJK2DConditional(rigidBody, mouseRigidBody, shape, mouseShape)) {
+			if (GJKConditional2D(rigidBody, p, shape)) {
 				hoveredEntity = shapeIndex;
 
 				break;
@@ -95,7 +92,6 @@ namespace Trident {
 
 	void Physics2DSceneLayer::onEvent(Event& event) {
 		EventDispatcher eventDispatcher(event);
-
 		eventDispatcher.dispatch<KeyDownEvent>(BIND(onEvent));
 		eventDispatcher.dispatch<KeyUpEvent>(BIND(onEvent));
 		eventDispatcher.dispatch<MouseDownEvent>(BIND(onEvent));

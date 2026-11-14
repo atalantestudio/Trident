@@ -241,7 +241,7 @@ namespace Trident {
 			}
 
 			if (lengthSquared(d) < epsilon<float32>()) {
-				ENGINE_WARNING("GJK 2D: Vertex, edge or face overlap.");
+				ENGINE_WARNING("GJK2D: Vertex, edge or face overlap.");
 
 				break;
 			}
