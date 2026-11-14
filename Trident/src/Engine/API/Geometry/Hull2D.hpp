@@ -6,6 +6,7 @@
 #include "Engine/API/Geometry/Edge.hpp"
 #include "Engine/API/Geometry/Hull2DType.hpp"
 #include "Engine/API/Physics/2D/Base.hpp"
+#include "Engine/API/Physics/Material.hpp"
 
 namespace Trident {
 	/// A convex hull wrapping a 2D geometry.
@@ -121,6 +122,6 @@ namespace Trident {
 
 			RigidBodyID2D rigidBodyId;
 
-			float32 friction;
+			PhysicsMaterial material;
 	};
 }

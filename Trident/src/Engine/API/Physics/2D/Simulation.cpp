@@ -4,8 +4,6 @@
 #include "pch.hpp"
 
 #include "Engine/API/Physics/2D/Collider/Collider.hpp"
-#include "Engine/API/Physics/2D/Constraint/Constraint.hpp"
-#include "Engine/API/Physics/2D/Joint.hpp"
 #include "Engine/API/Physics/2D/Simulation.hpp"
 #include "Engine/ECS/Component/Geometry2DComponent.hpp"
 #include "Engine/ECS/Component/RigidBody2DComponent.hpp"
@@ -20,53 +18,6 @@ namespace Trident {
 		ENGINE_ASSERT(geometry.hullIndex < hulls.count(), "The geometry doesn't have a hull.");
 
 		return hulls[geometry.hullIndex];
-	}
-
-	static vec2<float32> calculateRelativeVelocity(const RigidBody2D& A, const RigidBody2D& B, vec2<float32> rA, vec2<float32> rB) {
-		return B.linearVelocity + perpendicularRight(rB) * B.angularVelocity - A.linearVelocity - perpendicularRight(rA) * A.angularVelocity;
-	}
-
-	static void mergeContactManifolds(ContactManifold2D& manifold, const ContactManifold2D& newManifold) {
-		#if defined(ENABLE_PHYSICS_2D_WARM_STARTING)
-			Contact2D mergedContacts[2]{};
-			uint32 newContactIndex = 0;
-
-			while (newContactIndex < newManifold.contactCount) {
-				const Contact2D& cNew = newManifold.contacts[newContactIndex];
-				const Contact2D* cOld = nullptr;
-
-				uint32 contactIndex = 0;
-
-				while (contactIndex < manifold.contactCount) {
-					const Contact2D& c = manifold.contacts[contactIndex];
-
-					if (cNew.id == c.id) {
-						cOld = &c;
-
-						break;
-					}
-
-					contactIndex += 1;
-				}
-
-				Contact2D& c = mergedContacts[newContactIndex];
-				c = cNew;
-
-				if (cOld != nullptr) {
-					c.accumulatedNormalImpulse = cOld->accumulatedNormalImpulse;
-					c.accumulatedTangentImpulse = cOld->accumulatedTangentImpulse;
-				}
-
-				newContactIndex += 1;
-			}
-
-			std::copy_n(mergedContacts, newManifold.contactCount, manifold.contacts);
-
-			manifold.normal = newManifold.normal;
-			manifold.contactCount = newManifold.contactCount;
-		#else
-			manifold = newManifold;
-		#endif
 	}
 
 	PhysicsSimulation2D createSimulation(const PhysicsSimulationDescriptor2D& descriptor) {
@@ -104,7 +55,7 @@ namespace Trident {
 
 			Hull2D shapeDescriptor = getHull(descriptor.scene, rigidBodyId);
 			shapeDescriptor.rigidBodyId = rigidBodyId;
-			shapeDescriptor.friction = rigidBodyDescriptor.friction;
+			shapeDescriptor.material.friction = rigidBodyDescriptor.friction;
 
 			createShape(simulation, shapeDescriptor);
 
@@ -123,7 +74,7 @@ namespace Trident {
 
 			Hull2D shapeDescriptor = getHull(descriptor.scene, entity);
 			shapeDescriptor.rigidBodyId = rigidBodyId;
-			shapeDescriptor.friction = rigidBodyDescriptor.friction;
+			shapeDescriptor.material.friction = rigidBodyDescriptor.friction;
 
 			createShape(simulation, shapeDescriptor);
 
@@ -159,6 +110,7 @@ namespace Trident {
 		rigidBody.force = {0.0f, 0.0f};
 		rigidBody.torque = 0.0_Nm;
 
+		// TODO(wip)
 		rigidBody.inverseMass = descriptor.inverseMass;
 		rigidBody.inverseInertia = descriptor.inverseInertia;
 
@@ -170,8 +122,10 @@ namespace Trident {
 	}
 
 	ShapeID2D createShape(PhysicsSimulation2D& simulation, const Hull2D& descriptor) {
+		// TODO(wip)
 		// DEBUG_ASSERT(!std::isinf(descriptor.density) && !std::isnan(descriptor.density) && descriptor.density >= 0.0f);
-		// DEBUG_ASSERT(!std::isinf(descriptor.material.friction) && !std::isnan(descriptor.material.friction) && descriptor.material.friction >= 0.0f);
+
+		DEBUG_ASSERT(!std::isinf(descriptor.material.friction) && !std::isnan(descriptor.material.friction) && descriptor.material.friction >= 0.0f);
 
 		ENGINE_ASSERT(simulation.usedShapeCount < simulation.shapes.count(), "Shape count limit already reached.");
 		ENGINE_ASSERT(descriptor.rigidBodyId < simulation.usedRigidBodyCount, "Invalid rigid body ID.");
@@ -226,353 +180,8 @@ namespace Trident {
 		simulation.tick += 1;
 	}
 
-	void broadPhase(PhysicsSimulation2D& simulation) {
-		CollisionPair2D collisionPair;
-		uint32 indexA = 0;
-
-		// TODO(physics/2d/broad-phase): Only register potentially overlapping entities.
-		while (indexA < simulation.broadPhase.usedDynamicShapeIdCount) {
-			collisionPair.shapeIdA = simulation.broadPhase.dynamicShapeIds[indexA];
-
-			uint32 indexB = 0;
-
-			// Register all dynamic-static entity pairs.
-			while (indexB < simulation.broadPhase.usedStaticShapeIdCount) {
-				collisionPair.shapeIdB = simulation.broadPhase.staticShapeIds[indexB];
-
-				simulation.collisionPairs.emplace_back(collisionPair);
-
-				indexB += 1;
-			}
-
-			indexB = indexA + 1;
-
-			// Register all dynamic-dynamic entity pairs.
-			while (indexB < simulation.broadPhase.usedDynamicShapeIdCount) {
-				collisionPair.shapeIdB = simulation.broadPhase.dynamicShapeIds[indexB];
-
-				simulation.collisionPairs.emplace_back(collisionPair);
-
-				indexB += 1;
-			}
-
-			indexA += 1;
-		}
-	}
-
-	void narrowPhase(PhysicsSimulation2D& simulation) {
-		static constexpr Collider2D COLLIDER_2D_TABLE[static_cast<uint32>(Hull2DType::count)][static_cast<uint32>(Hull2DType::count)] = {
-			{nullptr, nullptr, nullptr},
-			{nullptr, CircleCircle2D, CircleConvexHull2D},
-			{nullptr, nullptr, ConvexHullConvexHull2D},
-		};
-
-		for (const CollisionPair2D collisionPair : simulation.collisionPairs) {
-			const Hull2D& shapeA = simulation.shapes[collisionPair.shapeIdA];
-			const Hull2D& shapeB = simulation.shapes[collisionPair.shapeIdB];
-
-			const RigidBody2D& rigidBodyA = simulation.rigidBodies[shapeA.rigidBodyId];
-			const RigidBody2D& rigidBodyB = simulation.rigidBodies[shapeB.rigidBodyId];
-
-			// The broad phase must ensure that A hull type < B hull type.
-			const Collider2D collider = COLLIDER_2D_TABLE[static_cast<uint32>(shapeA.type)][static_cast<uint32>(shapeB.type)];
-
-			DEBUG_ASSERT(collider != nullptr);
-
-			ContactPair2D contactPair;
-
-			if (!collider(shapeA, shapeB, rigidBodyA, rigidBodyB, &contactPair.manifold)) {
-				// Either a degenerate case, or the entities are not overlapping.
-				simulation.contactPairs.erase(collisionPair);
-
-				continue;
-			}
-
-			const std::map<CollisionPair2D, ContactPair2D>::iterator contactPairIterator = simulation.contactPairs.find(collisionPair);
-
-			if (contactPairIterator == simulation.contactPairs.end()) {
-				simulation.contactPairs.insert({collisionPair, contactPair});
-
-				continue;
-			}
-
-			mergeContactManifolds(contactPairIterator->second.manifold, contactPair.manifold);
-		}
-	}
-
-	void integrateVelocities(PhysicsSimulation2D& simulation) {
-		uint32 shapeIdIndex = 0;
-
-		// TODO(physics/2d/apply-forces): Integrate velocities on dynamic resting entities (e.g. an object on a moving platform may move due to inertia).
-		while (shapeIdIndex < simulation.broadPhase.usedDynamicShapeIdCount) {
-			const Hull2D& shape = simulation.shapes[simulation.broadPhase.dynamicShapeIds[shapeIdIndex]];
-
-			RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
-			rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + simulation.gravity) * simulation.deltaTime;
-			rigidBody.angularVelocity += rigidBody.torque * rigidBody.inverseInertia * simulation.deltaTime;
-
-			shapeIdIndex += 1;
-		}
-	}
-
-	/// Applies linear and angular impulses to the body.
-	inline static void applyImpulse(
-		RigidBody2D& rigidBody,
-
-		/// The impulse vector.
-		vec2<float32> j,
-
-		/// The vector from the body's position to the contact.
-		vec2<float32> r
-	) {
+	void applyImpulse(RigidBody2D& rigidBody, vec2<float32> j, vec2<float32> r) {
 		rigidBody.linearVelocity += j * rigidBody.inverseMass;
-
-		// Subtract to get a clockwise rotation.
 		rigidBody.angularVelocity -= parallelogramArea(r, j) * rigidBody.inverseInertia;
-	}
-
-	void updateContactManifolds(PhysicsSimulation2D& simulation) {
-		for (std::pair<const CollisionPair2D, ContactPair2D>& pair : simulation.contactPairs) {
-			const Hull2D& shapeA = simulation.shapes[pair.first.shapeIdA];
-			const Hull2D& shapeB = simulation.shapes[pair.first.shapeIdB];
-
-			RigidBody2D& rigidBodyA = simulation.rigidBodies[shapeA.rigidBodyId];
-			RigidBody2D& rigidBodyB = simulation.rigidBodies[shapeB.rigidBodyId];
-
-			ContactPair2D& contactPair = pair.second;
-			contactPair.friction = sqrt(shapeA.friction * shapeB.friction);
-			contactPair.manifold.tangent = perpendicularRight(contactPair.manifold.normal);
-
-			uint8 contactIndex = 0;
-
-			while (contactIndex < contactPair.manifold.contactCount) {
-				Contact2D& contact = contactPair.manifold.contacts[contactIndex];
-				contact.rA = contact.position - rigidBodyA.position;
-				contact.rB = contact.position - rigidBodyB.position;
-
-				const float32 inverseMassSum = rigidBodyA.inverseMass + rigidBodyB.inverseMass;
-				const float32 rArA = dot(contact.rA, contact.rA);
-				const float32 rBrB = dot(contact.rB, contact.rB);
-
-				{
-					const float32 rnA = dot(contact.rA, contactPair.manifold.normal);
-					const float32 rnB = dot(contact.rB, contactPair.manifold.normal);
-
-					// TODO(physics/2d): The 2d_stacking instability was accidentally fixed by removing the outer parentheses and moving `inverseMassSum` to the left. Why?
-					// const float32 normal = (rigidBodyA.inverseInertia * (rArA - rnA * rnA) + rigidBodyB.inverseInertia * (rBrB - rnB * rnB)) + inverseMassSum;
-					const float32 normal = inverseMassSum + rigidBodyA.inverseInertia * (rArA - rnA * rnA) + rigidBodyB.inverseInertia * (rBrB - rnB * rnB);
-
-					contact.massNormal = 1.0f / normal;
-				}
-
-				{
-					const float32 rtA = dot(contact.rA, contactPair.manifold.tangent);
-					const float32 rtB = dot(contact.rB, contactPair.manifold.tangent);
-					const float32 tangent = inverseMassSum + rigidBodyA.inverseInertia * (rArA - rtA * rtA) + rigidBodyB.inverseInertia * (rBrB - rtB * rtB);
-
-					contact.massTangent = 1.0f / tangent;
-				}
-
-				const float32 penetrationBias = (shapeA.getPenetrationBias() + shapeB.getPenetrationBias()) * 0.5f;
-
-				contact.bias = -penetrationBias * simulation.inverseDeltaTime * min(0.0f, contact.separation + simulation.allowedPenetration);
-
-				#if defined(ENABLE_PHYSICS_2D_IMPULSE_ACCUMULATION)
-					const vec2<float32> j = contactPair.manifold.normal * contact.accumulatedNormalImpulse + contactPair.manifold.tangent * contact.accumulatedTangentImpulse;
-
-					applyImpulse(rigidBodyA, -j, contact.rA);
-					applyImpulse(rigidBodyB, j, contact.rB);
-				#endif
-
-				contactIndex += 1;
-			}
-		}
-	}
-
-	/* void updateJoints(PhysicsSimulation2D& simulation) {
-		const ComponentPool<Joint2D>& jointPool = scene->ecs.getComponentPool<Joint2D>();
-		uint32 componentIndex = 0;
-
-		while (componentIndex < jointPool.componentCount) {
-			const Entity entity = jointPool.componentIndexToEntity[componentIndex];
-
-			Joint2D& joint = scene->ecs.getComponent<Joint2D>(entity);
-			RigidBody2DComponent& rigidBodyA = scene->ecs.getComponent<RigidBody2DComponent>(joint.A);
-			RigidBody2DComponent& rigidBodyB = scene->ecs.getComponent<RigidBody2DComponent>(joint.B);
-
-			// TODO(physics/2d/update-joints): Why is the transpose needed?
-			const mat2x2<float32> RAT = transpose(rotationAngle<mat2x2<float32>>(rigidBodyA.rotation));
-			const mat2x2<float32> RBT = transpose(rotationAngle<mat2x2<float32>>(rigidBodyB.rotation));
-
-			joint.rA = joint.localAnchorA * RAT;
-			joint.rB = joint.localAnchorB * RBT;
-
-			const vec2<float32> pA = rigidBodyA.position + joint.rA;
-			const vec2<float32> pB = rigidBodyB.position + joint.rB;
-			const vec2<float32> pAB = pB - pA;
-
-			const mat2x2<float32> K1 = {
-				rigidBodyA.inverseMass + rigidBodyB.inverseMass, 0.0f,
-				0.0f,                                            rigidBodyA.inverseMass + rigidBodyB.inverseMass,
-			};
-			const mat2x2<float32> K2 = {
-				 rigidBodyA.inverseInertia * joint.rA[1] * joint.rA[1], -rigidBodyA.inverseInertia * joint.rA[0] * joint.rA[1],
-				-rigidBodyA.inverseInertia * joint.rA[0] * joint.rA[1],  rigidBodyA.inverseInertia * joint.rA[0] * joint.rA[0],
-			};
-			const mat2x2<float32> K3 = {
-				 rigidBodyB.inverseInertia * joint.rB[1] * joint.rB[1], -rigidBodyB.inverseInertia * joint.rB[0] * joint.rB[1],
-				-rigidBodyB.inverseInertia * joint.rB[0] * joint.rB[1],  rigidBodyB.inverseInertia * joint.rB[0] * joint.rB[0],
-			};
-			const mat2x2<float32> S = {
-				joint.softness, 0.0f,
-				0.0f,           joint.softness,
-			};
-			const mat2x2<float32> K = K1 + K2 + K3 + S;
-
-			joint.M = inverse(K);
-			joint.bias = pAB * inverseDeltaTime * -joint.biasFactor;
-
-			#if defined(ENABLE_PHYSICS_2D_WARM_STARTING)
-				rigidBodyA.applyImpulse(-joint.accumulatedImpulse, joint.rA);
-				rigidBodyB.applyImpulse(joint.accumulatedImpulse, joint.rB);
-			#else
-				joint.accumulatedImpulse = {0.0f, 0.0f};
-			#endif
-
-			componentIndex += 1;
-		}
-	} */
-
-	void applyImpulses(PhysicsSimulation2D& simulation) {
-		// const ComponentPool<ref<Constraint2D>>& constraintPool = scene->ecs.getComponentPool<ref<Constraint2D>>();
-		// const ComponentPool<Joint2D>& jointPool = scene->ecs.getComponentPool<Joint2D>();
-		uint32 iteration = 0;
-
-		while (iteration < simulation.impulseIterationCount) {
-			for (std::pair<const CollisionPair2D, ContactPair2D>& pair : simulation.contactPairs) {
-				const Hull2D& shapeA = simulation.shapes[pair.first.shapeIdA];
-				const Hull2D& shapeB = simulation.shapes[pair.first.shapeIdB];
-
-				RigidBody2D& rigidBodyA = simulation.rigidBodies[shapeA.rigidBodyId];
-				RigidBody2D& rigidBodyB = simulation.rigidBodies[shapeB.rigidBodyId];
-
-				ContactPair2D& contactPair = pair.second;
-
-				uint8 contactIndex = 0;
-
-				while (contactIndex < contactPair.manifold.contactCount) {
-					Contact2D& contact = contactPair.manifold.contacts[contactIndex];
-
-					vec2<float32> relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, contact.rA, contact.rB);
-					float32 normalImpulseLength;
-
-					// Apply normal impulse.
-					{
-						const float32 relativeVelocityTowardsNormal = dot(relativeVelocity, contactPair.manifold.normal);
-
-						normalImpulseLength = (-relativeVelocityTowardsNormal + contact.bias) * contact.massNormal;
-
-						#if defined(ENABLE_PHYSICS_2D_IMPULSE_ACCUMULATION)
-							const float32 oldNormalValue = contact.accumulatedNormalImpulse;
-
-							contact.accumulatedNormalImpulse = max(0.0f, oldNormalValue + normalImpulseLength);
-
-							normalImpulseLength = contact.accumulatedNormalImpulse - oldNormalValue;
-						#else
-							normalImpulseLength = max(0.0f, normalImpulseLength);
-						#endif
-
-						const vec2<float32> j = contactPair.manifold.normal * normalImpulseLength;
-
-						applyImpulse(rigidBodyA, -j, contact.rA);
-						applyImpulse(rigidBodyB, j, contact.rB);
-					}
-
-					relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, contact.rA, contact.rB);
-
-					// Apply friction impulse.
-					{
-						const float32 relativeVelocityTowardsTangent = dot(relativeVelocity, contactPair.manifold.tangent);
-
-						float32 tangentImpulseLength = -relativeVelocityTowardsTangent * contact.massTangent;
-
-						#if defined(ENABLE_PHYSICS_2D_IMPULSE_ACCUMULATION)
-							const float32 maxTangentImpulseLength = contactPair.friction * contact.accumulatedNormalImpulse;
-							const float32 oldTangentValue = contact.accumulatedTangentImpulse;
-
-							contact.accumulatedTangentImpulse = clamp(oldTangentValue + tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
-
-							tangentImpulseLength = contact.accumulatedTangentImpulse - oldTangentValue;
-						#else
-							const float32 maxTangentImpulseLength = contactPair.friction * normalImpulseLength;
-
-							tangentImpulseLength = clamp(tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
-						#endif
-
-						const vec2<float32> j = contactPair.manifold.tangent * tangentImpulseLength;
-
-						applyImpulse(rigidBodyA, -j, contact.rA);
-						applyImpulse(rigidBodyB, j, contact.rB);
-					}
-
-					contactIndex += 1;
-				}
-			}
-
-			// TODO(physics/2d/constraint): Restore constraints.
-			/* uint32 constraintComponentIndex = 0;
-
-			while (constraintComponentIndex < constraintPool.componentCount) {
-				const Entity entity = constraintPool.componentIndexToEntity[constraintComponentIndex];
-				const ref<Constraint2D> constraint = scene->ecs.getComponent<ref<Constraint2D>>(entity);
-
-				constraint->update(&scene->ecs, deltaTime);
-
-				constraintComponentIndex += 1;
-			} */
-
-			// TODO(physics/2d/joint): Restore joints.
-			/* uint32 jointComponentIndex = 0;
-
-			while (jointComponentIndex < jointPool.componentCount) {
-				const Entity entity = jointPool.componentIndexToEntity[jointComponentIndex];
-
-				Joint2D& joint = scene->ecs.getComponent<Joint2D>(entity);
-				RigidBody2DComponent& rigidBodyA = scene->ecs.getComponent<RigidBody2DComponent>(joint.A);
-				RigidBody2DComponent& rigidBodyB = scene->ecs.getComponent<RigidBody2DComponent>(joint.B);
-
-				relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, joint.rA, joint.rB);
-
-				const vec2<float32> j = (joint.bias - relativeVelocity - joint.softness * joint.accumulatedImpulse) * joint.M;
-
-				joint.accumulatedImpulse += j;
-
-				rigidBodyA.applyImpulse(-j, joint.rA);
-				rigidBodyB.applyImpulse(j, joint.rB);
-
-				jointComponentIndex += 1;
-			} */
-
-			iteration += 1;
-		}
-	}
-
-	void integratePositions(PhysicsSimulation2D& simulation) {
-		uint32 shapeIdIndex = 0;
-
-		// TODO(physics/2d/integration): Integration for static entities (e.g. a moving platform that isn't affected by other forces)?
-		// TODO(physics/2d/integration): Integration for dynamic entities with infinite mass?
-		// TODO(physics/2d/integration): Integration for dynamic resting entities (e.g. an object on a moving platform may move due to inertia)?
-		while (shapeIdIndex < simulation.broadPhase.usedDynamicShapeIdCount) {
-			const Hull2D& shape = simulation.shapes[simulation.broadPhase.dynamicShapeIds[shapeIdIndex]];
-
-			RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
-			rigidBody.position += rigidBody.linearVelocity * simulation.deltaTime;
-			rigidBody.rotation += rigidBody.angularVelocity * simulation.deltaTime;
-			rigidBody.force = {0.0f, 0.0f};
-			rigidBody.torque = 0.0f;
-
-			shapeIdIndex += 1;
-		}
 	}
 }

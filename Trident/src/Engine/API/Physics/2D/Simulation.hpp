@@ -74,4 +74,15 @@ namespace Trident {
 	void integratePositions(PhysicsSimulation2D& simulation);
 
 	void tick(PhysicsSimulation2D& simulation);
+
+	/// Applies linear and angular impulses to the body.
+	void applyImpulse(
+		RigidBody2D& rigidBody,
+
+		/// The impulse vector.
+		vec2<float32> j,
+
+		/// The vector from the body's position to the contact.
+		vec2<float32> r
+	);
 }
