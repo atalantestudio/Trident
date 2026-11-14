@@ -12,10 +12,10 @@
 #include "Engine/ECS/Tag.hpp"
 
 namespace Trident {
-	static const Hull2D& getHull(const PhysicsSimulation2D& simulation, Entity entity) {
-		const view<Hull2D>& hulls = simulation.scene->getHulls();
-		const Geometry2DComponent geometryComponent = simulation.scene->ecs.getComponent<Geometry2DComponent>(entity);
-		const Geometry2D& geometry = simulation.scene->getGeometries()[geometryComponent.geometryIndex];
+	static const Hull2D& getHull(const Scene2D* scene, Entity entity) {
+		const view<Hull2D>& hulls = scene->getHulls();
+		const Geometry2DComponent geometryComponent = scene->ecs.getComponent<Geometry2DComponent>(entity);
+		const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
 
 		ENGINE_ASSERT(geometry.hullIndex < hulls.count(), "The geometry doesn't have a hull.");
 
@@ -74,14 +74,117 @@ namespace Trident {
 		simulation.deltaTime = static_cast<float32>(descriptor.deltaTime);
 		simulation.inverseDeltaTime = static_cast<float32>(1.0 / descriptor.deltaTime);
 		simulation.gravity = descriptor.gravity;
-		simulation.tick = 0;
-		simulation.impulseIterationCount = descriptor.impulseIterationCount;
 		simulation.allowedPenetration = descriptor.allowedPenetration;
-		simulation.scene = descriptor.scene;
+		simulation.impulseIterationCount = descriptor.impulseIterationCount;
+		simulation.tick = 0;
+
+		const TagPool<StaticEntityTag>& staticPool = descriptor.scene->ecs.getTagPool<StaticEntityTag>();
+		const TagPool<DynamicEntityTag>& dynamicPool = descriptor.scene->ecs.getTagPool<DynamicEntityTag>();
+
+		simulation.rigidBodies = sequence<RigidBody2DComponent>(staticPool.tagCount + dynamicPool.tagCount);
+		simulation.shapes = sequence<Hull2D>(staticPool.tagCount + dynamicPool.tagCount);
+		simulation.usedRigidBodyCount = 0;
+		simulation.usedShapeCount = 0;
+		simulation.broadPhase.staticShapeIds = sequence<uint32>(staticPool.tagCount);
+		simulation.broadPhase.kinematicShapeIds = sequence<uint32>(0);
+		simulation.broadPhase.dynamicShapeIds = sequence<uint32>(dynamicPool.tagCount);
+		simulation.broadPhase.usedStaticShapeIdCount = 0;
+		simulation.broadPhase.usedKinematicShapeIdCount = 0;
+		simulation.broadPhase.usedDynamicShapeIdCount = 0;
+
+		uint32 tagIndex = 0;
+
+		while (tagIndex < staticPool.tagCount) {
+			const Entity entity = staticPool.tagIndexToEntity[tagIndex];
+
+			RigidBody2DComponent rigidBodyDescriptor = descriptor.scene->ecs.getComponent<RigidBody2DComponent>(entity);
+			rigidBodyDescriptor.type = RigidBodyType::STATIC;
+
+			const RigidBodyID2D rigidBodyId = createRigidBody(simulation, rigidBodyDescriptor);
+
+			Hull2D shapeDescriptor = getHull(descriptor.scene, rigidBodyId);
+			shapeDescriptor.rigidBodyId = rigidBodyId;
+
+			createShape(simulation, shapeDescriptor);
+
+			tagIndex += 1;
+		}
+
+		tagIndex = 0;
+
+		while (tagIndex < dynamicPool.tagCount) {
+			const Entity entity = dynamicPool.tagIndexToEntity[tagIndex];
+
+			RigidBody2DComponent rigidBodyDescriptor = descriptor.scene->ecs.getComponent<RigidBody2DComponent>(entity);
+			rigidBodyDescriptor.type = RigidBodyType::DYNAMIC;
+
+			const RigidBodyID2D rigidBodyId = createRigidBody(simulation, rigidBodyDescriptor);
+
+			Hull2D shapeDescriptor = getHull(descriptor.scene, rigidBodyId);
+			shapeDescriptor.rigidBodyId = rigidBodyId;
+
+			createShape(simulation, shapeDescriptor);
+
+			tagIndex += 1;
+		}
+
 		simulation.collisionPairs = {};
 		simulation.contactPairs = {};
 
 		return simulation;
+	}
+
+	RigidBodyID2D createRigidBody(PhysicsSimulation2D& simulation, const RigidBody2DComponent& descriptor) {
+		DEBUG_ASSERT(!std::isinf(descriptor.position.x) && !std::isnan(descriptor.position.x) && !std::isinf(descriptor.position.y) && !std::isnan(descriptor.position.y));
+		DEBUG_ASSERT(!std::isinf(descriptor.rotation) && !std::isnan(descriptor.rotation));
+
+		ENGINE_ASSERT(simulation.usedRigidBodyCount < simulation.rigidBodies.count(), "Rigid body count limit already reached.");
+
+		simulation.rigidBodies[simulation.usedRigidBodyCount] = descriptor;
+
+		const uint32 id = simulation.usedRigidBodyCount;
+
+		simulation.usedRigidBodyCount += 1;
+
+		return id;
+	}
+
+	ShapeID2D createShape(PhysicsSimulation2D& simulation, const Hull2D& descriptor) {
+		// DEBUG_ASSERT(!std::isinf(descriptor.density) && !std::isnan(descriptor.density) && descriptor.density >= 0.0f);
+		// DEBUG_ASSERT(!std::isinf(descriptor.material.friction) && !std::isnan(descriptor.material.friction) && descriptor.material.friction >= 0.0f);
+
+		ENGINE_ASSERT(simulation.usedShapeCount < simulation.shapes.count(), "Shape count limit already reached.");
+		ENGINE_ASSERT(descriptor.rigidBodyId < simulation.usedRigidBodyCount, "Invalid rigid body ID.");
+
+		simulation.shapes[simulation.usedShapeCount] = descriptor;
+
+		const RigidBody2DComponent& rigidBody = simulation.rigidBodies[descriptor.rigidBodyId];
+		const uint32 id = simulation.usedShapeCount;
+
+		switch (rigidBody.type) {
+			case RigidBodyType::STATIC: {
+				simulation.broadPhase.staticShapeIds[simulation.broadPhase.usedStaticShapeIdCount] = id;
+				simulation.broadPhase.usedStaticShapeIdCount += 1;
+
+				break;
+			}
+			case RigidBodyType::KINEMATIC: {
+				simulation.broadPhase.kinematicShapeIds[simulation.broadPhase.usedKinematicShapeIdCount] = id;
+				simulation.broadPhase.usedKinematicShapeIdCount += 1;
+
+				break;
+			}
+			case RigidBodyType::DYNAMIC: {
+				simulation.broadPhase.dynamicShapeIds[simulation.broadPhase.usedDynamicShapeIdCount] = id;
+				simulation.broadPhase.usedDynamicShapeIdCount += 1;
+
+				break;
+			}
+		}
+
+		simulation.usedShapeCount += 1;
+
+		return id;
 	}
 
 	void tick(PhysicsSimulation2D& simulation) {
@@ -102,22 +205,19 @@ namespace Trident {
 	}
 
 	void broadPhase(PhysicsSimulation2D& simulation) {
-		const TagPool<DynamicEntityTag>& dynamicPool = simulation.scene->ecs.getTagPool<DynamicEntityTag>();
-		const TagPool<StaticEntityTag>& staticPool = simulation.scene->ecs.getTagPool<StaticEntityTag>();
-
 		CollisionPair2D collisionPair;
 		uint32 indexA = 0;
 		uint32 indexB;
 
 		// TODO(physics/2d/broad-phase): Only register potentially overlapping entities.
-		while (indexA < dynamicPool.tagCount) {
-			collisionPair.shapeIdA = dynamicPool.tagIndexToEntity[indexA];
+		while (indexA < simulation.broadPhase.usedDynamicShapeIdCount) {
+			collisionPair.shapeIdA = simulation.broadPhase.dynamicShapeIds[indexA];
 
 			indexB = 0;
 
 			// Register all dynamic-static entity pairs.
-			while (indexB < staticPool.tagCount) {
-				collisionPair.shapeIdB = staticPool.tagIndexToEntity[indexB];
+			while (indexB < simulation.broadPhase.usedStaticShapeIdCount) {
+				collisionPair.shapeIdB = simulation.broadPhase.staticShapeIds[indexB];
 
 				simulation.collisionPairs.emplace_back(collisionPair);
 
@@ -127,8 +227,8 @@ namespace Trident {
 			indexB = indexA + 1;
 
 			// Register all dynamic-dynamic entity pairs.
-			while (indexB < dynamicPool.tagCount) {
-				collisionPair.shapeIdB = dynamicPool.tagIndexToEntity[indexB];
+			while (indexB < simulation.broadPhase.usedDynamicShapeIdCount) {
+				collisionPair.shapeIdB = simulation.broadPhase.dynamicShapeIds[indexB];
 
 				simulation.collisionPairs.emplace_back(collisionPair);
 
@@ -147,20 +247,20 @@ namespace Trident {
 		};
 
 		for (const CollisionPair2D collisionPair : simulation.collisionPairs) {
-			const RigidBody2DComponent& rigidBodyA = simulation.scene->ecs.getComponent<RigidBody2DComponent>(collisionPair.shapeIdA);
-			const RigidBody2DComponent& rigidBodyB = simulation.scene->ecs.getComponent<RigidBody2DComponent>(collisionPair.shapeIdB);
+			const Hull2D& shapeA = simulation.shapes[collisionPair.shapeIdA];
+			const Hull2D& shapeB = simulation.shapes[collisionPair.shapeIdB];
 
-			const Hull2D& hullA = getHull(simulation, collisionPair.shapeIdA);
-			const Hull2D& hullB = getHull(simulation, collisionPair.shapeIdB);
+			const RigidBody2DComponent& rigidBodyA = simulation.rigidBodies[shapeA.rigidBodyId];
+			const RigidBody2DComponent& rigidBodyB = simulation.rigidBodies[shapeB.rigidBodyId];
 
 			// The broad phase must ensure that A hull type < B hull type.
-			const Collider2D collider = COLLIDER_2D_TABLE[static_cast<uint32>(hullA.type)][static_cast<uint32>(hullB.type)];
+			const Collider2D collider = COLLIDER_2D_TABLE[static_cast<uint32>(shapeA.type)][static_cast<uint32>(shapeB.type)];
 
 			DEBUG_ASSERT(collider != nullptr);
 
 			ContactPair2D contactPair;
 
-			if (!collider(hullA, hullB, rigidBodyA, rigidBodyB, &contactPair.manifold)) {
+			if (!collider(shapeA, shapeB, rigidBodyA, rigidBodyB, &contactPair.manifold)) {
 				// Either a degenerate case, or the entities are not overlapping.
 				simulation.contactPairs.erase(collisionPair);
 
@@ -183,34 +283,27 @@ namespace Trident {
 		// TODO(physics/2d/apply-forces): Implement torque.
 		constexpr float32 torque = 0.0_Nm;
 
-		ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = simulation.scene->ecs.getComponentPool<RigidBody2DComponent>();
-		uint32 componentIndex = 0;
+		uint32 shapeIdIndex = 0;
 
 		// TODO(physics/2d/apply-forces): Integrate velocities on dynamic resting entities (e.g. an object on a moving platform may move due to inertia).
-		while (componentIndex < rigidBodyComponentPool.componentCount) {
-			RigidBody2DComponent& rigidBodyComponent = rigidBodyComponentPool.components[componentIndex];
+		while (shapeIdIndex < simulation.broadPhase.usedDynamicShapeIdCount) {
+			const Hull2D& shape = simulation.shapes[simulation.broadPhase.dynamicShapeIds[shapeIdIndex]];
 
-			// TODO(physics/2d/apply-forces): Exclude dynamic entities with an inverse mass of 0 from the loop.
-			if (rigidBodyComponent.inverseMass == 0.0_kg) {
-				componentIndex += 1;
+			RigidBody2DComponent& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
+			rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + simulation.gravity) * simulation.deltaTime;
+			rigidBody.angularVelocity += torque * rigidBody.inverseInertia * simulation.deltaTime;
 
-				continue;
-			}
-
-			rigidBodyComponent.linearVelocity += (rigidBodyComponent.force * rigidBodyComponent.inverseMass + simulation.gravity) * simulation.deltaTime;
-			rigidBodyComponent.angularVelocity += torque * rigidBodyComponent.inverseInertia * simulation.deltaTime;
-
-			componentIndex += 1;
+			shapeIdIndex += 1;
 		}
 	}
 
 	void updateContactManifolds(PhysicsSimulation2D& simulation) {
 		for (std::pair<const CollisionPair2D, ContactPair2D>& pair : simulation.contactPairs) {
-			RigidBody2DComponent& rigidBodyA = simulation.scene->ecs.getComponent<RigidBody2DComponent>(pair.first.shapeIdA);
-			RigidBody2DComponent& rigidBodyB = simulation.scene->ecs.getComponent<RigidBody2DComponent>(pair.first.shapeIdB);
+			const Hull2D& shapeA = simulation.shapes[pair.first.shapeIdA];
+			const Hull2D& shapeB = simulation.shapes[pair.first.shapeIdB];
 
-			const Hull2D& hullA = getHull(simulation, pair.first.shapeIdA);
-			const Hull2D& hullB = getHull(simulation, pair.first.shapeIdB);
+			RigidBody2DComponent& rigidBodyA = simulation.rigidBodies[shapeA.rigidBodyId];
+			RigidBody2DComponent& rigidBodyB = simulation.rigidBodies[shapeB.rigidBodyId];
 
 			ContactPair2D& contactPair = pair.second;
 			contactPair.friction = sqrt(rigidBodyA.friction * rigidBodyB.friction);
@@ -246,7 +339,7 @@ namespace Trident {
 					contact.massTangent = 1.0f / tangent;
 				}
 
-				const float32 penetrationBias = (hullA.getPenetrationBias() + hullB.getPenetrationBias()) * 0.5f;
+				const float32 penetrationBias = (shapeA.getPenetrationBias() + shapeB.getPenetrationBias()) * 0.5f;
 
 				contact.bias = -penetrationBias * simulation.inverseDeltaTime * min(0.0f, contact.separation + simulation.allowedPenetration);
 
@@ -323,8 +416,11 @@ namespace Trident {
 
 		while (iteration < simulation.impulseIterationCount) {
 			for (std::pair<const CollisionPair2D, ContactPair2D>& pair : simulation.contactPairs) {
-				RigidBody2DComponent& rigidBodyA = simulation.scene->ecs.getComponent<RigidBody2DComponent>(pair.first.shapeIdA);
-				RigidBody2DComponent& rigidBodyB = simulation.scene->ecs.getComponent<RigidBody2DComponent>(pair.first.shapeIdB);
+				const Hull2D& shapeA = simulation.shapes[pair.first.shapeIdA];
+				const Hull2D& shapeB = simulation.shapes[pair.first.shapeIdB];
+
+				RigidBody2DComponent& rigidBodyA = simulation.rigidBodies[shapeA.rigidBodyId];
+				RigidBody2DComponent& rigidBodyB = simulation.rigidBodies[shapeB.rigidBodyId];
 
 				ContactPair2D& contactPair = pair.second;
 
@@ -428,31 +524,22 @@ namespace Trident {
 	}
 
 	void integratePositions(PhysicsSimulation2D& simulation) {
-		ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = simulation.scene->ecs.getComponentPool<RigidBody2DComponent>();
-		uint32 componentIndex = 0;
+		uint32 shapeIdIndex = 0;
 
 		// TODO(physics/2d/integration): Integration for static entities (e.g. a moving platform that isn't affected by other forces)?
 		// TODO(physics/2d/integration): Integration for dynamic entities with infinite mass?
 		// TODO(physics/2d/integration): Integration for dynamic resting entities (e.g. an object on a moving platform may move due to inertia)?
-		while (componentIndex < rigidBodyComponentPool.componentCount) {
-			RigidBody2DComponent& rigidBodyComponent = rigidBodyComponentPool.components[componentIndex];
+		while (shapeIdIndex < simulation.broadPhase.usedDynamicShapeIdCount) {
+			const Hull2D& hull = simulation.shapes[simulation.broadPhase.dynamicShapeIds[shapeIdIndex]];
 
-			// TODO(physics/2d/integration): Exclude dynamic entities with an inverse mass of 0 from the loop.
-			if (rigidBodyComponent.inverseMass == 0.0_kg) {
-				componentIndex += 1;
+			RigidBody2DComponent& rigidBody = simulation.rigidBodies[hull.rigidBodyId];
+			rigidBody.position += rigidBody.linearVelocity * simulation.deltaTime;
+			rigidBody.rotation += rigidBody.angularVelocity * simulation.deltaTime;
+			rigidBody.updateWorld(hull.centroid);
 
-				continue;
-			}
+			rigidBody.force = {0.0_N, 0.0_N};
 
-			const Hull2D& hull = getHull(simulation, rigidBodyComponentPool.componentIndexToEntity[componentIndex]);
-
-			rigidBodyComponent.position += rigidBodyComponent.linearVelocity * simulation.deltaTime;
-			rigidBodyComponent.rotation += rigidBodyComponent.angularVelocity * simulation.deltaTime;
-			rigidBodyComponent.updateWorld(hull.centroid);
-
-			rigidBodyComponent.force = {0.0_N, 0.0_N};
-
-			componentIndex += 1;
+			shapeIdIndex += 1;
 		}
 	}
 }

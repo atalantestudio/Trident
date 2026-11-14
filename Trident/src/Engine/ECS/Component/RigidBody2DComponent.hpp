@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Engine/API/Physics/RigidBodyType.hpp"
+
 namespace Trident {
 	struct RigidBody2DComponent {
 		void updateWorld(vec2<float32> centroid) {
@@ -59,5 +61,7 @@ namespace Trident {
 
 		// TODO: Keep inside the rigid body?
 		vec2<float32> force;
+
+		RigidBodyType type;
 	};
 }

@@ -18,11 +18,11 @@ namespace Trident {
 		scene = allocateRef<Scene2D>(sceneAsset);
 
 		PhysicsSimulationDescriptor2D simulationDescriptor;
-		simulationDescriptor.scene = scene;
 		simulationDescriptor.deltaTime = getApplication()->getFixedDeltaTime();
 		simulationDescriptor.gravity = {0.0f, -9.80665f};
-		simulationDescriptor.impulseIterationCount = 10;
 		simulationDescriptor.allowedPenetration = 0.01f;
+		simulationDescriptor.impulseIterationCount = 10;
+		simulationDescriptor.scene = scene;
 
 		simulation = createSimulation(simulationDescriptor);
 
@@ -37,17 +37,15 @@ namespace Trident {
 
 		checkHover();
 
-		const ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
+		uint32 shapeIndex = 0;
 
-		uint32 componentIndex = 0;
+		while (shapeIndex < simulation.usedShapeCount) {
+			const Hull2D& shape = simulation.shapes[shapeIndex];
+			const RigidBody2DComponent& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 
-		while (componentIndex < rigidBodyComponentPool.componentCount) {
-			const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
-			const RigidBody2DComponent& rigidBodyComponent = rigidBodyComponentPool.components[componentIndex];
+			renderer.setWorld(shapeIndex, rigidBody.world);
 
-			renderer.setWorld(entity, rigidBodyComponent.world);
-
-			componentIndex += 1;
+			shapeIndex += 1;
 		}
 
 		renderer.selectEntity(selectedEntity);
@@ -70,34 +68,29 @@ namespace Trident {
 	void Physics2DSceneLayer::checkHover() {
 		hoveredEntity = max<Entity>();
 
-		const ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
-
-		if (rigidBodyComponentPool.componentCount == 0) {
+		if (simulation.usedShapeCount == 0) {
 			return;
 		}
 
-		const Hull2D mouseHull = Hull2D::point();
+		const Hull2D mouseShape = Hull2D::point();
 
-		RigidBody2DComponent mouseRigidBodyComponent{};
-		mouseRigidBodyComponent.position = renderer.cameraPosition + mousePosition;
-		mouseRigidBodyComponent.updateWorld(mouseHull.centroid);
+		RigidBody2DComponent mouseRigidBody{};
+		mouseRigidBody.position = renderer.cameraPosition + mousePosition;
+		mouseRigidBody.updateWorld(mouseShape.centroid);
 
-		sint32 componentIndex = static_cast<sint32>(rigidBodyComponentPool.componentCount) - 1;
+		sint32 shapeIndex = static_cast<sint32>(simulation.usedShapeCount) - 1;
 
-		while (componentIndex >= 0) {
-			const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
-			const Geometry2DComponent geometryComponent = scene->ecs.getComponent<Geometry2DComponent>(entity);
-			const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
-			const Hull2D& hull = scene->getHulls()[geometry.hullIndex];
-			const RigidBody2DComponent& rigidBodyComponent = scene->ecs.getComponent<RigidBody2DComponent>(entity);
+		while (shapeIndex >= 0) {
+			const Hull2D& shape = simulation.shapes[shapeIndex];
+			const RigidBody2DComponent& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 
-			if (GJK2DConditional(rigidBodyComponent, mouseRigidBodyComponent, hull, mouseHull)) {
-				hoveredEntity = entity;
+			if (GJK2DConditional(rigidBody, mouseRigidBody, shape, mouseShape)) {
+				hoveredEntity = shapeIndex;
 
 				break;
 			}
 
-			componentIndex -= 1;
+			shapeIndex -= 1;
 		}
 	}
 
@@ -169,13 +162,11 @@ namespace Trident {
 		}
 
 		if (event.getButton() == MouseButton::LEFT && selectedEntity != max<Entity>()) {
-			const Geometry2DComponent geometryComponent = scene->ecs.getComponent<Geometry2DComponent>(selectedEntity);
-			const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
-			const Hull2D& hull = scene->getHulls()[geometry.hullIndex];
+			const Hull2D shape = simulation.shapes[selectedEntity];
 
-			RigidBody2DComponent& rigidBody = scene->ecs.getComponent<RigidBody2DComponent>(selectedEntity);
+			RigidBody2DComponent& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 			rigidBody.position += placeholderOffset;
-			rigidBody.updateWorld(hull.centroid);
+			rigidBody.updateWorld(shape.centroid);
 
 			selectedEntity = max<Entity>();
 		}

@@ -12,16 +12,27 @@ namespace Trident {
 	#define ENABLE_PHYSICS_2D_WARM_STARTING
 
 	struct PhysicsSimulationDescriptor2D {
-		Scene2D* scene;
 		float64 deltaTime;
 
 		/// Left-handed gravity acceleration.
 		vec2<float32> gravity;
 
+		float32 allowedPenetration;
+
 		/// Number of iterations in the sequential solver.
 		uint32 impulseIterationCount;
 
-		float32 allowedPenetration;
+		const Scene2D* scene;
+	};
+
+	struct BroadPhase2D {
+		sequence<ShapeID2D> staticShapeIds;
+		sequence<ShapeID2D> kinematicShapeIds;
+		sequence<ShapeID2D> dynamicShapeIds;
+
+		uint32 usedStaticShapeIdCount;
+		uint32 usedKinematicShapeIdCount;
+		uint32 usedDynamicShapeIdCount;
 	};
 
 	/// A simulated 2D physics world.
@@ -29,14 +40,19 @@ namespace Trident {
 		float32 deltaTime;
 		float32 inverseDeltaTime;
 		vec2<float32> gravity;
+		float32 allowedPenetration;
+		uint32 impulseIterationCount;
 
 		// Index of the current tick since world creation.
 		uint32 tick;
 
-		uint32 impulseIterationCount;
-		float32 allowedPenetration;
+		sequence<RigidBody2DComponent> rigidBodies;
+		sequence<Hull2D> shapes;
 
-		Scene2D* scene;
+		uint32 usedRigidBodyCount;
+		uint32 usedShapeCount;
+
+		BroadPhase2D broadPhase;
 
 		std::vector<CollisionPair2D> collisionPairs;
 		std::map<CollisionPair2D, ContactPair2D> contactPairs;
@@ -44,7 +60,9 @@ namespace Trident {
 
 	PhysicsSimulation2D createSimulation(const PhysicsSimulationDescriptor2D& descriptor);
 
-	void tick(PhysicsSimulation2D& simulation);
+	RigidBodyID2D createRigidBody(PhysicsSimulation2D& simulation, const RigidBody2DComponent& descriptor);
+
+	ShapeID2D createShape(PhysicsSimulation2D& simulation, const Hull2D& descriptor);
 
 	void broadPhase(PhysicsSimulation2D& simulation);
 	void narrowPhase(PhysicsSimulation2D& simulation);
@@ -53,4 +71,6 @@ namespace Trident {
 	// void updateJoints(PhysicsSimulation2D& simulation);
 	void applyImpulses(PhysicsSimulation2D& simulation);
 	void integratePositions(PhysicsSimulation2D& simulation);
+
+	void tick(PhysicsSimulation2D& simulation);
 }

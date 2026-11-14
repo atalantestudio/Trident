@@ -625,9 +625,9 @@ namespace Trident {
 
 		while (componentIndex < componentCount) {
 			const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
-			const RigidBody2DComponent& rigidBodyComponent = rigidBodyComponentPool.components[componentIndex];
+			const vec2<float32> p = vec2<float32>{0.0f, 0.0f} * rigidBodyMappedRange[componentIndex].world;
 
-			centerOfMassMappedRange[entity].position = {rigidBodyComponent.position[0], rigidBodyComponent.position[1], componentIndex * inverseComponentCount};
+			centerOfMassMappedRange[entity].position = {p[0], p[1], componentIndex * inverseComponentCount};
 			componentIndex += 1;
 		}
 	}
