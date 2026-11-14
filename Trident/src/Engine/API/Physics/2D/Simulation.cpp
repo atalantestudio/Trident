@@ -10,23 +10,17 @@
 #include "Engine/ECS/Tag.hpp"
 
 namespace Trident {
-	static const Hull2D& getHull(const Scene2D& scene, Entity entity) {
-		const view<Hull2D>& hulls = scene.getHulls();
-		const Geometry2DComponent geometryComponent = scene.ecs.getComponent<Geometry2DComponent>(entity);
-		const Geometry2D& geometry = scene.getGeometries()[geometryComponent.geometryIndex];
-
-		ENGINE_ASSERT(geometry.hullIndex < hulls.count(), "The geometry doesn't have a hull.");
-
-		return hulls[geometry.hullIndex];
-	}
-
 	template<typename Tag>
 	static void importRigidBodiesAndShapesFromComponentPool(PhysicsSimulation2D& simulation, const Scene2D& scene, const TagPool<Tag>& pool, RigidBodyType rigidBodyType) {
+		const view<Hull2D>& hulls = scene.getHulls();
+
 		uint32 tagIndex = 0;
 
 		while (tagIndex < pool.tagCount) {
 			const Entity entity = pool.tagIndexToEntity[tagIndex];
 			const RigidBody2DComponent rigidBodyComponent = scene.ecs.getComponent<RigidBody2DComponent>(entity);
+			const Geometry2DComponent geometryComponent = scene.ecs.getComponent<Geometry2DComponent>(entity);
+			const Geometry2D& geometry = scene.getGeometries()[geometryComponent.geometryIndex];
 
 			RigidBodyDescriptor2D rigidBodyDescriptor{};
 			rigidBodyDescriptor.type = rigidBodyType;
@@ -38,7 +32,7 @@ namespace Trident {
 
 			const RigidBodyID2D rigidBodyId = createRigidBody(simulation, rigidBodyDescriptor);
 
-			Hull2D hull = getHull(scene, rigidBodyId);
+			Hull2D hull = hulls[geometry.hullIndex];
 			hull.rigidBodyId = rigidBodyId;
 			hull.material.friction = rigidBodyComponent.friction;
 
