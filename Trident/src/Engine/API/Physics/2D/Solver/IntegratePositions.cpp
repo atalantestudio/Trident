@@ -6,22 +6,46 @@
 #include "Engine/API/Physics/2D/Simulation.hpp"
 
 namespace Trident {
-	void integratePositions(PhysicsSimulation2D& simulation) {
+	static void integratePositionsType(PhysicsSimulation2D& simulation, view<ShapeID2D> shapeIds) {
 		uint32 shapeIdIndex = 0;
 
-		// TODO(physics/2d/integration): Integration for static entities (e.g. a moving platform that isn't affected by other forces)?
-		// TODO(physics/2d/integration): Integration for dynamic entities with infinite mass?
-		// TODO(physics/2d/integration): Integration for dynamic resting entities (e.g. an object on a moving platform may move due to inertia)?
-		while (shapeIdIndex < simulation.broadPhase.usedDynamicShapeIdCount) {
-			const Hull2D& shape = simulation.shapes[simulation.broadPhase.dynamicShapeIds[shapeIdIndex]];
+		while (shapeIdIndex < shapeIds.count()) {
+			const Hull2D& shape = simulation.shapes[shapeIds[shapeIdIndex]];
 
 			RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
+
+			if (rigidBody.flags & RigidBodyFlags2D::DISABLE_SIMULATION) {
+				shapeIdIndex += 1;
+
+				continue;
+			}
+
+			if (rigidBody.flags & RigidBodyFlags2D::LOCK_LINEAR_X_MOVEMENT) {
+				rigidBody.linearVelocity.x = 0.0f;
+			}
+
+			if (rigidBody.flags & RigidBodyFlags2D::LOCK_LINEAR_Y_MOVEMENT) {
+				rigidBody.linearVelocity.x = 0.0f;
+			}
+
+			if (rigidBody.flags & RigidBodyFlags2D::LOCK_ANGULAR_MOVEMENT) {
+				rigidBody.angularVelocity = 0.0f;
+			}
+
 			rigidBody.position += rigidBody.linearVelocity * simulation.deltaTime;
+			// rigidBody.transform.rotation = integrateRotation(rigidBody.transform.rotation, rigidBody.angularVelocity * simulation.deltaTime);
 			rigidBody.rotation += rigidBody.angularVelocity * simulation.deltaTime;
+			// rigidBody.transform.rotation.setAngle(rigidBody.rotation);
+
 			rigidBody.force = {0.0f, 0.0f};
 			rigidBody.torque = 0.0f;
 
 			shapeIdIndex += 1;
 		}
+	}
+
+	void integratePositions(PhysicsSimulation2D& simulation) {
+		integratePositionsType(simulation, view<ShapeID2D>(&simulation.broadPhase.kinematicShapeIds[0], simulation.broadPhase.usedKinematicShapeIdCount));
+		integratePositionsType(simulation, view<ShapeID2D>(&simulation.broadPhase.dynamicShapeIds[0], simulation.broadPhase.usedDynamicShapeIdCount));
 	}
 }

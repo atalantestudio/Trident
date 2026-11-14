@@ -51,7 +51,8 @@ namespace Trident {
 	}
 
 	void narrowPhase(PhysicsSimulation2D& simulation) {
-		static constexpr Collider2D COLLIDER_2D_TABLE[static_cast<uint32>(Hull2DType::count)][static_cast<uint32>(Hull2DType::count)] = {
+		static constexpr uint32 SHAPE_TYPE_COUNT = static_cast<uint32>(Hull2DType::count);
+		static constexpr Collider2D COLLIDER_2D_TABLE[SHAPE_TYPE_COUNT][SHAPE_TYPE_COUNT] = {
 			{nullptr, nullptr, nullptr},
 			{nullptr, CircleCircle2D, CircleConvexHull2D},
 			{nullptr, nullptr, ConvexHullConvexHull2D},
@@ -61,13 +62,14 @@ namespace Trident {
 			const Hull2D& shapeA = simulation.shapes[collisionPair.shapeIdA];
 			const Hull2D& shapeB = simulation.shapes[collisionPair.shapeIdB];
 
-			const RigidBody2D& rigidBodyA = simulation.rigidBodies[shapeA.rigidBodyId];
-			const RigidBody2D& rigidBodyB = simulation.rigidBodies[shapeB.rigidBodyId];
+			DEBUG_ASSERT(shapeA.type <= shapeB.type);
 
-			// The broad phase must ensure that A hull type < B hull type.
 			const Collider2D collider = COLLIDER_2D_TABLE[static_cast<uint32>(shapeA.type)][static_cast<uint32>(shapeB.type)];
 
 			DEBUG_ASSERT(collider != nullptr);
+
+			const RigidBody2D& rigidBodyA = simulation.rigidBodies[shapeA.rigidBodyId];
+			const RigidBody2D& rigidBodyB = simulation.rigidBodies[shapeB.rigidBodyId];
 
 			ContactPair2D contactPair;
 
@@ -78,7 +80,7 @@ namespace Trident {
 				continue;
 			}
 
-			const std::map<CollisionPair2D, ContactPair2D>::iterator contactPairIterator = simulation.contactPairs.find(collisionPair);
+			const std::map<const CollisionPair2D, ContactPair2D>::iterator contactPairIterator = simulation.contactPairs.find(collisionPair);
 
 			if (contactPairIterator == simulation.contactPairs.end()) {
 				simulation.contactPairs.insert({collisionPair, contactPair});

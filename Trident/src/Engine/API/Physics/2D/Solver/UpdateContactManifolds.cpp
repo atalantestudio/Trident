@@ -6,17 +6,35 @@
 #include "Engine/API/Physics/2D/Simulation.hpp"
 
 namespace Trident {
+	static float32 getPenetrationBias(const Hull2D& shape) {
+		switch (shape.type) {
+			case Hull2DType::CIRCLE: {
+				return 0.01f;
+			}
+			case Hull2DType::POLYGON: {
+				return 0.2f;
+			}
+			default: {
+				DEBUG_ASSERT(false);
+
+				return 0.0f;
+			}
+		}
+	}
+
 	void updateContactManifolds(PhysicsSimulation2D& simulation) {
 		for (std::pair<const CollisionPair2D, ContactPair2D>& pair : simulation.contactPairs) {
 			const Hull2D& shapeA = simulation.shapes[pair.first.shapeIdA];
 			const Hull2D& shapeB = simulation.shapes[pair.first.shapeIdB];
 
+			const float32 penetrationBias = (getPenetrationBias(shapeA) + getPenetrationBias(shapeB)) * 0.5f;
+
 			RigidBody2D& rigidBodyA = simulation.rigidBodies[shapeA.rigidBodyId];
 			RigidBody2D& rigidBodyB = simulation.rigidBodies[shapeB.rigidBodyId];
 
 			ContactPair2D& contactPair = pair.second;
-			contactPair.friction = sqrt(shapeA.material.friction * shapeB.material.friction);
 			contactPair.manifold.tangent = perpendicularRight(contactPair.manifold.normal);
+			contactPair.friction = sqrt(shapeA.material.friction * shapeB.material.friction);
 
 			uint8 contactIndex = 0;
 
@@ -47,8 +65,6 @@ namespace Trident {
 
 					contact.massTangent = 1.0f / tangent;
 				}
-
-				const float32 penetrationBias = (shapeA.getPenetrationBias() + shapeB.getPenetrationBias()) * 0.5f;
 
 				contact.bias = -penetrationBias * simulation.inverseDeltaTime * min(0.0f, contact.separation + simulation.allowedPenetration);
 
