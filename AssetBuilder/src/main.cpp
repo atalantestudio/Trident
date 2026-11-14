@@ -7,6 +7,7 @@
 #include "AssetBuilder/API/Font/GlyphRasterizer.hpp"
 #include "AssetBuilder/API/Lightmapper/Lightmapper.hpp"
 #include "AssetBuilder/Process/Font/DefaultFont.hpp"
+#include "AssetBuilder/Process/Geometry/2D/Floor.hpp"
 #include "AssetBuilder/Process/Geometry/2D/Polygon.hpp"
 #include "AssetBuilder/Process/Geometry/2D/Triangle.hpp"
 #include "AssetBuilder/Process/Geometry/2D/UnitCircle.hpp"
@@ -116,10 +117,11 @@ namespace Trident {
 
 		private:
 			void registerProcesses() {
-				allocateProcesses(77);
+				allocateProcesses(78);
 
 				registerProcess<BuildGeometryAssetProcess>(&assetLibrary);
 
+				registerProcess<FloorGeometry2D>(&assetLibrary);
 				registerProcess<PolygonGeometry2D>(&assetLibrary);
 				registerProcess<TriangleGeometry2D>(&assetLibrary);
 				registerProcess<UnitCircleGeometry2D>(&assetLibrary);
