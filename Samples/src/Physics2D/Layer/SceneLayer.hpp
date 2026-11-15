@@ -50,7 +50,7 @@ namespace Trident {
 		private:
 			PhysicsSimulation2D simulation;
 			Physics2DRenderer renderer;
-			PhysicsRendererBuildOptions2D rendererOptions;
+			PhysicsRendererBuildOptions2D rendererBuildOptions;
 
 			sequence<BoxHull2D> boxHulls;
 

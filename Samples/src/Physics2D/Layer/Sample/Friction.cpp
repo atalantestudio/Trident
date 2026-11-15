@@ -9,8 +9,8 @@ namespace Trident {
 	void Physics2DSceneLayer::LoadFrictionSample(PhysicsSimulationDescriptor2D& simulationDescriptor) {
 		static constexpr float32 FRICTIONS[] = {0.75f, 0.5f, 0.35f, 0.1f, 0.0f};
 
-		rendererOptions.hulls = sequence<PhysicsRendererBuildHull2D>(4);
-		rendererOptions.maxCircleInstanceCount = 0;
+		rendererBuildOptions.hulls = sequence<PhysicsRendererBuildHull2D>(4);
+		rendererBuildOptions.maxCircleInstanceCount = 0;
 
 		simulationDescriptor.maxStaticRigidBodyCount = 6;
 		simulationDescriptor.maxKinematicAndDynamicRigidBodyCount = 5;

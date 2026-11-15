@@ -8,10 +8,10 @@
 
 namespace Trident {
 	void Physics2DSceneLayer::initialize() {
-		rendererOptions.sampleCount = ImageSampleCount::x1;
-		rendererOptions.cameraPosition = {0.0f, 8.0f};
-		rendererOptions.zoomLevel = 36.0f;
-		rendererOptions.maxContactCount = 2048;
+		rendererBuildOptions.sampleCount = ImageSampleCount::x1;
+		rendererBuildOptions.cameraPosition = {0.0f, 8.0f};
+		rendererBuildOptions.zoomLevel = 36.0f;
+		rendererBuildOptions.maxContactCount = 2048;
 
 		PhysicsSimulationDescriptor2D simulationDescriptor;
 		simulationDescriptor.deltaTime = getApplication()->getFixedDeltaTime();
@@ -50,7 +50,7 @@ namespace Trident {
 		}
 
 		renderer.setLayer(this);
-		renderer.build(rendererOptions);
+		renderer.build(rendererBuildOptions);
 	}
 
 	StaticMemoryDescriptor Physics2DSceneLayer::getStaticMemoryDescriptor() const {
@@ -110,7 +110,7 @@ namespace Trident {
 		for (const std::pair<const CollisionPair2D, ContactPair2D>& pair : simulation.contactPairs) {
 			const ContactManifold2D& contactManifold = pair.second.manifold;
 
-			if (contactCount + contactManifold.contactCount >= rendererOptions.maxContactCount) {
+			if (contactCount + contactManifold.contactCount >= rendererBuildOptions.maxContactCount) {
 				break;
 			}
 
@@ -173,7 +173,7 @@ namespace Trident {
 	}
 
 	void Physics2DSceneLayer::registerHullForRender(const HullHeader2D* hullHeader) {
-		PhysicsRendererBuildHull2D& hull = rendererOptions.hulls[hullHeader->userIndex - 1];
+		PhysicsRendererBuildHull2D& hull = rendererBuildOptions.hulls[hullHeader->userIndex - 1];
 		hull.hullHeader = hullHeader;
 		hull.maxInstanceCount = 128;
 	}

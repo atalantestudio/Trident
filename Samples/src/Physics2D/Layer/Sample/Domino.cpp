@@ -7,8 +7,8 @@
 
 namespace Trident {
 	void Physics2DSceneLayer::LoadDominoSample(PhysicsSimulationDescriptor2D& simulationDescriptor) {
-		rendererOptions.hulls = sequence<PhysicsRendererBuildHull2D>(6);
-		rendererOptions.maxCircleInstanceCount = 0;
+		rendererBuildOptions.hulls = sequence<PhysicsRendererBuildHull2D>(6);
+		rendererBuildOptions.maxCircleInstanceCount = 0;
 
 		simulationDescriptor.maxStaticRigidBodyCount = 4;
 		simulationDescriptor.maxKinematicAndDynamicRigidBodyCount = 11;
@@ -64,7 +64,7 @@ namespace Trident {
 			.rigidBodyId = createRigidBody(simulation, {
 				.type = RigidBodyType::STATIC,
 				.position = {1.0f, 6.0f},
-				.rotation = 0.3f,
+				.rotation = -0.3f,
 			}),
 			.material = material,
 			.density = 1.0f,

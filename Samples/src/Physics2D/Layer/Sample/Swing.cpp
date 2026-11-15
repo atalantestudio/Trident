@@ -7,8 +7,8 @@
 
 namespace Trident {
 	void Physics2DSceneLayer::LoadSwingSample(PhysicsSimulationDescriptor2D& simulationDescriptor) {
-		rendererOptions.hulls = sequence<PhysicsRendererBuildHull2D>(5);
-		rendererOptions.maxCircleInstanceCount = 0;
+		rendererBuildOptions.hulls = sequence<PhysicsRendererBuildHull2D>(5);
+		rendererBuildOptions.maxCircleInstanceCount = 0;
 
 		simulationDescriptor.maxStaticRigidBodyCount = 2;
 		simulationDescriptor.maxKinematicAndDynamicRigidBodyCount = 4;

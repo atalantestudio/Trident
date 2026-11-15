@@ -88,8 +88,6 @@ namespace Trident {
 		shape.material = descriptor.material;
 		shape.density = descriptor.density;
 
-		RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
-
 		switch (shape.type) {
 			case ShapeType2D::CIRCLE: {
 				shape.circle = *static_cast<const CircleShape2D*>(typeDescriptor);
@@ -116,6 +114,7 @@ namespace Trident {
 
 		updateMassAndInertia(simulation, shape.rigidBodyId);
 
+		const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 		const uint32 id = simulation.usedShapeCount;
 
 		switch (rigidBody.type) {
