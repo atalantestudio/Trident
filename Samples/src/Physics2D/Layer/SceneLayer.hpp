@@ -47,7 +47,7 @@ namespace Trident {
 			void LoadCircleSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
 			void LoadDominoSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
 			void LoadFrictionSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
-			// void LoadPolygonSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
+			void LoadPolygonSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
 			void LoadSlideSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
 			void LoadSwingSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
 

@@ -42,7 +42,9 @@ namespace Trident {
 		else if (SampleName == "friction") {
 			LoadFrictionSample(simulationDescriptor);
 		}
-		// TODO(physics/2d): Add polygon demo.
+		else if (SampleName == "polygon") {
+			LoadPolygonSample(simulationDescriptor);
+		}
 		else if (SampleName == "slide") {
 			LoadSlideSample(simulationDescriptor);
 		}
