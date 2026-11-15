@@ -19,11 +19,11 @@ namespace Trident {
 		/// The distance between the center and the farthest vertex.
 		float32 radius;
 
-		float32 mass;
-
 		// TODO(physics/2d/hull/bounds)
 		/// Axis-aligned box in local space.
 		// AABB2D bounds;
+
+		float32 mass;
 
 		/// The inertia about the centroid.
 		float32 inertia;

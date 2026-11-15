@@ -18,12 +18,7 @@ namespace Trident {
 
 				sequence<EntityComponentMapping<Geometry2DComponent>> geometryMappings(entityCount);
 				sequence<EntityComponentMapping<RigidBody2DComponent>> rigidBodyMappings(entityCount);
-
 				Entity entity = 0;
-
-				geometryMappings[entity] = {entity, {1}};
-
-				entity += 1;
 
 				while (entity < geometryMappings.count()) {
 					geometryMappings[entity] = {entity, {0}};
@@ -37,7 +32,7 @@ namespace Trident {
 					createRigidBody({
 						.position = {0.0_m, -10.0_m},
 						.rotation = 0.0_rad,
-						.scale = {1.0f, 1.0f},
+						.scale = {100.0f, 20.0f},
 						.mass = max<float32>(),
 						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 						.friction = 0.2f,
@@ -70,7 +65,6 @@ namespace Trident {
 						.entityCount = entityCount,
 						.geometryAssetIdentifiers = {
 							assetLibrary->getAsset<Geometry2DAsset>("2d_unit_square")->identifier,
-							assetLibrary->getAsset<Geometry2DAsset>("2d_floor")->identifier,
 						},
 						.geometryMappings = geometryMappings,
 						.rigidBodyMappings = rigidBodyMappings,
