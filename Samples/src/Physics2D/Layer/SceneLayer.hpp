@@ -52,7 +52,6 @@ namespace Trident {
 			void LoadSwingSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
 
 		private:
-			ref<Scene2D> scene;
 			PhysicsSimulation2D simulation;
 			Physics2DRenderer renderer;
 			PhysicsRendererBuildOptions2D rendererBuildOptions;

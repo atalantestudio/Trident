@@ -8,7 +8,6 @@
 #include "Engine/API/Physics/2D/RigidBody.hpp"
 #include "Engine/API/Physics/2D/Shape/Hull/BoxHull.hpp"
 #include "Engine/API/Physics/2D/Shape/Shape.hpp"
-#include "Engine/API/Scene/Scene2D.hpp"
 
 namespace Trident {
 	#define ENABLE_PHYSICS_2D_IMPULSE_ACCUMULATION
@@ -25,14 +24,11 @@ namespace Trident {
 		/// Number of iterations in the sequential solver.
 		uint32 impulseIterationCount;
 
-
 		// TODO(physics/2d): Ensure that x > 0.
 		uint32 maxStaticRigidBodyCount;
 		uint32 maxKinematicAndDynamicRigidBodyCount;
 		uint32 maxStaticShapeCount;
 		uint32 maxKinematicAndDynamicShapeCount;
-
-		const Scene2D* scene = nullptr;
 	};
 
 	struct BroadPhase2D {
@@ -67,9 +63,6 @@ namespace Trident {
 		std::vector<CollisionPair2D> collisionPairs;
 		std::map<CollisionPair2D, ContactPair2D> contactPairs;
 	};
-
-	// TODO(wip)
-	extern HullHeader2D importedHullHeaders[100];
 
 	PhysicsSimulation2D createSimulation(const PhysicsSimulationDescriptor2D& descriptor);
 

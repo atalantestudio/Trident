@@ -15,18 +15,14 @@ namespace Trident {
 			return false;
 		}
 
-		// The scaling factor is assumed to be the same in both axes.
-		const float32 scaleA = rigidBodyA.scale[0];
-		const float32 scaleB = rigidBodyB.scale[0];
-
-		const float32 d = lengthAB - pow(shapeA.circle.radius * scaleA + shapeB.circle.radius * scaleB, 2.0f);
+		const float32 d = lengthAB - pow(shapeA.circle.radius + shapeB.circle.radius, 2.0f);
 
 		if (d > 0.0f) {
 			return false;
 		}
 
-		const vec2<float32> sA = rigidBodyA.position + vertexSupport(shapeA, AB) * scaleA;
-		const vec2<float32> sB = rigidBodyB.position + vertexSupport(shapeB, -AB) * scaleB;
+		const vec2<float32> sA = rigidBodyA.position + vertexSupport(shapeA, AB);
+		const vec2<float32> sB = rigidBodyB.position + vertexSupport(shapeB, -AB);
 
 		manifold->normal = normalized(AB);
 		manifold->contactCount = 1;

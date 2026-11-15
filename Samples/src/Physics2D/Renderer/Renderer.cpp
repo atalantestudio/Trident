@@ -524,7 +524,7 @@ namespace Trident {
 		instanceOffset = maxCircleInstanceCount;
 
 		// Draw hull shape wireframes.
-		{
+		if (lineStripIndexOffset < indexBuffer->getSize()) {
 			commandEncoder->bindGraphicsPipeline(shapeStrokePipeline);
 			commandEncoder->bindVertexBuffer(1, instanceBuffer, 0);
 			commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(indexBuffer, lineStripIndexOffset);

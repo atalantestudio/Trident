@@ -51,7 +51,7 @@ namespace Trident {
 	}
 
 	void narrowPhase(PhysicsSimulation2D& simulation) {
-		static constexpr uint32 SHAPE_TYPE_COUNT = static_cast<uint32>(Hull2DType::count);
+		static constexpr uint32 SHAPE_TYPE_COUNT = static_cast<uint32>(ShapeType2D::count);
 		static constexpr Collider2D COLLIDER_2D_TABLE[SHAPE_TYPE_COUNT][SHAPE_TYPE_COUNT] = {
 			{CircleCircle2D, CircleConvexHull2D},
 			{nullptr, ConvexHullConvexHull2D},
