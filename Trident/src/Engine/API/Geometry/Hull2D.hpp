@@ -5,8 +5,6 @@
 
 #include "Engine/API/Geometry/Edge.hpp"
 #include "Engine/API/Geometry/Hull2DType.hpp"
-#include "Engine/API/Physics/2D/Base.hpp"
-#include "Engine/API/Physics/Material.hpp"
 
 namespace Trident {
 	/// A convex hull wrapping a 2D geometry.
@@ -70,9 +68,5 @@ namespace Trident {
 
 			// TODO(physics/2d/hull): Replace with a view inside a contiguous buffer.
 			sequence<Edge2D> edges;
-
-			RigidBodyID2D rigidBodyId;
-
-			PhysicsMaterial material;
 	};
 }

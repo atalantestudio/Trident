@@ -18,7 +18,7 @@ namespace Trident {
 		/// The distance between the center and the farthest vertex.
 		float32 radius;
 
-		// TODO(physics/2d/hull/bounds)
+		// TODO(physics/2d/shape/hull/bounds)
 		/// Axis-aligned box in local space.
 		// AABB2D bounds;
 
