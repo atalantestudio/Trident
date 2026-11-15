@@ -71,6 +71,9 @@ namespace Trident {
 		// #define DEBUG_ENUMERATE_ASSET_MAP_DATA
 	#endif
 
+	/// Whether to enable warm starting in 2D physics simulations.
+	#define ENABLE_PHYSICS_2D_WARM_STARTING
+
 	/// If enabled, glyphs with a single contour are checked to ensure that the contour is clockwise.
 	/// Otherwise, a warning is outputted and the contour's winding order is inverted.
 	#define TTF_FIX_INVERTED_CONTOURS

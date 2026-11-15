@@ -43,7 +43,7 @@ namespace Trident {
 
 						normalImpulseLength = (-relativeVelocityTowardsNormal + contact.bias) * contact.massNormal;
 
-						#if defined(ENABLE_PHYSICS_2D_IMPULSE_ACCUMULATION)
+						#if defined(ENABLE_PHYSICS_2D_WARM_STARTING)
 							const float32 oldNormalValue = contact.accumulatedNormalImpulse;
 
 							contact.accumulatedNormalImpulse = max(0.0f, oldNormalValue + normalImpulseLength);
@@ -67,7 +67,7 @@ namespace Trident {
 
 						float32 tangentImpulseLength = -relativeVelocityTowardsTangent * contact.massTangent;
 
-						#if defined(ENABLE_PHYSICS_2D_IMPULSE_ACCUMULATION)
+						#if defined(ENABLE_PHYSICS_2D_WARM_STARTING)
 							const float32 maxTangentImpulseLength = contactPair.friction * contact.accumulatedNormalImpulse;
 							const float32 oldTangentValue = contact.accumulatedTangentImpulse;
 

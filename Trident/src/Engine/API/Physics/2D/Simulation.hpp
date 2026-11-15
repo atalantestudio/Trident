@@ -10,9 +10,6 @@
 #include "Engine/API/Physics/2D/Shape/Shape.hpp"
 
 namespace Trident {
-	#define ENABLE_PHYSICS_2D_IMPULSE_ACCUMULATION
-	#define ENABLE_PHYSICS_2D_WARM_STARTING
-
 	struct PhysicsSimulationDescriptor2D {
 		float64 deltaTime;
 

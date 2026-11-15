@@ -68,7 +68,7 @@ namespace Trident {
 
 				contact.bias = -penetrationBias * simulation.inverseDeltaTime * min(0.0f, contact.separation + simulation.allowedPenetration);
 
-				#if defined(ENABLE_PHYSICS_2D_IMPULSE_ACCUMULATION)
+				#if defined(ENABLE_PHYSICS_2D_WARM_STARTING)
 					const vec2<float32> j = contactPair.manifold.normal * contact.accumulatedNormalImpulse + contactPair.manifold.tangent * contact.accumulatedTangentImpulse;
 
 					applyImpulse(rigidBodyA, -j, contact.rA);
