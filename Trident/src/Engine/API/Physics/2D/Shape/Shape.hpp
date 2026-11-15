@@ -36,9 +36,9 @@ namespace Trident {
 		};
 	};
 
-	/// Returns the index of the farthest vertex along `d` in the local space of the shape.
+	/// Returns the index of the farthest vertex along `d`.
 	uint32 indexSupport(
-		/// The shape to get a vertex support from.
+		/// The shape to evaluate.
 		/// Must have the CONVEX_HULL type.
 		const Shape2D& shape,
 
@@ -49,7 +49,7 @@ namespace Trident {
 
 	/// Returns the farthest vertex along `d` in the local space of the shape.
 	vec2<float32> vertexSupport(
-		/// The shape to get a vertex support from.
+		/// The shape to evaluate.
 		const Shape2D& shape,
 
 		/// The direction vector.
