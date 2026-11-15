@@ -33,6 +33,8 @@ namespace Trident {
 			const Shape2D& shapeA = simulation.shapes[pair.first.shapeIdA];
 			const Shape2D& shapeB = simulation.shapes[pair.first.shapeIdB];
 
+			const float32 penetrationBias = (getPenetrationBias(shapeA) + getPenetrationBias(shapeB)) * 0.5f;
+
 			RigidBody2D& rigidBodyA = simulation.rigidBodies[shapeA.rigidBodyId];
 			RigidBody2D& rigidBodyB = simulation.rigidBodies[shapeB.rigidBodyId];
 
@@ -70,9 +72,7 @@ namespace Trident {
 					contact.massTangent = 1.0f / tangent;
 				}
 
-				const float32 penetrationBias = (getPenetrationBias(shapeA) + getPenetrationBias(shapeB)) * 0.5f;
-
-				contact.bias = -penetrationBias * simulation.inverseDeltaTime * min(0.0f, contact.separation + ALLOWED_PENETRATION);
+				contact.bias = -penetrationBias * simulation.inverseDeltaTime * min(0.0f, contact.separation + simulation.allowedPenetration);
 
 				#if defined(ENABLE_PHYSICS_2D_IMPULSE_ACCUMULATION)
 					const vec2<float32> j = contactPair.manifold.normal * contact.accumulatedNormalImpulse + contactPair.manifold.tangent * contact.accumulatedTangentImpulse;

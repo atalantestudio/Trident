@@ -13,9 +13,10 @@ namespace Trident {
 		rendererOptions.zoomLevel = 36.0f;
 		rendererOptions.maxContactCount = 2048;
 
-		PhysicsSimulation2DDescriptor simulationDescriptor;
-		simulationDescriptor.deltaTime = static_cast<float32>(getApplication()->getFixedDeltaTime());
+		PhysicsSimulationDescriptor2D simulationDescriptor;
+		simulationDescriptor.deltaTime = getApplication()->getFixedDeltaTime();
 		simulationDescriptor.gravity = {0.0f, -9.80665f};
+		simulationDescriptor.allowedPenetration = 0.01f;
 		simulationDescriptor.impulseIterationCount = 10;
 
 		const view<char8> SampleName = getApplication()->getPropertyFile()->getProperty<view<char8>>("SampleName");

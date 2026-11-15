@@ -6,7 +6,7 @@
 #include "Physics2D/Layer/SceneLayer.hpp"
 
 namespace Trident {
-	void Physics2DSceneLayer::LoadFrictionSample(PhysicsSimulation2DDescriptor& simulationDescriptor) {
+	void Physics2DSceneLayer::LoadFrictionSample(PhysicsSimulationDescriptor2D& simulationDescriptor) {
 		static constexpr float32 FRICTIONS[] = {0.75f, 0.5f, 0.35f, 0.1f, 0.0f};
 
 		rendererOptions.hulls = sequence<PhysicsRendererBuildHull2D>(4);

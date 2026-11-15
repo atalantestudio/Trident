@@ -3,92 +3,91 @@
 
 #include "pch.hpp"
 
-#include "Engine/API/Physics/2D/Collider/Collider2D.hpp"
-#include "Engine/API/Physics/2D/Feature2D.hpp"
-#include "Engine/API/Physics/2D/SAT2D.hpp"
+#include "Engine/API/Physics/2D/Collider/Collider.hpp"
+#include "Engine/API/Physics/2D/Contact/ClipFeature.hpp"
+#include "Engine/API/Physics/2D/SAT/SATConvexHullConvexHull.hpp"
 
 namespace Trident {
-	// Returns the farthest edge along `d` in world-space.
-	static ClipFeature2D incidentEdgeSupport(const RigidBody2D& rigidBody, const Shape2D& shape, vec2<float32> d) {
-		const uint16 vertexCount = shape.hull->vertexCount;
-		const vec2<float32>* vertices = shape.hull->getVertices();
+	/// Finds and returns the incident edge on the provided rigid body.
+	static ClipFeature2D findIncidentEdge(const RigidBody2D& incidentBody, const Shape2D& incidentShape, vec2<float32> referenceEdgeNormal) {
+		const vec2<float32>* vertices = incidentShape.hull->getVertices();
 
-		ClipFeature2D edge{};
-		edge.vertexCount = 2;
+		ClipFeature2D incidentEdge{};
+		incidentEdge.vertexCount = 2;
 
-		float32 maxAngle = min<float32>();
-		uint32 edgeIndexA = 0;
-		uint32 edgeIndexB = 0;
+		float32 minAngle = max<float32>();
+		uint16 vertexIndex = 0;
 		uint16 indexA = 0;
 
-		while (indexA < vertexCount) {
-			const uint32 indexB = (indexA + 1) % vertexCount;
+		while (indexA < incidentShape.hull->vertexCount) {
+			const uint16 indexB = (indexA + 1) % incidentShape.hull->vertexCount;
 			const vec2<float32> a = vertices[indexA];
 			const vec2<float32> b = vertices[indexB];
-			const vec2<float32> normal = perpendicularLeft(b - a);
-			const float32 angle = dot(normal, d);
+			const vec2<float32> d = perpendicularLeft(b - a);
+			const float32 angle = dot(d, referenceEdgeNormal);
 
-			if (angle > maxAngle) {
-				edge.edge[0].position = a;
-				edge.edge[1].position = b;
+			if (angle < minAngle) {
+				minAngle = angle;
+				vertexIndex = indexA;
 
-				maxAngle = angle;
-				edgeIndexA = indexA;
-				edgeIndexB = indexB;
+				// TODO(physics/2d/incident-edge-vertex-order): Why is the simulation unstable when a and b are inverted?
+				incidentEdge.edge[0].position = b;
+				incidentEdge.edge[1].position = a;
 			}
 
 			indexA += 1;
 		}
 
-		ClipVertex2D& a = edge.edge[0];
-		a.position *= rigidBody.transform;
+		ClipVertex2D& a = incidentEdge.edge[0];
+		a.position = a.position * incidentBody.world;
 		a.id.referenceEdgeAIndex = ContactID2D::NULL_EDGE_INDEX;
 		a.id.referenceEdgeBIndex = ContactID2D::NULL_EDGE_INDEX;
-		a.id.incidentEdgeAIndex = (static_cast<sint32>(edgeIndexA) - 1) % vertexCount;
-		a.id.incidentEdgeBIndex = edgeIndexA;
+		a.id.incidentEdgeAIndex = (vertexIndex + 1) % incidentShape.hull->vertexCount;
+		a.id.incidentEdgeBIndex = vertexIndex;
 
-		ClipVertex2D& b = edge.edge[1];
-		b.position *= rigidBody.transform;
+		ClipVertex2D& b = incidentEdge.edge[1];
+		b.position = b.position * incidentBody.world;
 		b.id.referenceEdgeAIndex = ContactID2D::NULL_EDGE_INDEX;
 		b.id.referenceEdgeBIndex = ContactID2D::NULL_EDGE_INDEX;
-		b.id.incidentEdgeAIndex = edgeIndexA;
-		b.id.incidentEdgeBIndex = edgeIndexB;
+		b.id.incidentEdgeAIndex = vertexIndex;
+		b.id.incidentEdgeBIndex = (static_cast<sint16>(vertexIndex) - 1) % incidentShape.hull->vertexCount;
 
-		return edge;
+		return incidentEdge;
 	}
 
-	// Clips an edge against a 2D plane and returns a new edge formed by the clipped vertices.
+	/// Clips an edge against a 2D plane.
+	/// Returns a new edge containing the clipped vertices.
 	static ClipFeature2D clipEdge(const ClipFeature2D& edge, Plane2D plane, uint32 edgeIndex) {
 		const ClipVertex2D a = edge.edge[0];
 		const ClipVertex2D b = edge.edge[1];
 
-		const float32 dA = signedDistance(a.position, plane);
-		const float32 dB = signedDistance(b.position, plane);
+		const float32 distanceA = signedDistance(a.position, plane);
+		const float32 distanceB = signedDistance(b.position, plane);
 
 		ClipFeature2D clippedEdge{};
 
-		if (dA <= 0.0f) {
+		if (distanceA <= 0.0f) {
 			// Keep vertices that are below the line.
 			clippedEdge.edge[clippedEdge.vertexCount] = a;
 			clippedEdge.vertexCount += 1;
 		}
 
-		if (dB <= 0.0f) {
+		if (distanceB <= 0.0f) {
 			// Keep vertices that are below the line.
 			clippedEdge.edge[clippedEdge.vertexCount] = b;
 			clippedEdge.vertexCount += 1;
 		}
 
-		if (dA * dB < 0.0f) {
+		if (distanceA * distanceB < 0.0f) {
 			// If the vertices are on different sides of the plane, insert the intersection point.
 			DEBUG_ASSERT(clippedEdge.vertexCount < 2);
 
-			const float32 t = dA / (dA - dB);
+			const float32 t = distanceA / (distanceA - distanceB);
 
 			ClipVertex2D& c = clippedEdge.edge[clippedEdge.vertexCount];
 			c.position = lerp(a.position, b.position, t);
 
-			if (dA > 0.0f) {
+			if (distanceA > 0.0f) {
 				c.id = a.id;
 				c.id.referenceEdgeAIndex = edgeIndex;
 				c.id.referenceEdgeBIndex = ContactID2D::NULL_EDGE_INDEX;
@@ -107,98 +106,103 @@ namespace Trident {
 		return clippedEdge;
 	}
 
-	bool createEdgeContact(const SATEdgeQuery2D& query, const Shape2D& referenceShape, const Shape2D& incidentShape, const RigidBody2D& referenceBody, const RigidBody2D& incidentBody, ContactManifold2D* contactManifold) {
-		contactManifold->contactCount = 0;
+	static bool createEdgeContact(const SATEdgeQuery2D& query, const RigidBody2D& referenceBody, const RigidBody2D& incidentBody, const Shape2D& referenceShape, const Shape2D& incidentShape, ContactManifold2D* manifold) {
+		const uint32 referenceLeftEdgeIndex = (static_cast<sint32>(query.referenceEdgeIndex) - 1) % referenceShape.hull->vertexCount;
+		const uint32 referenceRightEdgeIndex = (query.referenceEdgeIndex + 1) % referenceShape.hull->vertexCount;
 
 		const vec2<float32>* vertices = referenceShape.hull->getVertices();
 
-		const vec2<float32> a = vertices[query.referenceEdgeIndexA] * referenceBody.transform;
-		const vec2<float32> b = vertices[query.referenceEdgeIndexB] * referenceBody.transform;
+		const vec2<float32> localA = vertices[query.referenceEdgeIndex];
+		const vec2<float32> localB = vertices[referenceRightEdgeIndex];
+		const vec2<float32> a = localA * referenceBody.world;
+		const vec2<float32> b = localB * referenceBody.world;
 
-		Plane2D plane;
-		plane.normal = edgeNormalClockwise(a, b);
-		plane.offset = dot(plane.normal, a);
-
-		ClipFeature2D incidentEdge = incidentEdgeSupport(incidentBody, incidentShape, -query.referencePlane.normal);
+		Plane2D referencePlane;
+		referencePlane.normal = query.axis;
+		referencePlane.offset = (
+			signedDistanceLPAB(localB, localA, referenceShape.hull->centroid) +
+			dot(referenceBody.transform.position, referencePlane.normal)
+		);
 
 		Plane2D leftSidePlane;
-		leftSidePlane.normal = perpendicularLeft(plane.normal);
-		leftSidePlane.offset = dot(leftSidePlane.normal, a);
-
-		incidentEdge = clipEdge(incidentEdge, leftSidePlane, (static_cast<sint32>(query.referenceEdgeIndexA) - 1) % referenceShape.hull->vertexCount);
-
-		if (incidentEdge.vertexCount < 2) {
-			return false;
-		}
+		leftSidePlane.normal = perpendicularLeft(query.axis);
+		leftSidePlane.offset = dot(a, leftSidePlane.normal);
 
 		Plane2D rightSidePlane;
-		rightSidePlane.normal = perpendicularRight(plane.normal);
-		rightSidePlane.offset = dot(rightSidePlane.normal, b);
+		rightSidePlane.normal = perpendicularRight(query.axis);
+		rightSidePlane.offset = dot(b, rightSidePlane.normal);
 
-		incidentEdge = clipEdge(incidentEdge, rightSidePlane, query.referenceEdgeIndexB);
+		ClipFeature2D incidentEdge = findIncidentEdge(incidentBody, incidentShape, query.axis * rotationAngle<mat2x2<float32>>(-incidentBody.rotation));
+
+		incidentEdge = clipEdge(incidentEdge, leftSidePlane, referenceLeftEdgeIndex);
 
 		if (incidentEdge.vertexCount < 2) {
 			return false;
 		}
 
-		contactManifold->normal = plane.normal;
+		incidentEdge = clipEdge(incidentEdge, rightSidePlane, referenceRightEdgeIndex);
 
-		uint32 vertexIndex = 0;
+		if (incidentEdge.vertexCount < 2) {
+			return false;
+		}
 
-		while (vertexIndex < incidentEdge.vertexCount) {
+		manifold->normal = referencePlane.normal;
+
+		uint8 vertexIndex = 0;
+
+		while (vertexIndex < 2) {
 			const ClipVertex2D& clipVertex = incidentEdge.edge[vertexIndex];
-			const float32 separation = signedDistance(clipVertex.position, plane);
+			const float32 separation = signedDistance(clipVertex.position, referencePlane);
 
 			// Keep vertices that are below the reference plane.
 			if (separation <= 0.0f) {
-				Contact2D& contact = contactManifold->contacts[contactManifold->contactCount];
-
-				// TODO(physics/2d): Moving a contact onto the reference plane might push it outside of the incident body.
-				contact.position = clipVertex.position - plane.normal * separation;
-
+				// Move the contact point onto the reference plane.
+				Contact2D& contact = manifold->contacts[manifold->contactCount];
+				contact.position = clipVertex.position - referencePlane.normal * separation;
 				contact.separation = separation;
 				contact.id = clipVertex.id;
 
-				contactManifold->contactCount += 1;
+				manifold->contactCount += 1;
 			}
 
 			vertexIndex += 1;
 		}
 
-		DEBUG_ASSERT(contactManifold->contactCount > 0);
-
-		return true;
+		return manifold->contactCount > 0;
 	}
 
-	bool ConvexHullConvexHull2D(const Shape2D& shapeA, const Shape2D& shapeB, const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, ContactManifold2D* contactManifold) {
+	bool ConvexHullConvexHull2D(const Shape2D& shapeA, const Shape2D& shapeB, const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, ContactManifold2D* manifold) {
 		DEBUG_ASSERT(shapeA.type == ShapeType2D::CONVEX_HULL);
 		DEBUG_ASSERT(shapeB.type == ShapeType2D::CONVEX_HULL);
 
-		const SATOutput2D sat = SAT2D(rigidBodyA, rigidBodyB, shapeA, shapeB);
+		manifold->contactCount = 0;
 
-		if (!sat.overlap) {
+		SATConvexHullConvexHullOutput2D output = SATConvexHullConvexHull2D(shapeA, shapeB, rigidBodyA, rigidBodyB);
+
+		if (!output.overlap) {
 			return false;
 		}
 
-		if (sat.edgeQueryA.separation >= sat.edgeQueryB.separation) {
-			return createEdgeContact(sat.edgeQueryA, shapeA, shapeB, rigidBodyA, rigidBodyB, contactManifold);
+		if (output.edgeQueryA.separation >= output.edgeQueryB.separation) {
+			output.edgeQueryA.axis *= rotationAngle<mat2x2<float32>>(rigidBodyA.rotation);
+
+			return createEdgeContact(output.edgeQueryA, rigidBodyA, rigidBodyB, shapeA, shapeB, manifold);
 		}
 
-		if (!createEdgeContact(sat.edgeQueryB, shapeB, shapeA, rigidBodyB, rigidBodyA, contactManifold)) {
-			return false;
-		}
+		output.edgeQueryB.axis *= rotationAngle<mat2x2<float32>>(rigidBodyB.rotation);
 
-		// TODO(physics/2d/convex-hull-convex-hull): Keep normal inversion?
-		contactManifold->normal *= -1.0f;
+		const bool result = createEdgeContact(output.edgeQueryB, rigidBodyB, rigidBodyA, shapeB, shapeA, manifold);
 
-		uint16 contactIndex = 0;
+		manifold->normal *= -1.0f;
 
-		while (contactIndex < contactManifold->contactCount) {
-			contactManifold->contacts[contactIndex].id.flip();
+		uint8 contactIndex = 0;
+
+		while (contactIndex < manifold->contactCount) {
+			manifold->contacts[contactIndex].id.flip();
 
 			contactIndex += 1;
 		}
 
-		return true;
+		return result;
 	}
 }

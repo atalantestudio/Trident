@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Engine/API/Physics/2D/Base.hpp"
+
 namespace Trident {
 	struct CollisionPair2D {
 		ShapeID2D shapeIdA;

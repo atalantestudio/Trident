@@ -37,15 +37,15 @@ namespace Trident {
 			bool onEvent(MouseWheelEvent& event);
 			bool onEvent(WindowResizeEvent& event);
 
-			void LoadBoxSample(PhysicsSimulation2DDescriptor& simulationDescriptor);
-			void LoadBoxPyramidSample(PhysicsSimulation2DDescriptor& simulationDescriptor);
-			void LoadBoxStackingSample(PhysicsSimulation2DDescriptor& simulationDescriptor);
-			void LoadCircleSample(PhysicsSimulation2DDescriptor& simulationDescriptor);
-			void LoadCircleSlidingSample(PhysicsSimulation2DDescriptor& simulationDescriptor);
-			void LoadDominoSample(PhysicsSimulation2DDescriptor& simulationDescriptor);
-			void LoadFrictionSample(PhysicsSimulation2DDescriptor& simulationDescriptor);
-			void LoadPolygonSample(PhysicsSimulation2DDescriptor& simulationDescriptor);
-			void LoadSwingSample(PhysicsSimulation2DDescriptor& simulationDescriptor);
+			void LoadBoxSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
+			void LoadBoxPyramidSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
+			void LoadBoxStackingSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
+			void LoadCircleSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
+			// void LoadCircleSlidingSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
+			void LoadDominoSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
+			void LoadFrictionSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
+			// void LoadPolygonSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
+			void LoadSwingSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
 
 		private:
 			PhysicsSimulation2D simulation;

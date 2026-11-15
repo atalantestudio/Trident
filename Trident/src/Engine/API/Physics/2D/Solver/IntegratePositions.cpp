@@ -35,7 +35,12 @@ namespace Trident {
 			rigidBody.transform.position += rigidBody.linearVelocity * simulation.deltaTime;
 			// rigidBody.transform.rotation = integrateRotation(rigidBody.transform.rotation, rigidBody.angularVelocity * simulation.deltaTime);
 			rigidBody.rotation += rigidBody.angularVelocity * simulation.deltaTime;
-			rigidBody.transform.rotation.setAngle(rigidBody.rotation);
+			// rigidBody.transform.rotation.setAngle(rigidBody.rotation);
+
+			rigidBody.updateWorld();
+
+			rigidBody.force = {0.0f, 0.0f};
+			rigidBody.torque = 0.0f;
 
 			shapeIdIndex += 1;
 		}

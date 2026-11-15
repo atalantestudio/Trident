@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Engine/API/Physics/2D/Base.hpp"
 #include "Engine/API/Physics/2D/RigidBody.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 

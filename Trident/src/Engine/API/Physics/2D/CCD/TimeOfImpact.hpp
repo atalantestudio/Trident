@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include "Engine/API/Physics/CCD/SeparationFunction.hpp"
-#include "Engine/API/Physics/CCD/TimeOfImpactState.hpp"
-#include "Engine/API/Physics/GJK2D.hpp"
+#include "Engine/API/Physics/2D/CCD/SeparationFunction.hpp"
+#include "Engine/API/Physics/2D/CCD/TimeOfImpactState.hpp"
+#include "Engine/API/Physics/2D/GJK.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 
 namespace Trident {

@@ -14,11 +14,13 @@ namespace Trident {
 	#define ENABLE_PHYSICS_2D_IMPULSE_ACCUMULATION
 	#define ENABLE_PHYSICS_2D_WARM_STARTING
 
-	struct PhysicsSimulation2DDescriptor {
-		float32 deltaTime;
+	struct PhysicsSimulationDescriptor2D {
+		float64 deltaTime;
 
 		/// Left-handed gravity acceleration.
 		vec2<float32> gravity;
+
+		float32 allowedPenetration;
 
 		/// Number of iterations in the sequential solver.
 		uint32 impulseIterationCount;
@@ -30,8 +32,6 @@ namespace Trident {
 		uint32 maxStaticShapeCount;
 		uint32 maxKinematicAndDynamicShapeCount;
 	};
-
-	static constexpr float32 ALLOWED_PENETRATION = 0.01f;
 
 	struct BroadPhase2D {
 		sequence<ShapeID2D> staticShapeIds;
@@ -51,10 +51,12 @@ namespace Trident {
 		/// Gravity acceleration.
 		vec2<float32> gravity;
 
-		uint32 tick;
+		float32 allowedPenetration;
+
 		uint32 impulseIterationCount;
 
-		// TODO(physics/2d/delta-time): Need half delta-time too?
+		// Index of the current tick since world creation.
+		uint32 tick;
 
 		sequence<RigidBody2D> rigidBodies;
 		sequence<Shape2D> shapes;
@@ -68,9 +70,8 @@ namespace Trident {
 		std::map<CollisionPair2D, ContactPair2D> contactPairs;
 	};
 
-	PhysicsSimulation2D createSimulation(const PhysicsSimulation2DDescriptor& descriptor);
+	PhysicsSimulation2D createSimulation(const PhysicsSimulationDescriptor2D& descriptor);
 
-	void clearPairs(PhysicsSimulation2D& simulation);
 	void broadPhase(PhysicsSimulation2D& simulation);
 	void narrowPhase(PhysicsSimulation2D& simulation);
 	void integrateVelocities(PhysicsSimulation2D& simulation);
@@ -78,14 +79,13 @@ namespace Trident {
 	void updateJoints(PhysicsSimulation2D& simulation);
 	void applyImpulses(PhysicsSimulation2D& simulation);
 	void integratePositions(PhysicsSimulation2D& simulation);
-	void resetForces(PhysicsSimulation2D& simulation);
 
 	void tick(PhysicsSimulation2D& simulation);
 
 	RigidBodyID2D createRigidBody(PhysicsSimulation2D& simulation, const RigidBodyDescriptor2D& descriptor);
 	ShapeID2D createShape(PhysicsSimulation2D& simulation, const ShapeDescriptor2D& descriptor, const void* typeDescriptor);
 
-	BoxHull2D createBoxHull(vec2<float32> halfSize);
+	BoxHull2D createBoxHull(vec2<float32> halfSize, float32 mass = 1.0f);
 
 	/// Applies linear and angular impulses to the body.
 	void applyImpulse(

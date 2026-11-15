@@ -61,7 +61,6 @@
 // 2D physics
 #include "Engine/API/Physics/2D/GJK2D.hpp"
 #include "Engine/API/Physics/2D/GJK2DConditional.hpp"
-#include "Engine/API/Physics/2D/SAT2D.hpp"
 #include "Engine/API/Physics/2D/Simulation.hpp"
 
 // 3D physics

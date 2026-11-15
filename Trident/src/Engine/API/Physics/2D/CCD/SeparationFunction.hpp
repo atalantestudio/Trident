@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "Engine/API/Physics/CCD/MinSeparationOutput.hpp"
-#include "Engine/API/Physics/Feature2D.hpp"
+#include "Engine/API/Physics/2D/CCD/MinSeparationOutput.hpp"
+#include "Engine/API/Physics/2D/Contact/ClipFeature.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 
 namespace Trident {

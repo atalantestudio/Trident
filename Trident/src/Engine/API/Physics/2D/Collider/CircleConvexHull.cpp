@@ -3,10 +3,10 @@
 
 #include "pch.hpp"
 
-#include "Engine/API/Physics/2D/Collider/Collider2D.hpp"
+#include "Engine/API/Physics/2D/Collider/Collider.hpp"
 #include "Engine/API/Physics/2D/Contact/ContactManifold.hpp"
 #include "Engine/API/Physics/2D/GJK2D.hpp"
-#include "Engine/API/Physics/2D/SAT2D.hpp"
+#include "Engine/API/Physics/2D/SAT/SATCircleConvexHull.hpp"
 
 namespace Trident {
 	bool CircleConvexHull2D(const Shape2D& shapeA, const Shape2D& shapeB, const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, ContactManifold2D* contactManifold) {

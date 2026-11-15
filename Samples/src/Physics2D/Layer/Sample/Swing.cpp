@@ -6,7 +6,7 @@
 #include "Physics2D/Layer/SceneLayer.hpp"
 
 namespace Trident {
-	void Physics2DSceneLayer::LoadSwingSample(PhysicsSimulation2DDescriptor& simulationDescriptor) {
+	void Physics2DSceneLayer::LoadSwingSample(PhysicsSimulationDescriptor2D& simulationDescriptor) {
 		rendererOptions.hulls = sequence<PhysicsRendererBuildHull2D>(5);
 		rendererOptions.maxCircleInstanceCount = 0;
 

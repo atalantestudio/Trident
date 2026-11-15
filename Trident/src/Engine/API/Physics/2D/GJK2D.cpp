@@ -160,7 +160,7 @@ namespace Trident {
 		vertex.iA = 0;
 		vertex.iB = 0;
 		vertex.vA = A.transform.position;
-		vertex.vB = shapeB.hull->getVertices()[vertex.iB] * B.transform;
+		vertex.vB = shapeB.hull->getVertices()[vertex.iB] * B.world;
 		vertex.v = vertex.vB - vertex.vA;
 
 		Simplex2 s = {vertex};
@@ -237,7 +237,7 @@ namespace Trident {
 
 			Simplex2Vertex vertex;
 			vertex.iA = 0;
-			vertex.iB = indexSupport(shapeB, d * B.transform.rotation);
+			vertex.iB = indexSupport(shapeB, d * rotationAngle<mat2x2<float32>>(B.rotation));
 
 			bool duplicate = false;
 			uint8 j = 0;
@@ -257,7 +257,7 @@ namespace Trident {
 			}
 
 			vertex.vA = A.transform.position;
-			vertex.vB = shapeB.hull->getVertices()[vertex.iB] * B.transform;
+			vertex.vB = shapeB.hull->getVertices()[vertex.iB] * B.world;
 			vertex.v = vertex.vB - vertex.vA;
 
 			s[s.count] = vertex;

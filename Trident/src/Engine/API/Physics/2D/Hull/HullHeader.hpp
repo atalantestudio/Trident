@@ -22,6 +22,9 @@ namespace Trident {
 		/// Axis-aligned box in local space.
 		// AABB2D bounds;
 
+		// TODO(physics/2d): Debug only.
+		float32 mass;
+
 		/// The inertia about the centroid.
 		float32 inertia;
 

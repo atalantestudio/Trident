@@ -3,9 +3,8 @@
 
 #pragma once
 
-#include "Engine/API/Physics/2D/Base.hpp"
-
 namespace Trident {
+	// Clockwise angle.
 	struct Rotation2D {
 		float32 getAngle() const {
 			return atan2(s, c);

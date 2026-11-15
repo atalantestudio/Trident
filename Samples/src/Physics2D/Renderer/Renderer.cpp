@@ -423,7 +423,7 @@ namespace Trident {
 			PhysicsRendererInstance2D& instance = instanceMappedRanges[0][circleInstanceCount];
 			instance.position = rigidBody.transform.position;
 			instance.centroid = rigidBody.centroid;
-			instance.rotation = rotationAngle<mat2x2<float32>>(rigidBody.transform.rotation.getAngle());
+			instance.rotation = rotationAngle<mat2x2<float32>>(-rigidBody.rotation);
 			instance.color = color;
 			instance.shapeId = shapeId;
 
@@ -437,7 +437,7 @@ namespace Trident {
 		PhysicsRendererInstance2D& instance = instanceMappedRanges[hullIndex][hull.instanceCount];
 		instance.position = rigidBody.transform.position;
 		instance.centroid = rigidBody.centroid;
-		instance.rotation = rotationAngle<mat2x2<float32>>(rigidBody.transform.rotation.getAngle());
+		instance.rotation = rotationAngle<mat2x2<float32>>(-rigidBody.rotation);
 		instance.color = color;
 		instance.shapeId = shapeId;
 

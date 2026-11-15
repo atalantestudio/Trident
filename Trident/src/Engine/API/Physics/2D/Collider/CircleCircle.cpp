@@ -3,7 +3,7 @@
 
 #include "pch.hpp"
 
-#include "Engine/API/Physics/2D/Collider/Collider2D.hpp"
+#include "Engine/API/Physics/2D/Collider/Collider.hpp"
 
 namespace Trident {
 	bool CircleCircle2D(const Shape2D& shapeA, const Shape2D& shapeB, const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, ContactManifold2D* contactManifold) {

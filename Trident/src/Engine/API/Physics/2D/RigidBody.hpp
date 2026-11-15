@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Physics/2D/RigidBodyFlags.hpp"
-#include "Engine/API/Physics/2D/Transform2D.hpp"
+#include "Engine/API/Physics/2D/Transform.hpp"
 #include "Engine/API/Physics/RigidBodyType.hpp"
 
 namespace Trident {
@@ -27,10 +27,14 @@ namespace Trident {
 
 	struct RigidBody2D {
 		// TODO(physics/2d): Debug-only.
-		inline mat3x3<float32> getWorld() const {
-			return (
+		mat3x3<float32> world;
+
+		// TODO(physics/2d): Debug-only.
+		inline void updateWorld() {
+			world = (
 				translation<mat3x3<float32>>(-centroid) *
-				rotationAngle<mat3x3<float32>>(transform.rotation.getAngle()) *
+				// rotationAngle<mat3x3<float32>>(transform.rotation.getAngle()) *
+				rotationAngle<mat3x3<float32>>(rotation) *
 				translation<mat3x3<float32>>(transform.position)
 			);
 		}

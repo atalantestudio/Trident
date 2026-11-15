@@ -37,6 +37,7 @@ namespace Trident {
 		/// Position of the center of mass in world-space.
 		vec2<float32> position;
 
+		// Clockwise order.
 		float32 rotation;
 
 		// This isn't meant to be dynamically updated.

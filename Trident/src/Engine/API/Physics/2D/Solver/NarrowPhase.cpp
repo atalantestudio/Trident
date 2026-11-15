@@ -3,70 +3,51 @@
 
 #include "pch.hpp"
 
-#include "Engine/API/Physics/2D/Collider/Collider2D.hpp"
+#include "Engine/API/Physics/2D/Collider/Collider.hpp"
 #include "Engine/API/Physics/2D/Simulation.hpp"
 
 namespace Trident {
 	static void mergeContactManifolds(ContactManifold2D& manifold, const ContactManifold2D& newManifold) {
 		#if defined(ENABLE_PHYSICS_2D_WARM_STARTING)
-			Contact2D mergedContacts[2];
-		#endif
+			Contact2D mergedContacts[2]{};
+			uint32 newContactIndex = 0;
 
-		uint32 contactIndex = 0;
+			while (newContactIndex < newManifold.contactCount) {
+				const Contact2D& cNew = newManifold.contacts[newContactIndex];
+				const Contact2D* cOld = nullptr;
 
-		while (contactIndex < newManifold.contactCount) {
-			const Contact2D& cNew = newManifold.contacts[contactIndex];
+				uint32 contactIndex = 0;
 
-			#if defined(ENABLE_PHYSICS_2D_WARM_STARTING)
-				uint32 k = max<uint32>();
-				uint32 j = 0;
+				while (contactIndex < manifold.contactCount) {
+					const Contact2D& c = manifold.contacts[contactIndex];
 
-				while (j < manifold.contactCount) {
-					const Contact2D& cOld = manifold.contacts[j];
-
-					if (cNew.id == cOld.id) {
-						k = j;
+					if (cNew.id == c.id) {
+						cOld = &c;
 
 						break;
 					}
 
-					j += 1;
+					contactIndex += 1;
 				}
 
-				Contact2D& c = mergedContacts[contactIndex];
-			#else
-				Contact2D& c = manifold.contacts[contactIndex];
-			#endif
+				Contact2D& c = mergedContacts[newContactIndex];
+				c = cNew;
 
-			c = cNew;
-
-			#if defined(ENABLE_PHYSICS_2D_WARM_STARTING)
-				if (k != max<uint32>()) {
-					const Contact2D& cOld = manifold.contacts[k];
-
-					c.accumulatedNormalImpulse = cOld.accumulatedNormalImpulse;
-					c.accumulatedTangentImpulse = cOld.accumulatedTangentImpulse;
+				if (cOld != nullptr) {
+					c.accumulatedNormalImpulse = cOld->accumulatedNormalImpulse;
+					c.accumulatedTangentImpulse = cOld->accumulatedTangentImpulse;
 				}
-			#else
-				c.accumulatedNormalImpulse = 0.0f;
-				c.accumulatedTangentImpulse = 0.0f;
-			#endif
 
-			contactIndex += 1;
-		}
-
-		#if defined(ENABLE_PHYSICS_2D_WARM_STARTING)
-			contactIndex = 0;
-
-			while (contactIndex < newManifold.contactCount) {
-				manifold.contacts[contactIndex] = mergedContacts[contactIndex];
-
-				contactIndex += 1;
+				newContactIndex += 1;
 			}
-		#endif
 
-		manifold.contactCount = newManifold.contactCount;
-		manifold.normal = newManifold.normal;
+			std::copy_n(mergedContacts, newManifold.contactCount, manifold.contacts);
+
+			manifold.normal = newManifold.normal;
+			manifold.contactCount = newManifold.contactCount;
+		#else
+			manifold = newManifold;
+		#endif
 	}
 
 	void narrowPhase(PhysicsSimulation2D& simulation) {
@@ -84,10 +65,13 @@ namespace Trident {
 			const RigidBody2D& rigidBodyA = simulation.rigidBodies[shapeA.rigidBodyId];
 			const RigidBody2D& rigidBodyB = simulation.rigidBodies[shapeB.rigidBodyId];
 
-			// The broad phase must ensure that A hull type < B hull type.
+			DEBUG_ASSERT(shapeA.type <= shapeB.type);
+
 			const Collider2D collider = COLLIDER_2D_TABLE[static_cast<uint32>(shapeA.type)][static_cast<uint32>(shapeB.type)];
 
 			DEBUG_ASSERT(collider != nullptr);
+
+			ContactPair2D contactPair;
 
 			if (!collider(shapeA, shapeB, rigidBodyA, rigidBodyB, &contactPair.manifold)) {
 				// Either a degenerate case, or the entities are not overlapping.

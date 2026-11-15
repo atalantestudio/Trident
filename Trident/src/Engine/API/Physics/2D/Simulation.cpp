@@ -5,17 +5,15 @@
 
 #include "Engine/API/Physics/2D/Simulation.hpp"
 
-// TODO(physics/2d): Debug only.
-// #define TEST_FIX_MASS_PRECISION
-
 namespace Trident {
-	PhysicsSimulation2D createSimulation(const PhysicsSimulation2DDescriptor& descriptor) {
+	PhysicsSimulation2D createSimulation(const PhysicsSimulationDescriptor2D& descriptor) {
 		PhysicsSimulation2D simulation;
-		simulation.deltaTime = descriptor.deltaTime;
-		simulation.inverseDeltaTime = 1.0f / descriptor.deltaTime;
+		simulation.deltaTime = static_cast<float32>(descriptor.deltaTime);
+		simulation.inverseDeltaTime = static_cast<float32>(1.0 / descriptor.deltaTime);
 		simulation.gravity = descriptor.gravity;
-		simulation.tick = 0;
+		simulation.allowedPenetration = descriptor.allowedPenetration;
 		simulation.impulseIterationCount = descriptor.impulseIterationCount;
+		simulation.tick = 0;
 		simulation.rigidBodies = sequence<RigidBody2D>(descriptor.maxStaticRigidBodyCount + descriptor.maxKinematicAndDynamicRigidBodyCount);
 		simulation.shapes = sequence<Shape2D>(descriptor.maxStaticShapeCount + descriptor.maxKinematicAndDynamicShapeCount);
 		simulation.usedRigidBodyCount = 0;
@@ -33,7 +31,8 @@ namespace Trident {
 	}
 
 	void tick(PhysicsSimulation2D& simulation) {
-		clearPairs(simulation);
+		simulation.collisionPairs.clear();
+
 		broadPhase(simulation);
 		narrowPhase(simulation);
 		integrateVelocities(simulation);
@@ -41,7 +40,6 @@ namespace Trident {
 		// updateJoints(simulation);
 		applyImpulses(simulation);
 		integratePositions(simulation);
-		resetForces(simulation);
 
 		simulation.tick += 1;
 	}
@@ -56,8 +54,10 @@ namespace Trident {
 		rigidBody.type = descriptor.type;
 		rigidBody.flags = descriptor.flags;
 		rigidBody.transform.position = descriptor.position;
-		rigidBody.transform.rotation.setAngle(descriptor.rotation);
-		rigidBody.rotation = descriptor.rotation;
+		// rigidBody.transform.rotation.setAngle(descriptor.rotation);
+		// rigidBody.transform.rotation.setAngle(-descriptor.rotation);
+		// rigidBody.rotation = descriptor.rotation;
+		rigidBody.rotation = -descriptor.rotation;
 		rigidBody.centroid = {0.0_m, 0.0_m};
 		rigidBody.inverseMass = 0.0_kg;
 		rigidBody.inverseInertia = 0.0f;
@@ -65,6 +65,8 @@ namespace Trident {
 		rigidBody.angularVelocity = descriptor.angularVelocity;
 		rigidBody.force = {0.0f, 0.0f};
 		rigidBody.torque = 0.0_Nm;
+
+		rigidBody.updateWorld();
 
 		const uint32 id = simulation.usedRigidBodyCount;
 
@@ -142,7 +144,7 @@ namespace Trident {
 		return id;
 	}
 
-	BoxHull2D createBoxHull(vec2<float32> halfSize) {
+	BoxHull2D createBoxHull(vec2<float32> halfSize, float32 mass) {
 		static uint32 userIndex = 1;
 
 		const float32 hx = halfSize.x;
@@ -155,12 +157,8 @@ namespace Trident {
 		boxHull.header.centroid = {0.0f, 0.0f};
 		boxHull.header.area = x * y;
 		boxHull.header.radius = length(halfSize);
-		boxHull.header.inertia = (x * x + y * y) / 12.0f;
-
-		#if defined(TEST_FIX_MASS_PRECISION)
-			boxHull.header.inertia = 200.0f * (x * x + y * y) / 12.0f;
-		#endif
-
+		boxHull.header.mass = mass;
+		boxHull.header.inertia = mass * (x * x + y * y) / 12.0f;
 		boxHull.header.vertexCount = 4;
 		boxHull.header.vertexOffset = offsetof(BoxHull2D, vertices);
 		boxHull.header.userIndex = userIndex;
@@ -203,11 +201,6 @@ namespace Trident {
 			case ShapeType2D::CONVEX_HULL: {
 				m = shape.hull->area * shape.density;
 				I = shape.hull->inertia * shape.density;
-
-				#if defined(TEST_FIX_MASS_PRECISION)
-					m = 200.0f;
-					I = shape.hull->inertia;
-				#endif
 
 				break;
 			}

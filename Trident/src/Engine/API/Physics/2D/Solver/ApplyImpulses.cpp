@@ -7,7 +7,7 @@
 
 namespace Trident {
 	inline static vec2<float32> calculateRelativeVelocity(const RigidBody2D& A, const RigidBody2D& B, vec2<float32> rA, vec2<float32> rB) {
-		return B.linearVelocity + perpendicularLeft(rB) * B.angularVelocity - A.linearVelocity - perpendicularLeft(rA) * A.angularVelocity;
+		return B.linearVelocity + perpendicularRight(rB) * B.angularVelocity - A.linearVelocity - perpendicularRight(rA) * A.angularVelocity;
 	}
 
 	void applyImpulses(PhysicsSimulation2D& simulation) {
@@ -18,12 +18,6 @@ namespace Trident {
 		// const ComponentPool<Joint2D>& jointPool = scene->ecs.getComponentPool<Joint2D>();
 
 		uint32 iteration = 0;
-
-		// TODO(physics/2d/constraint): Restore constraints.
-		// uint32 constraintComponentIndex;
-
-		// TODO(physics/2d/joint): Restore joints.
-		// uint32 jointComponentIndex;
 
 		while (iteration < simulation.impulseIterationCount) {
 			for (std::pair<const CollisionPair2D, ContactPair2D>& pair : simulation.contactPairs) {
@@ -97,7 +91,7 @@ namespace Trident {
 			}
 
 			// TODO(physics/2d/constraint): Restore constraints.
-			/* constraintComponentIndex = 0;
+			/* uint32 constraintComponentIndex = 0;
 
 			while (constraintComponentIndex < constraintPool.componentCount) {
 				const Entity entity = constraintPool.componentIndexToEntity[constraintComponentIndex];
@@ -109,7 +103,7 @@ namespace Trident {
 			} */
 
 			// TODO(physics/2d/joint): Restore joints.
-			/* jointComponentIndex = 0;
+			/* uint32 jointComponentIndex = 0;
 
 			while (jointComponentIndex < jointPool.componentCount) {
 				const Entity entity = jointPool.componentIndexToEntity[jointComponentIndex];
