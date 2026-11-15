@@ -97,13 +97,13 @@ namespace Trident {
 
 		// TODO(physics/2d): Set centroid.
 
-		const uint32 id = simulation.usedShapeCount;
-
 		// TODO(physics/2d): Update mass and inertia.
 		if (rigidBody.type != RigidBodyType::STATIC) {
 			rigidBody.inverseMass = 1.0f;
 			rigidBody.inverseInertia = 6.0f;
 		}
+
+		const uint32 id = simulation.usedShapeCount;
 
 		switch (rigidBody.type) {
 			case RigidBodyType::STATIC: {
