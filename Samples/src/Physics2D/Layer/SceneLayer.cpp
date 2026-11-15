@@ -34,10 +34,8 @@ namespace Trident {
 			LoadBoxStackingSample(simulationDescriptor);
 		}
 		else if (SampleName == "circle") {
-			// TODO(physics/2d): Fix circle demo.
 			LoadCircleSample(simulationDescriptor);
 		}
-		// TODO(physics/2d): Add circlesliding demo.
 		else if (SampleName == "domino") {
 			LoadDominoSample(simulationDescriptor);
 		}
@@ -45,6 +43,9 @@ namespace Trident {
 			LoadFrictionSample(simulationDescriptor);
 		}
 		// TODO(physics/2d): Add polygon demo.
+		else if (SampleName == "slide") {
+			LoadSlideSample(simulationDescriptor);
+		}
 		else if (SampleName == "swing") {
 			LoadSwingSample(simulationDescriptor);
 		}

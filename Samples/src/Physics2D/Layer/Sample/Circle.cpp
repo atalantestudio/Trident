@@ -28,9 +28,7 @@ namespace Trident {
 			.type = ShapeType2D::CIRCLE,
 			.rigidBodyId = createRigidBody(simulation, {
 				.type = RigidBodyType::STATIC,
-				.flags = {},
 				.position = {-10.0f, -10.0f},
-				.rotation = 0.0f,
 			}),
 			.material = material,
 			.density = 1.0f,
@@ -41,9 +39,7 @@ namespace Trident {
 			.type = ShapeType2D::CIRCLE,
 			.rigidBodyId = createRigidBody(simulation, {
 				.type = RigidBodyType::STATIC,
-				.flags = {},
 				.position = {10.0f, -10.0f},
-				.rotation = 0.0f,
 			}),
 			.material = material,
 			.density = 1.0f,
@@ -56,9 +52,7 @@ namespace Trident {
 			.type = ShapeType2D::CIRCLE,
 			.rigidBodyId = createRigidBody(simulation, {
 				.type = RigidBodyType::DYNAMIC,
-				.flags = {},
 				.position = {9.5f, 1.0f},
-				.rotation = 0.0f,
 			}),
 			.material = material,
 			.density = 200.0f,
