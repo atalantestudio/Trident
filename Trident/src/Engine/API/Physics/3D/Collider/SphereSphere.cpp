@@ -14,18 +14,18 @@ namespace Trident {
 		const vec3<float32> b = pair.rigidBodyB->position;
 		const vec3<float32> ab = b - a;
 
-		const float32 rA = pair.hullA->radius * pair.rigidBodyA->scale;
-		const float32 rB = pair.hullB->radius * pair.rigidBodyB->scale;
-		const float32 rArB = rA + rB;
-
 		const float32 dd = lengthSquared(ab);
 
-		if (dd > rArB * rArB) {
+		const float32 rA = pair.hullA->radius * pair.rigidBodyA->scale;
+		const float32 rB = pair.hullB->radius * pair.rigidBodyB->scale;
+		const float32 r = rA + rB;
+
+		if (dd > r * r) {
 			return false;
 		}
 
-		// Degenerate case (the spheres are coincident)
-		if (dd < 0.0001f) {
+		// Degenerate case (coincident spheres).
+		if (dd < 0.001f) {
 			return false;
 		}
 
@@ -37,7 +37,7 @@ namespace Trident {
 
 		Contact3D& contact = contactManifold->contacts[0];
 		contact.position = (a + normal * rA + b - normal * rB) * 0.5f;
-		contact.separation = d - rArB;
+		contact.separation = d - r;
 
 		return true;
 	}

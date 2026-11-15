@@ -7,27 +7,41 @@
 
 namespace Trident {
 	bool CircleCircle2D(const Shape2D& shapeA, const Shape2D& shapeB, const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, ContactManifold2D* manifold) {
-		const vec2<float32> AB = rigidBodyB.position - rigidBodyA.position;
-		const float32 lengthAB = lengthSquared(AB);
+		static constexpr float32 COINCIDENT_CIRCLE_BIAS = 0.001f;
 
-		if (abs(lengthAB) < 0.001f) {
-			// Degenerate case: The circles are coincident.
+		DEBUG_ASSERT(shapeA.type == ShapeType2D::CIRCLE);
+		DEBUG_ASSERT(shapeB.type == ShapeType2D::CIRCLE);
+
+		const vec2<float32> a = rigidBodyA.position;
+		const vec2<float32> b = rigidBodyB.position;
+		const vec2<float32> ab = b - a;
+
+		const float32 dd = lengthSquared(ab);
+
+		const float32 rA = shapeA.circle.radius;
+		const float32 rB = shapeB.circle.radius;
+		const float32 r = rA + rB;
+
+		if (dd > r * r) {
 			return false;
 		}
 
-		const float32 d = lengthAB - pow(shapeA.circle.radius + shapeB.circle.radius, 2.0f);
-
-		if (d > 0.0f) {
+		// Degenerate case (coincident circles).
+		if (dd < COINCIDENT_CIRCLE_BIAS) {
 			return false;
 		}
 
-		const vec2<float32> sA = rigidBodyA.position + vertexSupport(shapeA, AB);
-		const vec2<float32> sB = rigidBodyB.position + vertexSupport(shapeB, -AB);
+		const float32 d = sqrt(dd);
+		const vec2<float32> normal = ab / d;
 
-		manifold->normal = normalized(AB);
+		manifold->normal = normal;
 		manifold->contactCount = 1;
-		manifold->contacts[0].position = (sA + sB) * 0.5f;
-		manifold->contacts[0].separation = d;
+
+		Contact2D& contact = manifold->contacts[0];
+		contact.position = (a + normal * rA + b - normal * rB) * 0.5f;
+
+		// TODO(physics/2d/circle-circle): Why d - r isn't correct?
+		contact.separation = dd - r * r;
 
 		return true;
 	}
