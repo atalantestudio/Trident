@@ -10,10 +10,14 @@
 #include "SceneLayer.hpp"
 
 namespace Trident {
-	void Physics2DSceneLayer::postConstruct() {
-		const Application* application = getApplication();
-		const view<char8> sceneAssetName = application->getPropertyFile()->getProperty<view<char8>>("AssetName");
-		const ref<Scene2DAsset> sceneAsset = application->getAssetLibrary()->getAsset<Scene2DAsset>(sceneAssetName);
+	void Physics2DSceneLayer::initialize() {
+		rendererBuildOptions.sampleCount = ImageSampleCount::x1;
+		rendererBuildOptions.cameraPosition = {0.0f, 8.0f};
+		rendererBuildOptions.zoomLevel = 36.0f;
+		rendererBuildOptions.maxContactCount = 2048;
+
+		const view<char8> sceneAssetName = getApplication()->getPropertyFile()->getProperty<view<char8>>("AssetName");
+		const ref<Scene2DAsset> sceneAsset = getApplication()->getAssetLibrary()->getAsset<Scene2DAsset>(sceneAssetName);
 
 		scene = allocateRef<Scene2D>(sceneAsset);
 
@@ -26,16 +30,26 @@ namespace Trident {
 
 		simulation = createSimulation(simulationDescriptor);
 
-		renderer.layerInput = input;
 		renderer.setLayer(this);
 		renderer.build();
 		renderer.setScene(scene);
+	}
+
+	StaticMemoryDescriptor Physics2DSceneLayer::getStaticMemoryDescriptor() const {
+		return renderer.getStaticMemoryDescriptor();
+	}
+
+	void Physics2DSceneLayer::postConstruct() {
+		renderer.postBuild();
+		renderer.encodeOneTimeCommands();
 	}
 
 	void Physics2DSceneLayer::preRender() {
 		tick(simulation);
 
 		checkHover();
+
+		renderer.clearRegisteredData();
 
 		uint32 shapeIndex = 0;
 
@@ -57,8 +71,6 @@ namespace Trident {
 		if (draggingCamera) {
 			renderer.updateCameraProjection();
 		}
-
-		renderer.clearRegisteredData();
 	}
 
 	void Physics2DSceneLayer::render(ref<CommandEncoder> commandEncoder, float64 remainingFrameTime) const {
@@ -91,7 +103,9 @@ namespace Trident {
 	}
 
 	void Physics2DSceneLayer::registerHullForRender(const HullHeader2D* hullHeader) {
-		// TODO(wip)
+		PhysicsRendererBuildHull2D& hull = rendererBuildOptions.hulls[hullHeader->userIndex - 1];
+		hull.hullHeader = hullHeader;
+		hull.maxInstanceCount = 128;
 	}
 
 	void Physics2DSceneLayer::onEvent(Event& event) {
