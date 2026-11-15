@@ -11,12 +11,6 @@ namespace Trident {
 			case ShapeType2D::CIRCLE: {
 				return 0.01f;
 			}
-			case ShapeType2D::CAPSULE: {
-				// TODO(physics/2d/shape/capsule)
-				ENGINE_ERROR_UNIMPLEMENTED();
-
-				return 0.0f;
-			}
 			case ShapeType2D::CONVEX_HULL: {
 				return 0.2f;
 			}

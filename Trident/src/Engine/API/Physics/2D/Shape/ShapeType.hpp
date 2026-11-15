@@ -6,7 +6,6 @@
 namespace Trident {
 	enum class ShapeType2D : uint8 {
 		CIRCLE,
-		CAPSULE,
 		CONVEX_HULL,
 
 		count,

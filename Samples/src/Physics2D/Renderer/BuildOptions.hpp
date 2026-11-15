@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/ImageSampleCount.hpp"
-#include "Engine/API/Physics/2D/Hull/HullHeader.hpp"
+#include "Engine/API/Physics/2D/Shape/Hull/HullHeader.hpp"
 
 namespace Trident {
 	struct PhysicsRendererBuildHull2D {

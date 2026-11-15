@@ -5,8 +5,8 @@
 
 #include "Engine/API/Physics/2D/Base.hpp"
 #include "Engine/API/Physics/2D/CircleShape.hpp"
-#include "Engine/API/Physics/2D/Hull/HullHeader.hpp"
-#include "Engine/API/Physics/2D/ShapeType.hpp"
+#include "Engine/API/Physics/2D/Shape/Hull/HullHeader.hpp"
+#include "Engine/API/Physics/2D/Shape/ShapeType.hpp"
 #include "Engine/API/Physics/PhysicsMaterial.hpp"
 
 namespace Trident {

@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Physics/2D/RigidBody.hpp"
-#include "Engine/API/Physics/2D/Shape.hpp"
+#include "Engine/API/Physics/2D/Shape/Shape.hpp"
 
 namespace Trident {
 	struct SATEdgeQuery2D {

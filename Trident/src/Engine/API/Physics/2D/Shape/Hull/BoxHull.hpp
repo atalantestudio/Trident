@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Physics/2D/Hull/HullHeader.hpp"
+#include "Engine/API/Physics/2D/Shape/Hull/HullHeader.hpp"
 
 namespace Trident {
 	struct BoxHull2D {

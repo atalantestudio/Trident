@@ -5,7 +5,7 @@
 
 #include "Engine/API/Physics/2D/Contact/ClipFeature.hpp"
 #include "Engine/API/Physics/2D/RigidBody.hpp"
-#include "Engine/API/Physics/2D/Shape.hpp"
+#include "Engine/API/Physics/2D/Shape/Shape.hpp"
 #include "Engine/API/Physics/2D/Simplex.hpp"
 
 namespace Trident {

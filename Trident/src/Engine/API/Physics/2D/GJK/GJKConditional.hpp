@@ -1,14 +1,14 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
 
-#include "Engine/API/Geometry/Hull2D.hpp"
-#include "Engine/ECS/Component/RigidBody2DComponent.hpp"
+#include "Engine/API/Physics/2D/RigidBody.hpp"
+#include "Engine/API/Physics/2D/Shape/Shape.hpp"
 
 namespace Trident {
 	// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
-	// Returns true if the Minkowski difference of A and B contains the origin, and false otherwise.
+	// Returns whether A contains p.
 	// NOTE: In this implementation, `a` is the name of the most recent vertex added to the simplex.
-	bool GJK2DConditional(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB);
+	bool GJKConditional2D(const RigidBody2D& A, vec2<float32> p, const Shape2D& shapeA);
 }

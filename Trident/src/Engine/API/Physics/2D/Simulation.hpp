@@ -6,9 +6,9 @@
 #include "Engine/API/Physics/2D/Base.hpp"
 #include "Engine/API/Physics/2D/CollisionPair.hpp"
 #include "Engine/API/Physics/2D/ContactPair.hpp"
-#include "Engine/API/Physics/2D/Hull/BoxHull.hpp"
-#include "Engine/API/Physics/2D/Shape.hpp"
 #include "Engine/API/Physics/2D/RigidBody.hpp"
+#include "Engine/API/Physics/2D/Shape/Hull/BoxHull.hpp"
+#include "Engine/API/Physics/2D/Shape/Shape.hpp"
 
 namespace Trident {
 	#define ENABLE_PHYSICS_2D_IMPULSE_ACCUMULATION

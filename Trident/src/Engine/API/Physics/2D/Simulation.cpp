@@ -94,12 +94,6 @@ namespace Trident {
 
 				break;
 			}
-			case ShapeType2D::CAPSULE: {
-				// TODO(physics/2d/shape/capsule)
-				ENGINE_ERROR_UNIMPLEMENTED();
-
-				break;
-			}
 			case ShapeType2D::CONVEX_HULL: {
 				shape.hull = static_cast<const HullHeader2D*>(typeDescriptor);
 
@@ -188,11 +182,6 @@ namespace Trident {
 		switch (shape.type) {
 			case ShapeType2D::CIRCLE: {
 				// TODO(physics/2d/circle/update-mass)
-				ENGINE_ERROR_UNIMPLEMENTED();
-
-				break;
-			}
-			case ShapeType2D::CAPSULE: {
 				ENGINE_ERROR_UNIMPLEMENTED();
 
 				break;
