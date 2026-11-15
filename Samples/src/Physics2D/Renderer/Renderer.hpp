@@ -5,6 +5,7 @@
 
 #include "Engine/API/Physics/2D/Base.hpp"
 #include "Engine/API/Physics/2D/RigidBody.hpp"
+#include "Engine/API/Physics/2D/Shape/Shape.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 #include "Physics2D/Renderer/BuildOptions.hpp"
@@ -83,7 +84,7 @@ namespace Trident {
 
 			// void selectEntity(Entity entity);
 
-			void setInstance(uint32 hullIndex, const RigidBody2D& rigidBody, vec3<float32> color, ShapeID2D shapeId);
+			void setInstance(uint32 hullIndex, ShapeID2D shapeId, const Shape2D& shape, const RigidBody2D& rigidBody, vec3<float32> color);
 
 			void setContact(vec2<float32> contact);
 

@@ -76,8 +76,9 @@ namespace Trident {
 		renderer.resetCounters();
 
 		// TODO(physics/2d/test)
-		// constexpr vec3<float32> color = {0.956863, 0.996078, 0.858824};
-		constexpr vec3<float32> color = {0.0f, 0.2078f, 0.2471f};
+		// constexpr vec3<float32> color = {0.956863f, 0.996078f, 0.858824f};
+		// constexpr vec3<float32> color = {0.0f, 0.2078f, 0.2471f};
+		constexpr vec3<float32> color = {0.8f, 0.8f, 0.9f};
 
 		uint32 shapeIndex = 0;
 
@@ -87,12 +88,12 @@ namespace Trident {
 
 			switch (shape.type) {
 				case ShapeType2D::CIRCLE: {
-					renderer.setInstance(0, rigidBody, color, shapeIndex);
+					renderer.setInstance(0, shapeIndex, shape, rigidBody, color);
 
 					break;
 				}
 				case ShapeType2D::CONVEX_HULL: {
-					renderer.setInstance(shape.hull->userIndex, rigidBody, color, shapeIndex);
+					renderer.setInstance(shape.hull->userIndex, shapeIndex, shape, rigidBody, color);
 
 					break;
 				}
