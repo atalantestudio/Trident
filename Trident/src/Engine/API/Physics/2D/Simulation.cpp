@@ -100,16 +100,28 @@ namespace Trident {
 		simulation.impulseIterationCount = descriptor.impulseIterationCount;
 		simulation.tick = 0;
 
-		const TagPool<StaticEntityTag>& staticPool = descriptor.scene->ecs.getTagPool<StaticEntityTag>();
-		const TagPool<DynamicEntityTag>& dynamicPool = descriptor.scene->ecs.getTagPool<DynamicEntityTag>();
+		uint32 maxStaticRigidBodyCount = descriptor.maxStaticRigidBodyCount;
+		uint32 maxKinematicAndDynamicRigidBodyCount = descriptor.maxKinematicAndDynamicRigidBodyCount;
+		uint32 maxStaticShapeCount = descriptor.maxStaticShapeCount;
+		uint32 maxKinematicAndDynamicShapeCount = descriptor.maxKinematicAndDynamicShapeCount;
 
-		simulation.rigidBodies = sequence<RigidBody2D>(staticPool.tagCount + dynamicPool.tagCount);
-		simulation.shapes = sequence<Shape2D>(staticPool.tagCount + dynamicPool.tagCount);
+		if (descriptor.scene != nullptr) {
+			const TagPool<StaticEntityTag>& staticPool = descriptor.scene->ecs.getTagPool<StaticEntityTag>();
+			const TagPool<DynamicEntityTag>& dynamicPool = descriptor.scene->ecs.getTagPool<DynamicEntityTag>();
+
+			maxStaticRigidBodyCount += staticPool.tagCount;
+			maxKinematicAndDynamicRigidBodyCount += dynamicPool.tagCount;
+			maxStaticShapeCount += staticPool.tagCount;
+			maxKinematicAndDynamicShapeCount += dynamicPool.tagCount;
+		}
+
+		simulation.rigidBodies = sequence<RigidBody2D>(maxStaticRigidBodyCount + maxKinematicAndDynamicRigidBodyCount);
+		simulation.shapes = sequence<Shape2D>(maxStaticShapeCount + maxKinematicAndDynamicShapeCount);
 		simulation.usedRigidBodyCount = 0;
 		simulation.usedShapeCount = 0;
-		simulation.broadPhase.staticShapeIds = sequence<uint32>(staticPool.tagCount);
-		simulation.broadPhase.kinematicShapeIds = sequence<uint32>(0);
-		simulation.broadPhase.dynamicShapeIds = sequence<uint32>(dynamicPool.tagCount);
+		simulation.broadPhase.staticShapeIds = sequence<uint32>(maxStaticShapeCount);
+		simulation.broadPhase.kinematicShapeIds = sequence<uint32>(maxKinematicAndDynamicShapeCount);
+		simulation.broadPhase.dynamicShapeIds = sequence<uint32>(maxKinematicAndDynamicShapeCount);
 		simulation.broadPhase.usedStaticShapeIdCount = 0;
 		simulation.broadPhase.usedKinematicShapeIdCount = 0;
 		simulation.broadPhase.usedDynamicShapeIdCount = 0;
@@ -117,6 +129,9 @@ namespace Trident {
 		simulation.contactPairs = {};
 
 		if (descriptor.scene != nullptr) {
+			const TagPool<StaticEntityTag>& staticPool = descriptor.scene->ecs.getTagPool<StaticEntityTag>();
+			const TagPool<DynamicEntityTag>& dynamicPool = descriptor.scene->ecs.getTagPool<DynamicEntityTag>();
+
 			importRigidBodiesAndShapesFromComponentPool(simulation, *descriptor.scene, staticPool, RigidBodyType::STATIC);
 			importRigidBodiesAndShapesFromComponentPool(simulation, *descriptor.scene, dynamicPool, RigidBodyType::DYNAMIC);
 		}
@@ -220,11 +235,33 @@ namespace Trident {
 		return id;
 	}
 
-	BoxHull2D createBoxHull(vec2<float32> halfSize) {
-		// TODO(wip)
-		ENGINE_ERROR_UNIMPLEMENTED();
+	BoxHull2D createBoxHull(vec2<float32> halfSize, float32 mass) {
+		static uint32 userIndex = 1;
 
-		return {};
+		const float32 hx = halfSize.x;
+		const float32 hy = halfSize.y;
+
+		const float32 x = hx * 2.0f;
+		const float32 y = hy * 2.0f;
+
+		BoxHull2D boxHull;
+		boxHull.header.centroid = {0.0f, 0.0f};
+		boxHull.header.area = x * y;
+		boxHull.header.radius = length(halfSize);
+		boxHull.header.mass = mass;
+		boxHull.header.inertia = mass * (x * x + y * y) / 12.0f;
+		boxHull.header.vertexCount = 4;
+		boxHull.header.vertexOffset = offsetof(BoxHull2D, vertices);
+		// boxHull.header.vertexOffset = (uint64) boxHull.vertices;
+		boxHull.header.userIndex = userIndex;
+		boxHull.vertices[0] = {-hx,  hy};
+		boxHull.vertices[1] = { hx,  hy};
+		boxHull.vertices[2] = { hx, -hy};
+		boxHull.vertices[3] = {-hx, -hy};
+
+		userIndex += 1;
+
+		return boxHull;
 	}
 
 	void tick(PhysicsSimulation2D& simulation) {

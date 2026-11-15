@@ -1,23 +1,20 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-#pragma once
+#include "pch.hpp"
 
-#include "../../Physics2D/Renderer/Physics2DRenderer.hpp"
+#include "Physics2D/Renderer/Renderer.hpp"
 
 namespace Trident {
-	ref<GraphicsPipeline> Physics2DRenderer::createRigidBodyStrokePipeline() const {
+	ref<GraphicsPipeline> Physics2DRenderer::createCirclePipeline() const {
 		VertexInputBinding vertexInputBindings[] = {
 			VertexInputBinding(InputRate::VERTEX),
 			VertexInputBinding(InputRate::INSTANCE),
 		};
 
-		vertexInputBindings[0].registerAttribute<decltype(Vertex::position)>();
-		vertexInputBindings[1].registerAttribute<decltype(RigidBody::world)>();
-		vertexInputBindings[1].registerAttribute<decltype(RigidBody::fillColor)>();
-		vertexInputBindings[1].registerAttribute<decltype(RigidBody::strokeColor)>();
-		vertexInputBindings[1].registerAttribute<decltype(RigidBody::depth)>();
-		vertexInputBindings[1].registerAttribute<decltype(RigidBody::selected)>();
+		vertexInputBindings[0].registerAttribute<vec2<float32>>();
+		vertexInputBindings[1].registerAttribute<decltype(PhysicsRendererInstance2D::position)>();
+		vertexInputBindings[1].stride = sizeof(PhysicsRendererInstance2D);
 
 		const ColorBlendAttachment colorBlendAttachments[] = {
 			{
@@ -35,22 +32,22 @@ namespace Trident {
 					.stage = ShaderStage::VERTEX,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Rigid body stroke vertex",
+						.name = "Circle vertex",
 					#endif
 				},
-				"Physics2D/RigidBodyStroke.vert"
+				"Physics2D/Circle.vert"
 			),
 			.fragmentShaderModule = loadShaderModule(
 				{
 					.stage = ShaderStage::FRAGMENT,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Rigid body stroke fragment",
+						.name = "Circle fragment",
 					#endif
 				},
-				"Physics2D/RigidBodyStroke.frag"
+				"Physics2D/Circle.frag"
 			),
-			.primitiveTopology = PrimitiveTopology::LINE_STRIP,
+			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
 			.polygonMode = PolygonMode::FILL,
 			.cullMode = CullMode::BACK,
 			.frontFace = FrontFace::CLOCKWISE,
@@ -60,15 +57,13 @@ namespace Trident {
 				.attachments = colorBlendAttachments,
 			},
 			.depthStencilState = {
-				.depthTest = true,
-				.depthWrite = true,
-				.compareOperation = CompareOperation::GREATER_OR_EQUAL,
+				.depthTest = false,
 			},
 			.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
 			.renderPass = renderPass,
 			.subpassIndex = 0,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Rigid body stroke",
+				.name = "Circle",
 			#endif
 		});
 	}

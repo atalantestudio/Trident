@@ -1,4 +1,4 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #include "pch.hpp"
@@ -6,236 +6,9 @@
 #include "Engine/API/Geometry/Hull2D.hpp"
 #include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 
-#include "../../Physics2D/Renderer/CenterOfMassPipeline.hpp"
-#include "../../Physics2D/Renderer/DistancePipeline.hpp"
-#include "../../Physics2D/Renderer/EdgeFeaturePipeline.hpp"
-#include "../../Physics2D/Renderer/GridPipeline.hpp"
-#include "../../Physics2D/Renderer/Physics2DRenderer.hpp"
-#include "../../Physics2D/Renderer/RigidBodyFillPipeline.hpp"
-#include "../../Physics2D/Renderer/RigidBodyPlaceholderCenterOfMassPipeline.hpp"
-#include "../../Physics2D/Renderer/RigidBodyPlaceholderFillPipeline.hpp"
-#include "../../Physics2D/Renderer/RigidBodyPlaceholderStrokePipeline.hpp"
-#include "../../Physics2D/Renderer/RigidBodyStrokePipeline.hpp"
-#include "../../Physics2D/Renderer/VertexFeaturePipeline.hpp"
+#include "Physics2D/Renderer/Renderer.hpp"
 
 namespace Trident {
-	void Physics2DRenderer::build() {
-		setupRenderPass();
-
-		if (SAMPLE_COUNT != ImageSampleCount::x1) {
-			if (layerInput->swapchainImage == nullptr) {
-				recreateMultisampleImage();
-				recreateMultisampleImageView();
-			}
-		}
-
-		recreateDepthStencilImage();
-		recreateDepthStencilImageView();
-		recreateFramebuffers();
-
-		createCameraBuffer();
-		createViewBuffer();
-		createPlaceholderBuffer();
-
-		#if defined(SHOW_DISTANCE)
-			createClosestPointBuffer();
-		#endif
-
-		#if defined(SHOW_FEATURES)
-			createVertexFeatureBuffer();
-			createEdgeFeatureBuffer();
-		#endif
-
-		createCameraViewDescriptorSetLayout();
-		createPlaceholderDescriptorSetLayout();
-
-		allocateDescriptorSets();
-
-		updateCameraViewDescriptorSet();
-		updatePlaceholderDescriptorSet();
-
-		createCameraViewPipelineLayout();
-		createPlaceholderPipelineLayout();
-
-		gridPipeline = createGridPipeline();
-		rigidBodyFillPipeline = createRigidBodyFillPipeline();
-		rigidBodyStrokePipeline = createRigidBodyStrokePipeline();
-		centerOfMassPipeline = createCenterOfMassPipeline();
-		rigidBodyPlaceholderFillPipeline = createRigidBodyPlaceholderFillPipeline();
-		rigidBodyPlaceholderStrokePipeline = createRigidBodyPlaceholderStrokePipeline();
-		rigidBodyPlaceholderCenterOfMassPipeline = createRigidBodyPlaceholderCenterOfMassPipeline();
-
-		#if defined(SHOW_DISTANCE)
-			distancePipeline = createDistancePipeline();
-		#endif
-
-		#if defined(SHOW_FEATURES)
-			vertexFeaturePipeline = createVertexFeaturePipeline();
-			edgeFeaturePipeline = createEdgeFeaturePipeline();
-		#endif
-
-		updateCameraProjection();
-		updateViewport();
-	}
-
-	void Physics2DRenderer::setupRenderPass() {
-		renderPass = createRenderPass({
-			.attachments = {
-				// Color
-				{
-					.format = getSurface()->getFormat(),
-					.sampleCount = SAMPLE_COUNT,
-					.loadOperation = LoadOperation::CLEAR,
-					.storeOperation = StoreOperation::STORE,
-					.finalLayout = ImageLayout::PRESENT_SRC,
-				},
-
-				// Depth stencil
-				{
-					.format = ImageFormat::D32_SFLOAT,
-					.sampleCount = SAMPLE_COUNT,
-					.loadOperation = LoadOperation::CLEAR,
-					.storeOperation = StoreOperation::UNDEFINED,
-					.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-				},
-			},
-			.subpasses = {
-				{
-					.colorAttachmentReferences = {
-						{
-							.index = 0,
-							.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
-						},
-					},
-					.depthStencilAttachmentReference = {
-						.index = 1,
-						.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-					},
-				},
-			},
-		});
-	}
-
-	void Physics2DRenderer::recreateMultisampleImage() {
-		const Extent2D swapchainExtent = getSwapchain()->getExtent();
-
-		layerInput->swapchainImage = renderPass->createColorAttachmentImage(
-			{
-				.type = ImageType::TYPE_2D,
-				.extent = {swapchainExtent.x, swapchainExtent.y, 1},
-				.mipLevelCount = 1,
-				.layerCount = 1,
-				#if defined(DEBUG_OBJECT_NAME)
-					.name = "Multisample attachment",
-				#endif
-			},
-			0
-		);
-	}
-
-	void Physics2DRenderer::recreateMultisampleImageView() {
-		layerInput->swapchainImageView = layerInput->swapchainImage->createView({
-			.mipLevelOffset = 0,
-			.mipLevelCount = 1,
-			.layerOffset = 0,
-			.layerCount = 1,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Multisample attachment",
-			#endif
-		});
-	}
-
-	void Physics2DRenderer::recreateDepthStencilImage() {
-		const Extent2D swapchainExtent = getSwapchain()->getExtent();
-
-		depthStencilImage = renderPass->createDepthStencilAttachmentImage(
-			{
-				.type = ImageType::TYPE_2D,
-				.extent = {swapchainExtent.x, swapchainExtent.y, 1},
-				.mipLevelCount = 1,
-				.layerCount = 1,
-				#if defined(DEBUG_OBJECT_NAME)
-					.name = "Depth stencil attachment",
-				#endif
-			},
-			0
-		);
-	}
-
-	void Physics2DRenderer::recreateDepthStencilImageView() {
-		depthStencilImageView = depthStencilImage->createView({
-			.mipLevelOffset = 0,
-			.mipLevelCount = 1,
-			.layerOffset = 0,
-			.layerCount = 1,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Depth stencil attachment",
-			#endif
-		});
-	}
-
-	void Physics2DRenderer::recreateFramebuffers() {
-		const ref<Swapchain> swapchain = getSwapchain();
-
-		framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
-
-		FramebufferDescriptor framebufferDescriptor = {
-			.renderPass = renderPass,
-			.extent = swapchain->getExtent(),
-		};
-
-		if (SAMPLE_COUNT != ImageSampleCount::x1) {
-			framebufferDescriptor.imageViews = {layerInput->swapchainImageView, depthStencilImageView, nullptr};
-		}
-		else {
-			framebufferDescriptor.imageViews = {nullptr, depthStencilImageView};
-		}
-
-		#if defined(DEBUG_OBJECT_NAME)
-			sequence<char8> name;
-		#endif
-
-		uint32 framebufferIndex = 0;
-
-		while (framebufferIndex < framebuffers.count()) {
-			#if defined(DEBUG_OBJECT_NAME)
-				name = Logger::format("In flight []", framebufferIndex);
-
-				framebufferDescriptor.name = name;
-			#endif
-
-			if (SAMPLE_COUNT != ImageSampleCount::x1) {
-				framebufferDescriptor.imageViews[2] = swapchain->getImageView(framebufferIndex);
-			}
-			else {
-				framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
-			}
-
-			framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
-
-			framebufferIndex += 1;
-		}
-	}
-
-	void Physics2DRenderer::createCameraBuffer() {
-		const uint64 alignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
-
-		cameraBuffer = createDynamicBuffer({
-			.size = ceilPowerOf2(sizeof(Camera), alignment),
-			.usage = BufferUsage::UNIFORM,
-			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
-			.persistent = true,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Camera",
-			#endif
-		});
-
-		const BufferView<Camera> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
-
-		cameraMappedRange = cameraView.map();
-		cameraMappedRange->zoomLevel = DEFAULT_ZOOM_LEVEL;
-	}
-
 	void Physics2DRenderer::createViewBuffer() {
 		const uint64 alignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
 
@@ -254,7 +27,7 @@ namespace Trident {
 		viewMappedRange = viewView.map();
 	}
 
-	void Physics2DRenderer::createPlaceholderBuffer() {
+	/* void Physics2DRenderer::createPlaceholderBuffer() {
 		const uint64 alignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
 
 		placeholderBuffer = createDynamicBuffer({
@@ -271,7 +44,7 @@ namespace Trident {
 
 		placeholderMappedRange = placeholderView.map();
 		placeholderMappedRange->offset = {0.0f, 0.0f};
-	}
+	} */
 
 	#if defined(SHOW_DISTANCE)
 		void Physics2DRenderer::createClosestPointBuffer() {
@@ -350,7 +123,7 @@ namespace Trident {
 		});
 	}
 
-	void Physics2DRenderer::createPlaceholderDescriptorSetLayout() {
+	/* void Physics2DRenderer::createPlaceholderDescriptorSetLayout() {
 		const DescriptorSetLayoutBinding bindings[] = {
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
@@ -365,7 +138,7 @@ namespace Trident {
 				.name = "Placeholder",
 			#endif
 		});
-	}
+	} */
 
 	void Physics2DRenderer::createCameraViewPipelineLayout() {
 		cameraViewPipelineLayout = createPipelineLayout({
@@ -376,29 +149,16 @@ namespace Trident {
 		});
 	}
 
-	void Physics2DRenderer::createPlaceholderPipelineLayout() {
+	/* void Physics2DRenderer::createPlaceholderPipelineLayout() {
 		placeholderPipelineLayout = createPipelineLayout({
 			.descriptorSetLayouts = {cameraViewDescriptorSetLayout, placeholderDescriptorSetLayout},
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Placeholder",
 			#endif
 		});
-	}
+	} */
 
-	void Physics2DRenderer::allocateDescriptorSets() {
-		const ref<DescriptorSetLayout> descriptorSetLayouts[] = {
-			cameraViewDescriptorSetLayout,
-			placeholderDescriptorSetLayout,
-		};
-
-		// TODO(base/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
-		sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(descriptorSetLayouts);
-
-		cameraViewDescriptorSet = descriptorSets[0];
-		placeholderDescriptorSet = descriptorSets[1];
-	}
-
-	void Physics2DRenderer::setScene(const Scene2D* scene) {
+	/* void Physics2DRenderer::setScene(const Scene2D* scene) {
 		this->scene = scene;
 
 		const view<uint8> dataBuffer = scene->getDataBuffer();
@@ -528,7 +288,7 @@ namespace Trident {
 
 		transferQueue->submit(commandBuffer);
 		transferQueue->waitIdle();
-	}
+	} */
 
 	#if defined(SHOW_DISTANCE)
 		void Physics2DRenderer::setClosestPoints(vec2<float32> closestPointA, vec2<float32> closestPointB) const {
@@ -537,13 +297,9 @@ namespace Trident {
 		}
 	#endif
 
-	void Physics2DRenderer::setWorld(Entity entity, const mat3x3<float32>& world) const {
-		rigidBodyMappedRange[entity].world = world;
-	}
-
-	void Physics2DRenderer::setPlaceholderOffset(vec2<float32> offset) const {
+	/* void Physics2DRenderer::setPlaceholderOffset(vec2<float32> offset) const {
 		placeholderMappedRange->offset = offset;
-	}
+	} */
 
 	#if defined(SHOW_FEATURES)
 		void Physics2DRenderer::registerFeature(const Feature2D& feature) {
@@ -570,7 +326,7 @@ namespace Trident {
 		}
 	#endif
 
-	void Physics2DRenderer::selectEntity(Entity entity) {
+	/* void Physics2DRenderer::selectEntity(Entity entity) {
 		if (selectedEntity != max<Entity>()) {
 			rigidBodyMappedRange[selectedEntity].selected = 0;
 		}
@@ -580,7 +336,7 @@ namespace Trident {
 		if (selectedEntity != max<Entity>()) {
 			rigidBodyMappedRange[selectedEntity].selected = 1;
 		}
-	}
+	} */
 
 	void Physics2DRenderer::updateCameraViewDescriptorSet() const {
 		const BufferView<Camera> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
@@ -602,7 +358,7 @@ namespace Trident {
 		getDevice()->updateDescriptorSets(writeDescriptorSets);
 	}
 
-	void Physics2DRenderer::updatePlaceholderDescriptorSet() const {
+	/* void Physics2DRenderer::updatePlaceholderDescriptorSet() const {
 		const BufferView<Placeholder> placeholderView = placeholderBuffer->createView<Placeholder>(0, placeholderBuffer->getSize());
 
 		const WriteDescriptorSet writeDescriptorSets[] = {
@@ -614,9 +370,9 @@ namespace Trident {
 		};
 
 		getDevice()->updateDescriptorSets(writeDescriptorSets);
-	}
+	} */
 
-	void Physics2DRenderer::updateCentersOfMass() const {
+	/* void Physics2DRenderer::updateCentersOfMass() const {
 		const ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
 		const uint32 componentCount = rigidBodyComponentPool.componentCount;
 		const float32 inverseComponentCount = 1.0f / componentCount;
@@ -625,30 +381,31 @@ namespace Trident {
 
 		while (componentIndex < componentCount) {
 			const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
-			const vec2<float32> p = vec2<float32>{0.0f, 0.0f} * rigidBodyMappedRange[componentIndex].world;
+			const RigidBody2DComponent& rigidBodyComponent = rigidBodyComponentPool.components[componentIndex];
 
-			centerOfMassMappedRange[entity].position = {p[0], p[1], componentIndex * inverseComponentCount};
+			centerOfMassMappedRange[entity].position = {rigidBodyComponent.position[0], rigidBodyComponent.position[1], componentIndex * inverseComponentCount};
 			componentIndex += 1;
 		}
-	}
+	} */
 
 	void Physics2DRenderer::updateCameraProjection() const {
 		const vec2<float32> viewport = vec2<float32>(getSwapchain()->getExtent());
 		const vec2<float32> origin = -cameraPosition / (viewport * 0.5f);
-		const mat3x3<float32> P = orthographic(origin, viewport);
+		const float32 zoomLevel = getZoomLevel();
+		const mat3x3<float32> P = orthographic(origin * zoomLevel, viewport / zoomLevel);
 
 		cameraMappedRange->projection = {{
 			{P[0].x, P[0].y, P[0].z, 1.0f},
 			{P[1].x, P[1].y, P[1].z, 1.0f},
-			{P[2].x, P[2].y, P[2].z, 1.0f},
+			{P[2].x, P[2].y, P[2].z, zoomLevel},
 		}};
 	}
 
 	void Physics2DRenderer::updateViewport() const {
-		const Extent2D swapchainExtent = getSwapchain()->getExtent();
+		const vec2<float32> extent = vec2<float32>(getSwapchain()->getExtent());
 
-		viewMappedRange->viewport.x = static_cast<float32>(swapchainExtent.x);
-		viewMappedRange->viewport.y = static_cast<float32>(swapchainExtent.y);
+		viewMappedRange->viewport.x = extent.x;
+		viewMappedRange->viewport.y = extent.y;
 	}
 
 	void Physics2DRenderer::zoom(float32 delta) {
@@ -656,9 +413,42 @@ namespace Trident {
 			delta /= abs(delta);
 		}
 
-		cameraMappedRange->zoomLevel = clamp(cameraMappedRange->zoomLevel + delta, MIN_ZOOM_LEVEL, MAX_ZOOM_LEVEL);
+		cameraMappedRange->projection.m[2].w = clamp(getZoomLevel() + delta, MIN_ZOOM_LEVEL, MAX_ZOOM_LEVEL);
 
 		updateCameraProjection();
+	}
+
+	void Physics2DRenderer::setInstance(uint32 hullIndex, const RigidBody2D& rigidBody, vec3<float32> color, ShapeID2D shapeId) {
+		if (hullIndex == 0) {
+			PhysicsRendererInstance2D& instance = instanceMappedRanges[0][circleInstanceCount];
+			instance.position = rigidBody.position;
+			instance.centroid = rigidBody.centroid;
+			instance.rotation = rotationAngle<mat2x2<float32>>(-rigidBody.rotation);
+			instance.color = color;
+			instance.shapeId = shapeId;
+
+			circleInstanceCount += 1;
+
+			return;
+		}
+
+		PhysicsRendererBuildHull2D& hull = hulls[hullIndex - 1];
+
+		PhysicsRendererInstance2D& instance = instanceMappedRanges[hullIndex][hull.instanceCount];
+		instance.position = rigidBody.position;
+		instance.centroid = rigidBody.centroid;
+		instance.rotation = rotationAngle<mat2x2<float32>>(-rigidBody.rotation);
+		instance.color = color;
+		instance.shapeId = shapeId;
+
+		hull.instanceCount += 1;
+	}
+
+	void Physics2DRenderer::setContact(vec2<float32> contact) {
+		DEBUG_ASSERT(contactCount < maxContactCount);
+
+		contactMappedRange[contactCount] = contact;
+		contactCount += 1;
 	}
 
 	void Physics2DRenderer::render(ref<CommandEncoder> commandEncoder) const {
@@ -667,14 +457,14 @@ namespace Trident {
 		const float32 height = static_cast<float32>(swapchainExtent.y);
 
 		// TODO(physics/2d/renderer): Store the clear values inside the renderer.
-		sequence<ClearValue> clearValues(2 + (SAMPLE_COUNT != ImageSampleCount::x1));
-		clearValues[0] = {1.0f, 1.0f, 1.0f, 1.0f};
+		sequence<ClearValue> clearValues(2 + (sampleCount != ImageSampleCount::x1));
+		clearValues[0] = {0.0f, 0.0f, 0.0f, 1.0f};
 		clearValues[1] = {
 			.depth = 0.0f,
 			.stencil = 0,
 		};
 
-		if (SAMPLE_COUNT != ImageSampleCount::x1) {
+		if (sampleCount != ImageSampleCount::x1) {
 			clearValues[2] = {0.0f, 0.0f, 0.0f, 1.0f};
 		}
 
@@ -686,72 +476,93 @@ namespace Trident {
 		commandEncoder->setScissor(0, 0, swapchainExtent);
 
 		// Grid
-		{
+		/* {
 			commandEncoder->bindGraphicsPipeline(gridPipeline);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
 			commandEncoder->draw(3, 1, 0, 0);
+		} */
+
+		// Draw circle shapes.
+		if (circleInstanceCount > 0) {
+			commandEncoder->bindGraphicsPipeline(circlePipeline);
+			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
+			commandEncoder->bindVertexBuffer(1, instanceBuffer, 0);
+			commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(indexBuffer, 0);
+			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
+			commandEncoder->drawIndexed(6, circleInstanceCount, 0, 0, 0);
 		}
 
-		const view<Geometry2D> geometries = scene->getGeometries();
-		const view<Hull2D> hulls = scene->getHulls();
-		const ComponentPool<Geometry2DComponent>& geometryComponentPool = scene->ecs.getComponentPool<Geometry2DComponent>();
+		uint64 vertexOffset = 4 * sizeof(vec2<float32>);
+		uint32 instanceOffset = maxCircleInstanceCount;
+		uint32 indexOffset = 6;
 
-		uint32 componentIndex = 0;
-
-		// Rigid body fill
-		{
-			commandEncoder->bindGraphicsPipeline(rigidBodyFillPipeline);
-			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
-			commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0);
-			commandEncoder->bindIndexBuffer<IndexFormat::R32_UINT>(indexBuffer, 0);
+		// Draw hull shape.
+		/* {
+			commandEncoder->bindGraphicsPipeline(shapeFillPipeline);
+			commandEncoder->bindVertexBuffer(1, instanceBuffer, 0);
+			commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(indexBuffer, 0);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
 
-			while (componentIndex < geometryComponentPool.componentCount) {
-				const Entity entity = geometryComponentPool.componentIndexToEntity[componentIndex];
-				const Geometry2DComponent& geometryComponent = geometryComponentPool.components[componentIndex];
-				const Geometry2D& geometry = geometries[geometryComponent.geometryIndex];
+			uint32 shapeIndex = 0;
 
-				// TODO(physics/2d/materials): Restore materials (test colors were 0xf4fedbff and 0xe6ddffff).
-				commandEncoder->drawIndexed(geometry.getIndexRange().count, 1, geometry.getIndexRange().offset, geometry.getVertexPositionComponentRange().offset / 2, entity);
+			while (shapeIndex < hulls.count()) {
+				const PhysicsRendererBuildHull2D& hull = hulls[shapeIndex];
 
-				componentIndex += 1;
+				if (hull.instanceCount > 0) {
+					commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset);
+					commandEncoder->drawIndexed(hull.hullHeader->vertexCount, hull.instanceCount, indexOffset, 0, instanceOffset);
+				}
+
+				vertexOffset += hull.hullHeader->vertexCount * sizeof(vec2<float32>);
+				instanceOffset += hull.maxInstanceCount;
+				indexOffset += hull.hullHeader->vertexCount;
+				shapeIndex += 1;
+			}
+		} */
+
+		vertexOffset = 4 * sizeof(vec2<float32>);
+		instanceOffset = maxCircleInstanceCount;
+
+		// Draw hull shape wireframes.
+		{
+			commandEncoder->bindGraphicsPipeline(shapeStrokePipeline);
+			commandEncoder->bindVertexBuffer(1, instanceBuffer, 0);
+			commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(indexBuffer, lineStripIndexOffset);
+			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
+
+			uint32 shapeIndex = 0;
+
+			while (shapeIndex < hulls.count()) {
+				const PhysicsRendererBuildHull2D& hull = hulls[shapeIndex];
+
+				if (hull.instanceCount > 0) {
+					commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset);
+					commandEncoder->drawIndexed(hull.hullHeader->vertexCount + 1, hull.instanceCount, 0, 0, instanceOffset);
+				}
+
+				vertexOffset += hull.hullHeader->vertexCount * sizeof(vec2<float32>);
+				instanceOffset += hull.maxInstanceCount;
+				shapeIndex += 1;
 			}
 		}
 
-		componentIndex = 0;
-
-		// Rigid body stroke
-		{
-			commandEncoder->bindGraphicsPipeline(rigidBodyStrokePipeline);
-			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
-			commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0);
-			commandEncoder->bindIndexBuffer<IndexFormat::R32_UINT>(indexBuffer, 0);
+		// Draw contacts.
+		if (contactCount > 0) {
+			commandEncoder->bindGraphicsPipeline(contactPipeline);
+			commandEncoder->bindVertexBuffer(0, contactBuffer, 0);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
-
-			while (componentIndex < geometryComponentPool.componentCount) {
-				const Entity entity = geometryComponentPool.componentIndexToEntity[componentIndex];
-				const Geometry2DComponent& geometryComponent = geometryComponentPool.components[componentIndex];
-				const Geometry2D& geometry = geometries[geometryComponent.geometryIndex];
-				const Hull2D& hull = hulls[geometry.hullIndex];
-
-				// TODO(physics/2d/materials): Restore materials (test colors were 0xf4fedbff and 0xe6ddffff).
-				commandEncoder->drawIndexed(hull.lineIndexRange.count, 1, hull.lineIndexRange.offset, geometry.getVertexPositionComponentRange().offset / 2, entity);
-
-				componentIndex += 1;
-			}
+			commandEncoder->draw(contactCount, 1, 0, 0);
 		}
-
-		const ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
 
 		// Center of mass
-		{
+		/* {
 			updateCentersOfMass();
 
 			commandEncoder->bindGraphicsPipeline(centerOfMassPipeline);
 			commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, 0);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
 			commandEncoder->draw(rigidBodyComponentPool.componentCount, 1, 0, 0);
-		}
+		} */
 
 		/* #if defined(SHOW_DISTANCE)
 			renderDistance(commandEncoder);
@@ -761,7 +572,7 @@ namespace Trident {
 			renderFeatures(commandEncoder);
 		#endif */
 
-		if (selectedEntity != max<Entity>()) {
+		/* if (selectedEntity != max<Entity>()) {
 			const ref<DescriptorSet> descriptorSets[2] = {cameraViewDescriptorSet, placeholderDescriptorSet};
 			const Geometry2DComponent geometryComponent = scene->ecs.getComponent<Geometry2DComponent>(selectedEntity);
 			const Geometry2D& geometry = geometries[geometryComponent.geometryIndex];
@@ -794,7 +605,7 @@ namespace Trident {
 				commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, descriptorSets);
 				commandEncoder->drawIndexed(hull.lineIndexRange.count, 1, hull.lineIndexRange.offset, geometry.getVertexPositionComponentRange().offset / 2, selectedEntity);
 			}
-		}
+		} */
 
 		commandEncoder->endRenderPass();
 	}
@@ -827,30 +638,37 @@ namespace Trident {
 	#endif
 
 	void Physics2DRenderer::resize(WindowResizeEvent& event) {
-		if (SAMPLE_COUNT != ImageSampleCount::x1) {
-			if (layerInput->swapchainImage == nullptr) {
-				recreateMultisampleImage();
-				recreateMultisampleImageView();
-			}
+		if (sampleCount != ImageSampleCount::x1) {
+			colorImage = createColorImage();
+			colorImageView = createColorImageView();
 		}
 
-		recreateDepthStencilImage();
-		recreateDepthStencilImageView();
-		recreateFramebuffers();
+		depthStencilImage = createDepthStencilImage();
+		depthStencilImageView = createDepthStencilImageView();
+
+		createFramebuffers();
 
 		updateCameraProjection();
 		updateViewport();
 	}
 
-	void Physics2DRenderer::clearRegisteredData() {
-		#if defined(SHOW_DISTANCE)
+	void Physics2DRenderer::resetCounters() {
+		/* #if defined(SHOW_DISTANCE)
 			closestPointMappedRange[0].position = {0.0f, 0.0f};
 			closestPointMappedRange[1].position = {0.0f, 0.0f};
-		#endif
+		#endif */
 
-		#if defined(SHOW_FEATURES)
+		/* #if defined(SHOW_FEATURES)
 			vertexFeatureCount = 0;
 			edgeFeatureCount = 0;
-		#endif
+		#endif */
+
+		circleInstanceCount = 0;
+
+		for (PhysicsRendererBuildHull2D& hull : hulls) {
+			hull.instanceCount = 0;
+		}
+
+		contactCount = 0;
 	}
 }

@@ -1,12 +1,12 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-#pragma once
+#include "pch.hpp"
 
-#include "../../Physics2D/Renderer/Physics2DRenderer.hpp"
+#include "Physics2D/Renderer/Renderer.hpp"
 
 namespace Trident {
-	ref<GraphicsPipeline> Physics2DRenderer::createRigidBodyPlaceholderCenterOfMassPipeline() const {
+	/* ref<GraphicsPipeline> Physics2DRenderer::createRigidBodyPlaceholderCenterOfMassPipeline() const {
 		VertexInputBinding vertexInputBindings[] = {
 			VertexInputBinding(InputRate::VERTEX),
 		};
@@ -82,5 +82,5 @@ namespace Trident {
 				.name = "Rigid body placeholder center of mass",
 			#endif
 		});
-	}
+	} */
 }

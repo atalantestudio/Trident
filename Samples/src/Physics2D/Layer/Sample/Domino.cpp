@@ -64,7 +64,7 @@ namespace Trident {
 			.rigidBodyId = createRigidBody(simulation, {
 				.type = RigidBodyType::STATIC,
 				.position = {1.0f, 6.0f},
-				.rotation = 0.3f,
+				.rotation = -0.3f,
 			}),
 			.material = material,
 			.density = 1.0f,

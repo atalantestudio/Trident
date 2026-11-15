@@ -16,23 +16,44 @@ namespace Trident {
 		rendererBuildOptions.zoomLevel = 36.0f;
 		rendererBuildOptions.maxContactCount = 2048;
 
-		const view<char8> sceneAssetName = getApplication()->getPropertyFile()->getProperty<view<char8>>("AssetName");
-		const ref<Scene2DAsset> sceneAsset = getApplication()->getAssetLibrary()->getAsset<Scene2DAsset>(sceneAssetName);
-
-		scene = allocateRef<Scene2D>(sceneAsset);
-
 		PhysicsSimulationDescriptor2D simulationDescriptor;
 		simulationDescriptor.deltaTime = getApplication()->getFixedDeltaTime();
 		simulationDescriptor.gravity = {0.0f, -9.80665f};
 		simulationDescriptor.allowedPenetration = 0.01f;
 		simulationDescriptor.impulseIterationCount = 10;
-		simulationDescriptor.scene = scene;
 
-		simulation = createSimulation(simulationDescriptor);
+		const view<char8> SampleName = getApplication()->getPropertyFile()->getProperty<view<char8>>("SampleName");
+
+		if (SampleName == "box") {
+			LoadBoxSample(simulationDescriptor);
+		}
+		else if (SampleName == "boxpyramid") {
+			LoadBoxPyramidSample(simulationDescriptor);
+		}
+		else if (SampleName == "boxstacking") {
+			LoadBoxStackingSample(simulationDescriptor);
+		}
+		else if (SampleName == "circle") {
+			// TODO(physics/2d): Fix circle demo.
+			LoadCircleSample(simulationDescriptor);
+		}
+		// TODO(physics/2d): Add circlesliding demo.
+		else if (SampleName == "domino") {
+			LoadDominoSample(simulationDescriptor);
+		}
+		else if (SampleName == "friction") {
+			LoadFrictionSample(simulationDescriptor);
+		}
+		// TODO(physics/2d): Add polygon demo.
+		else if (SampleName == "swing") {
+			LoadSwingSample(simulationDescriptor);
+		}
+		else {
+			ENGINE_ASSERT(false, "Unknown sample \"[]\".", SampleName);
+		}
 
 		renderer.setLayer(this);
-		renderer.build();
-		renderer.setScene(scene);
+		renderer.build(rendererBuildOptions);
 	}
 
 	StaticMemoryDescriptor Physics2DSceneLayer::getStaticMemoryDescriptor() const {
@@ -49,7 +70,11 @@ namespace Trident {
 
 		checkHover();
 
-		renderer.clearRegisteredData();
+		renderer.resetCounters();
+
+		// TODO(physics/2d/test)
+		// constexpr vec3<float32> color = {0.956863, 0.996078, 0.858824};
+		constexpr vec3<float32> color = {0.0f, 0.2078f, 0.2471f};
 
 		uint32 shapeIndex = 0;
 
@@ -57,16 +82,50 @@ namespace Trident {
 			const Shape2D& shape = simulation.shapes[shapeIndex];
 			const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 
-			renderer.setWorld(shapeIndex, rigidBody.getWorld());
+			switch (shape.type) {
+				case ShapeType2D::CIRCLE: {
+					renderer.setInstance(0, rigidBody, color, shapeIndex);
+
+					break;
+				}
+				case ShapeType2D::CONVEX_HULL: {
+					renderer.setInstance(shape.hull->userIndex, rigidBody, color, shapeIndex);
+
+					break;
+				}
+				default: {
+					DEBUG_ASSERT(false);
+
+					break;
+				}
+			}
 
 			shapeIndex += 1;
 		}
 
-		renderer.selectEntity(selectedEntity);
+		uint32 contactCount = 0;
+
+		for (const std::pair<const CollisionPair2D, ContactPair2D>& pair : simulation.contactPairs) {
+			const ContactManifold2D& contactManifold = pair.second.manifold;
+
+			if (contactCount + contactManifold.contactCount >= rendererBuildOptions.maxContactCount) {
+				break;
+			}
+
+			uint32 contactIndex = 0;
+
+			while (contactIndex < contactManifold.contactCount) {
+				renderer.setContact(contactManifold.contacts[contactIndex].position);
+
+				contactIndex += 1;
+			}
+		}
+
+		/* renderer.selectEntity(selectedEntity);
 
 		if (selectedEntity != max<Entity>()) {
 			renderer.setPlaceholderOffset(placeholderOffset);
-		}
+		} */
 
 		if (draggingCamera) {
 			renderer.updateCameraProjection();

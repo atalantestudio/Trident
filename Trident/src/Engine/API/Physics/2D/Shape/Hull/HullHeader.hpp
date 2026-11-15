@@ -6,10 +6,8 @@
 namespace Trident {
 	struct HullHeader2D {
 		inline const vec2<float32>* getVertices() const {
-			// return pointer_cast<const vec2<float32>*>(pointer_cast<const uint8*>(this) + vertexOffset);
-			const vec2<float32>* vertices = (const vec2<float32>*) vertexOffset;
-
-			return vertices;
+			return pointer_cast<const vec2<float32>*>(pointer_cast<const uint8*>(this) + vertexOffset);
+			// return (const vec2<float32>*) vertexOffset;
 		}
 
 		/// The local centroid.
@@ -20,6 +18,8 @@ namespace Trident {
 
 		/// The distance between the center and the farthest vertex.
 		float32 radius;
+
+		float32 mass;
 
 		// TODO(physics/2d/hull/bounds)
 		/// Axis-aligned box in local space.

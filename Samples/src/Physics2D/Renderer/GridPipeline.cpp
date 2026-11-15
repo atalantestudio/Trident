@@ -1,66 +1,60 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-#pragma once
+#include "pch.hpp"
 
-#include "../../Physics2D/Renderer/Physics2DRenderer.hpp"
+#include "Physics2D/Renderer/Renderer.hpp"
 
 namespace Trident {
-	ref<GraphicsPipeline> Physics2DRenderer::createCenterOfMassPipeline() const {
-		VertexInputBinding vertexInputBindings[] = {
-			VertexInputBinding(InputRate::VERTEX),
-		};
-
-		vertexInputBindings[0].registerAttribute<decltype(CenterOfMass::position)>();
-
+	ref<GraphicsPipeline> Physics2DRenderer::createGridPipeline() const {
 		const ColorBlendAttachment colorBlendAttachments[] = {
 			{
-				.blend = false,
+				.blend = true,
+				.srcColorBlendFactor = BlendFactor::SRC_ALPHA,
+				.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA,
 			},
 		};
 
 		return createGraphicsPipeline({
 			.pipelineLayout = cameraViewPipelineLayout,
-			.vertexInputBindings = vertexInputBindings,
+			.vertexInputBindings = {},
 			.vertexShaderModule = loadShaderModule(
 				{
 					.stage = ShaderStage::VERTEX,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Center of mass vertex",
+						.name = "Grid vertex",
 					#endif
 				},
-				"Physics2D/CenterOfMass.vert"
+				"Physics2D/ScreenUVNDC.vert"
 			),
 			.fragmentShaderModule = loadShaderModule(
 				{
 					.stage = ShaderStage::FRAGMENT,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Center of mass fragment",
+						.name = "Grid fragment",
 					#endif
 				},
-				"Physics2D/CenterOfMass.frag"
+				"Physics2D/Grid.frag"
 			),
-			.primitiveTopology = PrimitiveTopology::POINT_LIST,
-			.polygonMode = PolygonMode::POINT,
+			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
+			.polygonMode = PolygonMode::FILL,
 			.cullMode = CullMode::BACK,
 			.frontFace = FrontFace::CLOCKWISE,
 			.lineWidth = 1.0f,
-			.minSampleShading = 1.0f,
+			.minSampleShading = 0.0f,
 			.colorBlendState = {
 				.attachments = colorBlendAttachments,
 			},
 			.depthStencilState = {
-				.depthTest = true,
-				.depthWrite = true,
-				.compareOperation = CompareOperation::GREATER_OR_EQUAL,
+				.depthTest = false,
 			},
 			.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
 			.renderPass = renderPass,
 			.subpassIndex = 0,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Center of mass",
+				.name = "Grid",
 			#endif
 		});
 	}

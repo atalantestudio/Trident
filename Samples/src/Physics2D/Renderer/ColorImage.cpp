@@ -1,0 +1,38 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
+#include "pch.hpp"
+
+#include "Physics2D/Renderer/Renderer.hpp"
+
+namespace Trident {
+	ref<Image> Physics2DRenderer::createColorImage() const {
+		const Extent2D extent = getSwapchain()->getExtent();
+
+		return renderPass->createColorAttachmentImage(
+			{
+				.type = ImageType::TYPE_2D,
+				.extent = {extent.x, extent.y, 1},
+				.mipLevelCount = 1,
+				.layerCount = 1,
+				#if defined(DEBUG_OBJECT_NAME)
+					.name = "Color",
+				#endif
+			},
+			0
+		);
+	}
+
+	ref<ImageView> Physics2DRenderer::createColorImageView() const {
+		return colorImage->createView({
+			.type = ImageViewType::TYPE_2D,
+			.mipLevelOffset = 0,
+			.mipLevelCount = 1,
+			.layerOffset = 0,
+			.layerCount = 1,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Color",
+			#endif
+		});
+	}
+}

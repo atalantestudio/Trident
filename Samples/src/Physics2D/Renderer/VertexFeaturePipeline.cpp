@@ -1,13 +1,13 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-#pragma once
+#include "pch.hpp"
 
-#include "../../Physics2D/Renderer/Physics2DRenderer.hpp"
+#include "Physics2D/Renderer/Renderer.hpp"
 
 namespace Trident {
-	#if defined(SHOW_DISTANCE)
-		ref<GraphicsPipeline> Physics2DRenderer::createDistancePipeline() const {
+	#if defined(SHOW_FEATURES)
+		ref<GraphicsPipeline> Physics2DRenderer::createVertexFeaturePipeline() const {
 			VertexInputBinding vertexInputBindings[] = {
 				VertexInputBinding(InputRate::VERTEX),
 			};
@@ -28,27 +28,27 @@ namespace Trident {
 						.stage = ShaderStage::VERTEX,
 						.entryPoint = "main",
 						#if defined(DEBUG_OBJECT_NAME)
-							.name = "Distance vertex",
+							.name = "Vertex feature vertex",
 						#endif
 					},
-					"Physics2D/Distance.vert"
+					"Physics2D/VertexFeature.vert"
 				),
 				.fragmentShaderModule = loadShaderModule(
 					{
 						.stage = ShaderStage::FRAGMENT,
 						.entryPoint = "main",
 						#if defined(DEBUG_OBJECT_NAME)
-							.name = "Distance fragment",
+							.name = "Vertex feature fragment",
 						#endif
 					},
-					"Physics2D/Distance.frag"
+					"Physics2D/VertexFeature.frag"
 				),
-				.primitiveTopology = PrimitiveTopology::LINE_LIST,
-				.polygonMode = PolygonMode::LINE,
+				.primitiveTopology = PrimitiveTopology::POINT_LIST,
+				.polygonMode = PolygonMode::POINT,
 				.cullMode = CullMode::BACK,
 				.frontFace = FrontFace::CLOCKWISE,
 				.lineWidth = 1.0f,
-				.minSampleShading = 0.0f,
+				.minSampleShading = 1.0f,
 				.colorBlendState = {
 					.attachments = colorBlendAttachments,
 				},
@@ -59,7 +59,7 @@ namespace Trident {
 				.renderPass = renderPass,
 				.subpassIndex = 0,
 				#if defined(DEBUG_OBJECT_NAME)
-					.name = "Distance",
+					.name = "Vertex feature",
 				#endif
 			});
 		}

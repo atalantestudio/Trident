@@ -77,7 +77,7 @@ namespace Trident {
 
 	ShapeID2D createShape(PhysicsSimulation2D& simulation, const ShapeDescriptor2D& descriptor, const void* typeDescriptor);
 
-	BoxHull2D createBoxHull(vec2<float32> halfSize);
+	BoxHull2D createBoxHull(vec2<float32> halfSize, float32 mass = 1.0f);
 
 	void broadPhase(PhysicsSimulation2D& simulation);
 	void narrowPhase(PhysicsSimulation2D& simulation);

@@ -1,12 +1,12 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-#pragma once
+#include "pch.hpp"
 
-#include "../../Physics2D/Renderer/Physics2DRenderer.hpp"
+#include "Physics2D/Renderer/Renderer.hpp"
 
 namespace Trident {
-	ref<GraphicsPipeline> Physics2DRenderer::createRigidBodyPlaceholderFillPipeline() const {
+	/* ref<GraphicsPipeline> Physics2DRenderer::createRigidBodyPlaceholderStrokePipeline() const {
 		VertexInputBinding vertexInputBindings[] = {
 			VertexInputBinding(InputRate::VERTEX),
 			VertexInputBinding(InputRate::INSTANCE),
@@ -14,14 +14,13 @@ namespace Trident {
 
 		vertexInputBindings[0].registerAttribute<decltype(Vertex::position)>();
 		vertexInputBindings[1].registerAttribute<decltype(RigidBody::world)>();
-		vertexInputBindings[1].registerAttribute<decltype(RigidBody::fillColor)>();
 		vertexInputBindings[1].stride = sizeof(RigidBody);
 
 		const ShaderModuleDescriptor vertexShaderModuleDescriptor = {
 			.stage = ShaderStage::VERTEX,
 			.entryPoint = "main",
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Placeholder fill vertex",
+				.name = "Placeholder stroke vertex",
 			#endif
 		};
 
@@ -30,12 +29,12 @@ namespace Trident {
 		switch (getGraphicsApi()) {
 			case GraphicsAPI::DX12:
 			case GraphicsAPI::VK: {
-				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderFill.vert");
+				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderStroke.vert");
 
 				break;
 			}
 			case GraphicsAPI::GL: {
-				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderFillSingleSet.vert");
+				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderStrokeSingleSet.vert");
 
 				break;
 			}
@@ -63,13 +62,13 @@ namespace Trident {
 					.stage = ShaderStage::FRAGMENT,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Placeholder fill fragment",
+						.name = "Placeholder stroke fragment",
 					#endif
 				},
-				"Physics2D/FragmentRGBA.frag"
+				"Physics2D/PlaceholderStroke.frag"
 			),
-			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
-			.polygonMode = PolygonMode::FILL,
+			.primitiveTopology = PrimitiveTopology::LINE_STRIP,
+			.polygonMode = PolygonMode::LINE,
 			.cullMode = CullMode::BACK,
 			.frontFace = FrontFace::CLOCKWISE,
 			.lineWidth = 1.0f,
@@ -84,8 +83,8 @@ namespace Trident {
 			.renderPass = renderPass,
 			.subpassIndex = 0,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Rigid body placeholder fill",
+				.name = "Rigid body placeholder stroke",
 			#endif
 		});
-	}
+	} */
 }
