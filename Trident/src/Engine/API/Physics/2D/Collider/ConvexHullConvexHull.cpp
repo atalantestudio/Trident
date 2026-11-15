@@ -4,12 +4,14 @@
 #include "pch.hpp"
 
 #include "Engine/API/Physics/2D/Collider/Collider.hpp"
-#include "Engine/API/Physics/2D/Feature.hpp"
+#include "Engine/API/Physics/2D/Contact/ClipFeature.hpp"
 #include "Engine/API/Physics/2D/SAT/SATConvexHullConvexHull.hpp"
 
 namespace Trident {
 	/// Finds and returns the incident edge on the provided rigid body.
 	static ClipFeature2D findIncidentEdge(const RigidBody2D& incidentBody, const Shape2D& incidentShape, vec2<float32> referenceEdgeNormal) {
+		const vec2<float32>* vertices = incidentShape.hull->getVertices();
+
 		ClipFeature2D incidentEdge{};
 		incidentEdge.vertexCount = 2;
 
@@ -19,8 +21,8 @@ namespace Trident {
 
 		while (indexA < incidentShape.hull->vertexCount) {
 			const uint16 indexB = (indexA + 1) % incidentShape.hull->vertexCount;
-			const vec2<float32> a = incidentShape.hull->getVertices()[indexA];
-			const vec2<float32> b = incidentShape.hull->getVertices()[indexB];
+			const vec2<float32> a = vertices[indexA];
+			const vec2<float32> b = vertices[indexB];
 			const vec2<float32> d = perpendicularLeft(b - a);
 			const float32 angle = dot(d, referenceEdgeNormal);
 
@@ -38,15 +40,15 @@ namespace Trident {
 
 		ClipVertex2D& a = incidentEdge.edge[0];
 		a.position = a.position * incidentBody.getWorld();
-		a.id.referenceEdgeAIndex = Contact2DID::NULL_EDGE_INDEX;
-		a.id.referenceEdgeBIndex = Contact2DID::NULL_EDGE_INDEX;
+		a.id.referenceEdgeAIndex = ContactID2D::NULL_EDGE_INDEX;
+		a.id.referenceEdgeBIndex = ContactID2D::NULL_EDGE_INDEX;
 		a.id.incidentEdgeAIndex = (vertexIndex + 1) % incidentShape.hull->vertexCount;
 		a.id.incidentEdgeBIndex = vertexIndex;
 
 		ClipVertex2D& b = incidentEdge.edge[1];
 		b.position = b.position * incidentBody.getWorld();
-		b.id.referenceEdgeAIndex = Contact2DID::NULL_EDGE_INDEX;
-		b.id.referenceEdgeBIndex = Contact2DID::NULL_EDGE_INDEX;
+		b.id.referenceEdgeAIndex = ContactID2D::NULL_EDGE_INDEX;
+		b.id.referenceEdgeBIndex = ContactID2D::NULL_EDGE_INDEX;
 		b.id.incidentEdgeAIndex = vertexIndex;
 		b.id.incidentEdgeBIndex = (static_cast<sint16>(vertexIndex) - 1) % incidentShape.hull->vertexCount;
 
@@ -88,12 +90,12 @@ namespace Trident {
 			if (distanceA > 0.0f) {
 				c.id = a.id;
 				c.id.referenceEdgeAIndex = edgeIndex;
-				c.id.referenceEdgeBIndex = Contact2DID::NULL_EDGE_INDEX;
+				c.id.referenceEdgeBIndex = ContactID2D::NULL_EDGE_INDEX;
 			}
 			else {
 				c.id = b.id;
 				c.id.incidentEdgeAIndex = edgeIndex;
-				c.id.incidentEdgeBIndex = Contact2DID::NULL_EDGE_INDEX;
+				c.id.incidentEdgeBIndex = ContactID2D::NULL_EDGE_INDEX;
 			}
 
 			clippedEdge.vertexCount += 1;
@@ -108,8 +110,10 @@ namespace Trident {
 		const uint32 referenceLeftEdgeIndex = (static_cast<sint32>(query.referenceEdgeIndex) - 1) % referenceShape.hull->vertexCount;
 		const uint32 referenceRightEdgeIndex = (query.referenceEdgeIndex + 1) % referenceShape.hull->vertexCount;
 
-		const vec2<float32> localA = referenceShape.hull->getVertices()[query.referenceEdgeIndex];
-		const vec2<float32> localB = referenceShape.hull->getVertices()[referenceRightEdgeIndex];
+		const vec2<float32>* referenceVertices = referenceShape.hull->getVertices();
+
+		const vec2<float32> localA = referenceVertices[query.referenceEdgeIndex];
+		const vec2<float32> localB = referenceVertices[referenceRightEdgeIndex];
 		const vec2<float32> a = localA * referenceBody.getWorld();
 		const vec2<float32> b = localB * referenceBody.getWorld();
 
@@ -168,6 +172,9 @@ namespace Trident {
 	}
 
 	bool ConvexHullConvexHull2D(const Shape2D& shapeA, const Shape2D& shapeB, const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, ContactManifold2D* manifold) {
+		DEBUG_ASSERT(shapeA.type == ShapeType2D::CONVEX_HULL);
+		DEBUG_ASSERT(shapeB.type == ShapeType2D::CONVEX_HULL);
+
 		manifold->contactCount = 0;
 
 		SATConvexHullConvexHullOutput2D output = SATConvexHullConvexHull2D(rigidBodyA, rigidBodyB, shapeA, shapeB);

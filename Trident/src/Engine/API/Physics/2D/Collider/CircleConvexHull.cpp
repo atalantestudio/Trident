@@ -20,8 +20,10 @@ namespace Trident {
 		if (d > -shapeA.circle.radius) {
 			manifold->normal = normalized(gjkOutput.closestA - rigidBodyA.position);
 			manifold->contactCount = 1;
-			manifold->contacts[0].position = gjkOutput.closestA;
-			manifold->contacts[0].separation = d;
+
+			Contact2D& contact = manifold->contacts[0];
+			contact.position = gjkOutput.closestA;
+			contact.separation = d;
 
 			return true;
 		}
@@ -30,8 +32,10 @@ namespace Trident {
 
 		manifold->normal = -satOutput.axis;
 		manifold->contactCount = 1;
-		manifold->contacts[0].position = satOutput.incidentSupportPoint - satOutput.axis * satOutput.separation;
-		manifold->contacts[0].separation = satOutput.separation - shapeA.circle.radius;
+
+		Contact2D& contact = manifold->contacts[0];
+		contact.position = satOutput.incidentSupportPoint - satOutput.axis * satOutput.separation;
+		contact.separation = satOutput.separation - shapeA.circle.radius;
 
 		return true;
 	}

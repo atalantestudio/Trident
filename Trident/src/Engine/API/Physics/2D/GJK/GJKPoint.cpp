@@ -146,7 +146,6 @@ namespace Trident {
 		s.count = 3;
 	}
 
-	// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
 	GJKPointOutput2D GJKPoint2D(const RigidBody2D& A, vec2<float32> p, const Shape2D& shapeA) {
 		constexpr uint8 GJK_2D_ITERATION_LIMIT = 8;
 

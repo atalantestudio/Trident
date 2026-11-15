@@ -50,11 +50,6 @@ namespace Trident {
 	typedef vec2<uint32> Extent2D;
 	typedef vec3<uint32> Extent3D;
 
-	struct Plane2D {
-		vec2<float32> normal;
-		float32 offset;
-	};
-
 	// TODO(lyah/vec2/cross-operations): Add to Lyah as `triple`.
 	template<typename T>
 	inline vec2<T> triple(vec2<T> a, vec2<T> b, vec2<T> c) {
@@ -118,43 +113,13 @@ namespace Trident {
 	}
 
 	// TODO(lyah/signed-distance): Add to Lyah.
-	/// Calculates the signed distance between a point and an infinite plane.
-	inline float32 signedDistance(vec2<float32> point, Plane2D plane) {
-		return dot(point, plane.normal) - plane.offset;
-	}
-
-	// TODO(lyah/signed-distance): Add to Lyah.
-	/// Calculates the signed distance between a point and an infinite line represented by a normal and a vector offset.
-	inline float32 signedDistanceLP(vec2<float32> normal, vec2<float32> offset, vec2<float32> point) {
-		return dot(normal, point - offset);
-	}
-
-	// TODO(lyah/signed-distance): Add to Lyah.
 	/// Calculates the signed distance between a point and an infinite plane represented by a normal and an offset.
 	inline float32 signedDistanceFP(vec3<float32> normal, float32 offset, vec3<float32> point) {
 		return dot(normal, point) - offset;
 	}
 
-	inline vec2<float32> edgeNormalClockwise(vec2<float32> a, vec2<float32> b) {
-		return perpendicularLeft(normalized(b - a));
-	}
-
 	inline vec3<float32> edgeNormalClockwise(vec3<float32> a, vec3<float32> b, vec3<float32> up) {
 		return normalized(cross(b - a, up));
-	}
-
-	inline bool parallelOrOpposite(vec3<float32> a, vec3<float32> b) {
-		constexpr float32 E = 0.0001f;
-
-		if (dot(a, b) / sqrt(lengthSquared(a) * lengthSquared(b)) > 1.0f - E) {
-			return true;
-		}
-
-		if (dot(a, -b) / sqrt(lengthSquared(a) * lengthSquared(b)) > 1.0f - E) {
-			return true;
-		}
-
-		return false;
 	}
 
 	// TODO(lyah/quaternion): Add to Lyah as `rotation` or `rotationFromTo`.

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Physics/2D/Feature.hpp"
+#include "Engine/API/Physics/2D/Contact/ClipFeature.hpp"
 #include "Engine/API/Physics/2D/RigidBody.hpp"
 #include "Engine/API/Physics/2D/Shape/Shape.hpp"
 #include "Engine/API/Physics/2D/Simplex.hpp"
@@ -36,5 +36,6 @@ namespace Trident {
 	};
 
 	// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
+	// Both `A` and `B` must have the CONVEX_HULL type.
 	GJK2DOutput GJK2D(const RigidBody2D& A, const RigidBody2D& B, const Shape2D& hullA, const Shape2D& hullB);
 }

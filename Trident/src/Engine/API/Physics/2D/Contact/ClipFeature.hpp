@@ -8,10 +8,11 @@
 namespace Trident {
 	struct ClipVertex2D {
 		vec2<float32> position;
-		Contact2DID id;
+		ContactID2D id;
 	};
 
 	// A vertex or edge of an object's geometry in world-space.
+	// TODO(physics/2d/feature): This is only used in the output of GJK but is not consumed anywhere. Remove?
 	struct Feature2D {
 		Feature2D() {}
 
