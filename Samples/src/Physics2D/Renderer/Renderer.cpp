@@ -505,7 +505,7 @@ namespace Trident {
 		uint32 indexOffset = 6;
 
 		// Draw hull shape.
-		/* {
+		/* if (lineStripIndexOffset < indexBuffer->getSize()) {
 			commandEncoder->bindGraphicsPipeline(shapeFillPipeline);
 			commandEncoder->bindVertexBuffer(1, instanceBuffer, 0);
 			commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(indexBuffer, 0);
