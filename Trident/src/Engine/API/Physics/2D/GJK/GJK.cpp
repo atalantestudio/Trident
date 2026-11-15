@@ -3,7 +3,7 @@
 
 #include "pch.hpp"
 
-#include "Engine/API/Physics/2D/GJK2D.hpp"
+#include "Engine/API/Physics/2D/GJK/GJK.hpp"
 
 namespace Trident {
 	// Calculates the closest point to the origin on a line formed by the simplex s.

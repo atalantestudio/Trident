@@ -5,6 +5,8 @@
 
 #include "Trident.hpp"
 
+#include "Engine/API/Physics/2D/Simulation.hpp"
+
 #include "Physics2D/Renderer/Renderer.hpp"
 
 namespace Trident {
@@ -41,10 +43,10 @@ namespace Trident {
 			void LoadBoxPyramidSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
 			void LoadBoxStackingSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
 			void LoadCircleSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
-			// void LoadCircleSlidingSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
 			void LoadDominoSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
 			void LoadFrictionSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
-			// void LoadPolygonSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
+			void LoadPolygonSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
+			void LoadSlideSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
 			void LoadSwingSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
 
 		private:

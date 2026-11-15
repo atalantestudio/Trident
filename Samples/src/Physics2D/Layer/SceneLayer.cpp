@@ -3,7 +3,8 @@
 
 #include "pch.hpp"
 
-#include "SampleApplication.hpp"
+#include "Engine/API/Physics/2D/GJK/GJKConditional.hpp"
+
 #include "Physics2D/Layer/SceneLayer.hpp"
 
 namespace Trident {
@@ -31,17 +32,20 @@ namespace Trident {
 			LoadBoxStackingSample(simulationDescriptor);
 		}
 		else if (SampleName == "circle") {
-			// TODO(physics/2d): Fix circle demo.
 			LoadCircleSample(simulationDescriptor);
 		}
-		// TODO(physics/2d): Add circlesliding demo.
 		else if (SampleName == "domino") {
 			LoadDominoSample(simulationDescriptor);
 		}
 		else if (SampleName == "friction") {
 			LoadFrictionSample(simulationDescriptor);
 		}
-		// TODO(physics/2d): Add polygon demo.
+		else if (SampleName == "polygon") {
+			LoadPolygonSample(simulationDescriptor);
+		}
+		else if (SampleName == "slide") {
+			LoadSlideSample(simulationDescriptor);
+		}
 		else if (SampleName == "swing") {
 			LoadSwingSample(simulationDescriptor);
 		}

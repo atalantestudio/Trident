@@ -5,7 +5,7 @@
 
 #include "Engine/API/Physics/2D/Collider/Collider.hpp"
 #include "Engine/API/Physics/2D/Contact/ContactManifold.hpp"
-#include "Engine/API/Physics/2D/GJK2D.hpp"
+#include "Engine/API/Physics/2D/GJK/GJK.hpp"
 #include "Engine/API/Physics/2D/SAT/SATCircleConvexHull.hpp"
 
 namespace Trident {

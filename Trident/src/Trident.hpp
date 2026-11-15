@@ -52,16 +52,3 @@
 #include "Engine/API/Graphics/Swapchain.hpp"
 #include "Engine/API/Graphics/ShaderModule.hpp"
 #include "Engine/Renderer/Renderer.hpp"
-
-// Geometry
-#include "Engine/API/Geometry/Geometry2D.hpp"
-#include "Engine/API/Geometry/Hull2D.hpp"
-#include "Engine/API/Geometry/Hull3D.hpp"
-
-// 2D physics
-#include "Engine/API/Physics/2D/GJK2D.hpp"
-#include "Engine/API/Physics/2D/GJK2DConditional.hpp"
-#include "Engine/API/Physics/2D/Simulation.hpp"
-
-// 3D physics
-#include "Engine/API/Physics/3D/PhysicsSimulation3D.hpp"
