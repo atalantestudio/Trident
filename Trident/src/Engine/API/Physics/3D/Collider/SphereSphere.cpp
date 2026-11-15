@@ -6,7 +6,9 @@
 #include "Engine/API/Physics/3D/Collider.hpp"
 
 namespace Trident {
-	bool SphereSphere(const RigidBodyPair3D& pair, ContactManifold3D* contactManifold) {
+	bool SphereSphere(const RigidBodyPair3D& pair, ContactManifold3D* manifold) {
+		static constexpr float32 COINCIDENT_CIRCLE_BIAS = 0.001f;
+
 		DEBUG_ASSERT(pair.hullA->type == Hull3DType::SPHERE);
 		DEBUG_ASSERT(pair.hullB->type == Hull3DType::SPHERE);
 
@@ -25,17 +27,17 @@ namespace Trident {
 		}
 
 		// Degenerate case (coincident spheres).
-		if (dd < 0.001f) {
+		if (dd < COINCIDENT_CIRCLE_BIAS) {
 			return false;
 		}
 
 		const float32 d = sqrt(dd);
 		const vec3<float32> normal = ab / d;
 
-		contactManifold->normal = normal;
-		contactManifold->contactCount = 1;
+		manifold->normal = normal;
+		manifold->contactCount = 1;
 
-		Contact3D& contact = contactManifold->contacts[0];
+		Contact3D& contact = manifold->contacts[0];
 		contact.position = (a + normal * rA + b - normal * rB) * 0.5f;
 		contact.separation = d - r;
 

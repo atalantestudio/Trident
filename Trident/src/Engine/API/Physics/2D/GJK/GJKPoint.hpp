@@ -25,7 +25,7 @@ namespace Trident {
 		vec2<float32> separatingAxis;
 	};
 
-	// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
-	// `A` must have the CONVEX_HULL type.
+	/// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
+	/// `A` must have the CONVEX_HULL type.
 	GJKPointOutput2D GJKPoint2D(const RigidBody2D& A, vec2<float32> p, const Shape2D& shapeA);
 }

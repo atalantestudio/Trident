@@ -28,7 +28,7 @@ namespace Trident {
 	// Bilateral Advancement algorithm implementation.
 	// Evaluates continuous collisions between A and B.
 	// The result of the last GJK call is copied to `gjkOutput` if it's not null.
-	static TimeOfImpact calculateTimeOfImpact(Scene2D* scene, Entity A, Entity B, GJK2DOutput* gjkOutputPointer) {
+	static TimeOfImpact calculateTimeOfImpact(Scene2D* scene, Entity A, Entity B, GJKOutput2D* gjkOutputPointer) {
 		static constexpr float32 TOLERANCE = 0.25f * 0.005f;
 		static constexpr float32 TARGET = 0.005f;
 
@@ -50,7 +50,7 @@ namespace Trident {
 			const PhysicalObjectCopy2D nextA = copyPhysicalObject(*scene, A, t0);
 			const PhysicalObjectCopy2D nextB = copyPhysicalObject(*scene, B, t0);
 
-			const GJK2DOutput gjkOutput = GJK2D(nextA, nextB);
+			const GJKOutput2D gjkOutput = GJK2D(nextA, nextB);
 
 			if (gjkOutputPointer != nullptr) {
 				*gjkOutputPointer = gjkOutput;

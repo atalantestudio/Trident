@@ -93,14 +93,12 @@ namespace Trident {
 	}
 
 	void PhysicsSimulation3D::narrowPhase() {
-		ContactPair3D contactPair;
+		static constexpr Collider3D COLLISION_TABLE[Hull3DType::count][Hull3DType::count] = {
+			{SphereSphere, SpherePolygon },
+			{nullptr,      PolygonPolygon},
+		};
 
 		for (RigidBodyPair3D pair : rigidBodyPairs) {
-			static constexpr Collider3D COLLISION_TABLE[Hull3DType::count][Hull3DType::count] = {
-				{SphereSphere, SpherePolygon },
-				{nullptr,      PolygonPolygon},
-			};
-
 			if (pair.hullA->type > pair.hullB->type) {
 				std::swap(pair.hullA, pair.hullB);
 				std::swap(pair.rigidBodyA, pair.rigidBodyB);
@@ -110,6 +108,8 @@ namespace Trident {
 			const Collider3D collider = COLLISION_TABLE[pair.hullA->type][pair.hullB->type];
 
 			DEBUG_ASSERT(collider != nullptr);
+
+			ContactPair3D contactPair;
 
 			if (!collider(pair, &contactPair.manifold)) {
 				// Either a degenerate case, or the entities are not overlapping.

@@ -16,9 +16,6 @@ namespace Trident {
 		// Plane2D referencePlane;
 		vec2<float32> axis;
 
-		/// The indices of the vertices composing the separating edge.
-		// uint32 referenceEdgeIndexA;
-		// uint32 referenceEdgeIndexB;
 		uint32 referenceEdgeIndex;
 	};
 
@@ -29,6 +26,7 @@ namespace Trident {
 	};
 
 	/// The Separating Axis Theorem algorithm in 2D.
+	/// Both `rigidBodyA` and `rigidBodyB` must have the CONVEX_HULL type.
 	/// See https://media.gdcvault.com/gdc2013/slides/822403Gregorius_Dirk_TheSeparatingAxisTest.pdf.
 	// TODO(physics/2d/sat): Optimize:
 	// - Don't test the same separating axis multiple times.

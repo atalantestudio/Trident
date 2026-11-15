@@ -13,6 +13,8 @@ namespace Trident {
 		SATEdgeQuery2D query;
 		query.separation = min<float32>();
 
+		const vec2<float32>* referenceVertices = referenceShape.hull->getVertices();
+
 		const mat2x2<float32> RA = rotationAngle<mat2x2<float32>>(referenceBody.rotation);
 		const mat2x2<float32> RBA = rotationAngle<mat2x2<float32>>(referenceBody.rotation - incidentBody.rotation);
 
@@ -20,8 +22,8 @@ namespace Trident {
 
 		while (indexA < referenceShape.hull->vertexCount) {
 			const uint16 indexB = (indexA + 1) % referenceShape.hull->vertexCount;
-			const vec2<float32> a = referenceShape.hull->getVertices()[indexA];
-			const vec2<float32> b = referenceShape.hull->getVertices()[indexB];
+			const vec2<float32> a = referenceVertices[indexA];
+			const vec2<float32> b = referenceVertices[indexB];
 			const vec2<float32> d = edgeNormalClockwise(a, b);
 			const vec2<float32> s = vertexSupport(incidentShape, -d * RBA) * incidentBody.getWorld();
 
@@ -49,6 +51,9 @@ namespace Trident {
 	// The returned object cannot be debugged because "an unspecified error occurs".
 	// See https://developercommunity.visualstudio.com/t/When-a-custom-function-returns-a-custom-/10422600.
 	SATConvexHullConvexHullOutput2D SATConvexHullConvexHull2D(const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, const Shape2D& shapeA, const Shape2D& shapeB) {
+		DEBUG_ASSERT(shapeA.type == ShapeType2D::CONVEX_HULL);
+		DEBUG_ASSERT(shapeB.type == ShapeType2D::CONVEX_HULL);
+
 		SATConvexHullConvexHullOutput2D output;
 		output.overlap = false;
 		output.edgeQueryA = queryEdgeDirections(rigidBodyA, rigidBodyB, shapeA, shapeB);

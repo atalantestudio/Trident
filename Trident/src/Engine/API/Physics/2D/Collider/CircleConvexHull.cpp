@@ -10,6 +10,9 @@
 
 namespace Trident {
 	bool CircleConvexHull2D(const Shape2D& shapeA, const Shape2D& shapeB, const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, ContactManifold2D* manifold) {
+		DEBUG_ASSERT(shapeA.type == ShapeType2D::CIRCLE);
+		DEBUG_ASSERT(shapeB.type == ShapeType2D::CONVEX_HULL);
+
 		const GJKPointOutput2D gjkOutput = GJKPoint2D(rigidBodyB, rigidBodyA.position, shapeB);
 		const float32 d = gjkOutput.distance - shapeA.circle.radius;
 

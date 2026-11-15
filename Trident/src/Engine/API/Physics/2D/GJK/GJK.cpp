@@ -146,7 +146,7 @@ namespace Trident {
 		s.count = 3;
 	}
 
-	GJK2DOutput GJK2D(const RigidBody2D& A, const RigidBody2D& B, const Shape2D& hullA, const Shape2D& hullB) {
+	GJKOutput2D GJK2D(const RigidBody2D& A, const RigidBody2D& B, const Shape2D& hullA, const Shape2D& hullB) {
 		constexpr uint8 GJK_2D_ITERATION_LIMIT = 8;
 
 		DEBUG_ASSERT(hullA.type == ShapeType2D::CONVEX_HULL);
@@ -279,7 +279,7 @@ namespace Trident {
 			i += 1;
 		}
 
-		GJK2DOutput output{};
+		GJKOutput2D output{};
 
 		const float32 divisor = 1.0f / s.divisor;
 

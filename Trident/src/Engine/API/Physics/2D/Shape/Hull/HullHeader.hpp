@@ -22,6 +22,7 @@ namespace Trident {
 		/// Axis-aligned box in local space.
 		// AABB2D bounds;
 
+		// TODO(physics/2d): Debug only.
 		float32 mass;
 
 		/// The inertia about the centroid.
@@ -30,7 +31,7 @@ namespace Trident {
 		uint32 vertexCount;
 
 		/// Byte offset of the vertex array in clockwise order.
-		uint64 vertexOffset;
+		uint32 vertexOffset;
 
 		uint32 userIndex;
 	};

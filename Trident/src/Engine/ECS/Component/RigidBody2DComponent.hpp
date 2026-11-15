@@ -4,6 +4,7 @@
 #pragma once
 
 namespace Trident {
+	// TODO(physics/2d): Deprecated. Use RigidBody2D instead.
 	struct RigidBody2DComponent {
 		void updateWorld(vec2<float32> centroid) {
 			world = (

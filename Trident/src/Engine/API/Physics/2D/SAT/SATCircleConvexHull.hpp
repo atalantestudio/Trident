@@ -21,11 +21,11 @@ namespace Trident {
 	};
 
 	/// The Separating Axis Theorem algorithm in 2D.
-	// A has a circle geometry and B has a convex hull geometry.
+	// `rigidBodyA` must have the CIRCLE type and `rigidBodyB` must have the CONVEX_HULL type.
 	// TODO(physics/2d/sat): Optimize:
 	// - Don't test the same separating axis multiple times.
 	// - Don't test parallel axes (https://dyn4j.org/2010/01/sat).
 	// - Reuse the separation axis from the last run to make the algorithm O(1) in non-intersection cases.
 	//   But what if the separation axis changes e.g. due to rotation?
-	SATCircleConvexHullOutput2D SATCircleConvexHull2D(const RigidBody2D& circleBody, const RigidBody2D& convexHullBody, const Shape2D& circleHull, const Shape2D& convexHullGeometry);
+	SATCircleConvexHullOutput2D SATCircleConvexHull2D(const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, const Shape2D& shapeA, const Shape2D& shapeB);
 }

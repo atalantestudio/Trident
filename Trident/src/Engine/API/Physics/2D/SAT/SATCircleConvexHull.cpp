@@ -7,6 +7,8 @@
 
 namespace Trident {
 	static void queryEdgeDirections(const RigidBody2D& referenceBody, const RigidBody2D& incidentBody, const Shape2D& referenceShape, const Shape2D& incidentShape, SATCircleConvexHullOutput2D& output) {
+		const vec2<float32>* referenceVertices = referenceShape.hull->getVertices();
+
 		const mat2x2<float32> RA = rotationAngle<mat2x2<float32>>(referenceBody.rotation);
 		const mat2x2<float32> RBA = rotationAngle<mat2x2<float32>>(referenceBody.rotation - incidentBody.rotation);
 
@@ -14,8 +16,8 @@ namespace Trident {
 
 		while (indexA < referenceShape.hull->vertexCount) {
 			const uint16 indexB = (indexA + 1) % referenceShape.hull->vertexCount;
-			const vec2<float32> a = referenceShape.hull->getVertices()[indexA];
-			const vec2<float32> b = referenceShape.hull->getVertices()[indexB];
+			const vec2<float32> a = referenceVertices[indexA];
+			const vec2<float32> b = referenceVertices[indexB];
 			const vec2<float32> d = edgeNormalClockwise(a, b);
 			const vec2<float32> s = vertexSupport(incidentShape, -d * RBA) * incidentBody.getWorld();
 
@@ -39,18 +41,24 @@ namespace Trident {
 		}
 	}
 
-	SATCircleConvexHullOutput2D SATCircleConvexHull2D(const RigidBody2D& circleBody, const RigidBody2D& convexHullBody, const Shape2D& circleShape, const Shape2D& convexHullShape) {
+	// TODO(ci/debugger/undefined-identifier)
+	// The returned object cannot be debugged because "an unspecified error occurs".
+	// See https://developercommunity.visualstudio.com/t/When-a-custom-function-returns-a-custom-/10422600.
+	SATCircleConvexHullOutput2D SATCircleConvexHull2D(const RigidBody2D& rigidBodyA, const RigidBody2D& rigidBodyB, const Shape2D& shapeA, const Shape2D& shapeB) {
+		DEBUG_ASSERT(shapeA.type == ShapeType2D::CIRCLE);
+		DEBUG_ASSERT(shapeB.type == ShapeType2D::CONVEX_HULL);
+
 		SATCircleConvexHullOutput2D output{};
 		output.separation = min<float32>();
 
-		queryEdgeDirections(convexHullBody, circleBody, convexHullShape, circleShape, output);
+		queryEdgeDirections(rigidBodyB, rigidBodyA, shapeB, shapeA, output);
 
 		if (output.separation > 0.0f) {
 			return output;
 		}
 
 		// TODO(physics/2d/sat-circle-convex-hull): Since the incident body is always the circle, does the axis need to be corrected?
-		output.axis *= rotationAngle<mat2x2<float32>>(convexHullBody.rotation);
+		output.axis *= rotationAngle<mat2x2<float32>>(rigidBodyB.rotation);
 
 		return output;
 	}

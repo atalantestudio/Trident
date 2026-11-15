@@ -7,8 +7,7 @@
 #include "Engine/API/Physics/2D/Shape/Shape.hpp"
 
 namespace Trident {
-	// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
-	// Returns whether `A` contains `p`.
-	// NOTE: In this implementation, `a` is the name of the most recent vertex added to the simplex.
+	/// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
+	/// Returns whether `A` contains `p`.
 	bool GJKConditional2D(const RigidBody2D& A, vec2<float32> p, const Shape2D& shapeA);
 }

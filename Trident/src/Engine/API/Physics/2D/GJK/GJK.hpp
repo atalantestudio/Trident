@@ -10,7 +10,7 @@
 
 namespace Trident {
 	// The result of GJK in 2D.
-	struct GJK2DOutput {
+	struct GJKOutput2D {
 		// Final simplex.
 		Simplex2 simplex;
 
@@ -35,7 +35,7 @@ namespace Trident {
 		Feature2D closestFeatureB;
 	};
 
-	// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
-	// Both `A` and `B` must have the CONVEX_HULL type.
-	GJK2DOutput GJK2D(const RigidBody2D& A, const RigidBody2D& B, const Shape2D& hullA, const Shape2D& hullB);
+	/// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
+	/// Both `A` and `B` must have the CONVEX_HULL type.
+	GJKOutput2D GJK2D(const RigidBody2D& A, const RigidBody2D& B, const Shape2D& hullA, const Shape2D& hullB);
 }

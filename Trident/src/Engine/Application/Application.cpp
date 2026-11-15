@@ -158,14 +158,6 @@ namespace Trident {
 	Application::~Application() {
 		delete propertyFile;
 
-		if (lastLayerInput.swapchainImageView != nullptr) {
-			lastLayerInput.swapchainImageView.~ref();
-		}
-
-		if (lastLayerInput.swapchainImage != nullptr) {
-			lastLayerInput.swapchainImage.~ref();
-		}
-
 		mutex->acquire();
 
 		sharedMemoryData->instanceCount -= 1;
@@ -232,7 +224,6 @@ namespace Trident {
 
 		if (projectType == ProjectType::MAIN) {
 			for (ref<Layer> layer : layerCompositor->getLayers()) {
-				layer->input = &lastLayerInput;
 				layer->postConstruct();
 			}
 		}
@@ -332,10 +323,6 @@ namespace Trident {
 		windowResized = false;
 
 		layerCompositor->resize();
-
-		// TODO(application/layer-input)
-		// lastLayerInput.swapchainImage = nullptr;
-		// lastLayerInput.swapchainImageView = nullptr;
 
 		const Extent2D extent = window->getExtent();
 
