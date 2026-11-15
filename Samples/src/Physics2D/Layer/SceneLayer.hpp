@@ -5,10 +5,8 @@
 
 #include "Trident.hpp"
 
-#include "Engine/API/Physics/2D/Shape/Hull/BoxHull.hpp"
 #include "Engine/API/Physics/2D/Simulation.hpp"
 
-#include "Physics2D/Renderer/BuildOptions.hpp"
 #include "Physics2D/Renderer/Renderer.hpp"
 
 namespace Trident {

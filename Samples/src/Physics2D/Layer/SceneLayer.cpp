@@ -4,10 +4,8 @@
 #include "pch.hpp"
 
 #include "Engine/API/Physics/2D/GJK/GJKConditional.hpp"
-#include "Engine/API/Scene/Scene2D.hpp"
 
-#include "../../SampleApplication.hpp"
-#include "SceneLayer.hpp"
+#include "Physics2D/Layer/SceneLayer.hpp"
 
 namespace Trident {
 	void Physics2DSceneLayer::initialize() {
