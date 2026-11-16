@@ -67,7 +67,10 @@ namespace Trident {
 
 	ShapeID2D createShape(PhysicsSimulation2D& simulation, const ShapeDescriptor2D& descriptor, const void* typeDescriptor);
 
-	BoxHull2D createBoxHull(vec2<float32> halfSize, float32 mass = 1.0f);
+	BoxHull2D createBoxHull(vec2<float32> halfSize);
+
+	/// Creates a triangle or box hull from the provided vertices.
+	BoxHull2D createHull(view<vec2<float32>> vertices);
 
 	void updateMassProperties(const Shape2D& shape, RigidBody2D& rigidBody);
 

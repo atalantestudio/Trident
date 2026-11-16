@@ -130,34 +130,6 @@ namespace Trident {
 		return id;
 	}
 
-	BoxHull2D createBoxHull(vec2<float32> halfSize, float32 mass) {
-		static uint32 userIndex = 1;
-
-		const float32 hx = halfSize.x;
-		const float32 hy = halfSize.y;
-
-		const float32 x = hx * 2.0f;
-		const float32 y = hy * 2.0f;
-
-		BoxHull2D boxHull;
-		boxHull.header.centroid = {0.0f, 0.0f};
-		boxHull.header.area = x * y;
-		boxHull.header.radius = length(halfSize);
-		boxHull.header.mass = mass;
-		boxHull.header.inertia = mass * (x * x + y * y) / 12.0f;
-		boxHull.header.vertexCount = 4;
-		boxHull.header.vertexOffset = offsetof(BoxHull2D, vertices);
-		boxHull.header.userIndex = userIndex;
-		boxHull.vertices[0] = {-hx,  hy};
-		boxHull.vertices[1] = { hx,  hy};
-		boxHull.vertices[2] = { hx, -hy};
-		boxHull.vertices[3] = {-hx, -hy};
-
-		userIndex += 1;
-
-		return boxHull;
-	}
-
 	void tick(PhysicsSimulation2D& simulation) {
 		simulation.collisionPairs.clear();
 

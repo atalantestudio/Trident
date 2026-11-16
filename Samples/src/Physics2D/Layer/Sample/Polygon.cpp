@@ -7,17 +7,24 @@
 
 namespace Trident {
 	static BoxHull2D createPolygonHull() {
-		// TODO(physics/2d/sample/polygon)
-		ENGINE_ERROR_UNIMPLEMENTED();
+		static constexpr vec2<float32> vertices[] = {
+			{-3.0f,   0.0f},
+			{ 4.0f,   0.0f},
+			{ 3.0f,  -1.0f},
+			{-2.25f, -1.5f},
+		};
 
-		return {};
+		return createHull(vertices);
 	}
 
 	static BoxHull2D createTriangleHull() {
-		// TODO(physics/2d/sample/polygon)
-		ENGINE_ERROR_UNIMPLEMENTED();
+		static constexpr vec2<float32> vertices[] = {
+			{0.0f, 0.0f},
+			{0.0f, 1.0f},
+			{6.0f, 0.0f},
+		};
 
-		return {};
+		return createHull(vertices);
 	}
 
 	void Physics2DSceneLayer::LoadPolygonSample(PhysicsSimulationDescriptor2D& simulationDescriptor) {
@@ -60,7 +67,7 @@ namespace Trident {
 			.type = ShapeType2D::CONVEX_HULL,
 			.rigidBodyId = createRigidBody(simulation, {
 				.type = RigidBodyType::STATIC,
-				.position = {0.45f, -0.625f},
+				.position = {3.0f, 4.0f},
 			}),
 			.material = material,
 			.density = 1.0f,
@@ -71,7 +78,7 @@ namespace Trident {
 			.type = ShapeType2D::CONVEX_HULL,
 			.rigidBodyId = createRigidBody(simulation, {
 				.type = RigidBodyType::DYNAMIC,
-				.position = {0.0f, 12.0f},
+				.position = {0.0f, 8.0f},
 				.rotation = radians(-165.0_deg),
 			}),
 			.material = material,
