@@ -51,7 +51,7 @@ namespace Trident {
 			.rigidBodyId = createRigidBody(simulation, {
 				.type = RigidBodyType::STATIC,
 				.position = {-2.0f, 11.0f},
-				.rotation = -0.25f,
+				.rotation = 0.25f,
 			}),
 			.material = material,
 			.density = 1.0f,
@@ -74,7 +74,7 @@ namespace Trident {
 			.rigidBodyId = createRigidBody(simulation, {
 				.type = RigidBodyType::STATIC,
 				.position = {2.0f, 7.0f},
-				.rotation = 0.25f,
+				.rotation = -0.25f,
 			}),
 			.material = material,
 			.density = 1.0f,
@@ -97,7 +97,7 @@ namespace Trident {
 			.rigidBodyId = createRigidBody(simulation, {
 				.type = RigidBodyType::STATIC,
 				.position = {-2.0f, 3.0f},
-				.rotation = -0.25f,
+				.rotation = 0.25f,
 			}),
 			.material = material,
 			.density = 1.0f,
