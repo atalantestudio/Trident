@@ -15,8 +15,9 @@ namespace Trident {
 
 		const vec2<float32>* referenceVertices = referenceShape.hull->getVertices();
 
-		const mat2x2<float32> RA = rotationAngle<mat2x2<float32>>(referenceBody.rotation);
-		const mat2x2<float32> RBA = rotationAngle<mat2x2<float32>>(referenceBody.rotation - incidentBody.rotation);
+		const mat3x3<float32> referenceWorld = referenceBody.getWorld();
+		const mat3x3<float32> incidentWorld = incidentBody.getWorld();
+		const Rotation2D RBA = incidentBody.transform.rotation * referenceBody.transform.rotation;
 
 		uint16 indexA = 0;
 
@@ -25,11 +26,11 @@ namespace Trident {
 			const vec2<float32> a = referenceVertices[indexA];
 			const vec2<float32> b = referenceVertices[indexB];
 			const vec2<float32> d = edgeNormalClockwise(a, b);
-			const vec2<float32> s = vertexSupport(incidentShape, -d * RBA) * incidentBody.getWorld();
+			const vec2<float32> s = vertexSupport(incidentShape, -d * RBA) * incidentWorld;
 
 			const float32 edgeDistance = abs(signedDistanceLPAB(a, b, {0.0f, 0.0f}));
-			const vec2<float32> offset = edgeDistance * d * referenceBody.getWorld();
-			const float32 separation = signedDistanceLP(d * RA, offset, s);
+			const vec2<float32> offset = edgeDistance * d * referenceWorld;
+			const float32 separation = signedDistanceLP(d * referenceBody.transform.rotation, offset, s);
 
 			if (separation > query.separation) {
 				query.separation = separation;
