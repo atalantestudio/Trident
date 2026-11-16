@@ -40,7 +40,9 @@ namespace Trident {
 		Contact2D& contact = manifold->contacts[0];
 		contact.position = (a + normal * rA + b - normal * rB) * 0.5f;
 
-		// TODO(physics/2d/circle-circle): Why d - r isn't correct?
+		// TODO(physics/2d/circle-circle)
+		// Using the squared values instantly separes the bodies with a bouncy effect.
+		// d - r is the correct calculation but the separation takes too much time.
 		contact.separation = dd - r * r;
 
 		return true;
