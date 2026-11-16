@@ -26,10 +26,12 @@ namespace Trident {
 	};
 
 	struct RigidBody2D {
-		// TODO(physics/2d): Debug-only.
+		// TODO(physics/2d/rigid-body): Use the transform instead.
 		inline mat3x3<float32> getWorld() const {
 			return (
+				// TODO(physics/2d/rigid-body): Remove centroid translation.
 				translation<mat3x3<float32>>(-centroid) *
+
 				rotationAngle<mat3x3<float32>>(rotation) *
 				translation<mat3x3<float32>>(transform.position)
 			);

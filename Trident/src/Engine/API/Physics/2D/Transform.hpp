@@ -6,7 +6,10 @@
 namespace Trident {
 	// Clockwise angle.
 	struct Rotation2D {
-		Rotation2D() {}
+		Rotation2D() :
+			s(0.0f),
+			c(1.0f)
+		{}
 
 		Rotation2D(float32 s, float32 c) :
 			s(s),
@@ -56,10 +59,10 @@ namespace Trident {
 		return q;
 	}
 
-	inline Rotation2D integrate(Rotation2D q, float32 deltaAngle) {
+	inline Rotation2D integrate(Rotation2D q, Rotation2D delta) {
 		return {
-			q.s + deltaAngle * q.c,
-			q.c - deltaAngle * q.s,
+			q.s * delta.c + q.c * delta.s,
+			q.c * delta.c - q.s * delta.s,
 		};
 	}
 
