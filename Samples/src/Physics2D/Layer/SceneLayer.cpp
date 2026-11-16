@@ -25,6 +25,9 @@ namespace Trident {
 		if (SampleName == "box") {
 			LoadBoxSample(simulationDescriptor);
 		}
+		else if (SampleName == "box2") {
+			LoadBox2Sample(simulationDescriptor);
+		}
 		else if (SampleName == "boxpyramid") {
 			LoadBoxPyramidSample(simulationDescriptor);
 		}

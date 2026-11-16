@@ -40,6 +40,7 @@ namespace Trident {
 			bool onEvent(WindowResizeEvent& event);
 
 			void LoadBoxSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
+			void LoadBox2Sample(PhysicsSimulationDescriptor2D& simulationDescriptor);
 			void LoadBoxPyramidSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
 			void LoadBoxStackingSample(PhysicsSimulationDescriptor2D& simulationDescriptor);
 			void LoadCircleSample(PhysicsSimulationDescriptor2D& simulationDescriptor);

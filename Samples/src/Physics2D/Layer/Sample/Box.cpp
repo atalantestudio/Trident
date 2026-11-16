@@ -49,29 +49,5 @@ namespace Trident {
 			.material = material,
 			.density = 200.0f,
 		}, &boxHulls[1]);
-
-		// TODO(physics/2d): Test only.
-		/* // Floor
-		createShape(simulation, {
-			.type = ShapeType2D::CONVEX_HULL,
-			.rigidBodyId = createRigidBody(simulation, {
-				.type = RigidBodyType::STATIC,
-				.position = {0.0f, -10.0f},
-			}),
-			.material = material,
-			.density = 1.0f,
-		}, &boxHulls[0]);
-
-		// Box
-		createShape(simulation, {
-			.type = ShapeType2D::CONVEX_HULL,
-			.rigidBodyId = createRigidBody(simulation, {
-				.type = RigidBodyType::DYNAMIC,
-				.position = {-0.799446940f, 1.92539740f},
-				.rotation = -1.53524327f,
-			}),
-			.material = material,
-			.density = 1.0f,
-		}, &boxHulls[1]); */
 	}
 }
