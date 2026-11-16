@@ -38,14 +38,14 @@ namespace Trident {
 		RigidBodyType type;
 		RigidBodyFlags2D flags;
 
+		/// Position of the centroid in local space.
+		vec2<float32> centroid;
+
 		// TODO(physics/2d): Use delta position and rotation.
 		Transform2D transform;
 
 		// TODO(physics/2d): Debug only.
 		float32 rotation;
-
-		/// Position of the centroid in local space.
-		vec2<float32> centroid;
 
 		float32 inverseMass;
 
@@ -56,7 +56,6 @@ namespace Trident {
 		float32 angularVelocity;
 
 		vec2<float32> force;
-
 		float32 torque;
 	};
 }

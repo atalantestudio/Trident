@@ -5,6 +5,7 @@
 
 #include "Engine/API/Physics/2D/Collider/Collider.hpp"
 #include "Engine/API/Physics/2D/Contact/ClipFeature.hpp"
+#include "Engine/API/Physics/2D/Plane.hpp"
 #include "Engine/API/Physics/2D/SAT/SATConvexHullConvexHull.hpp"
 
 namespace Trident {
@@ -30,7 +31,7 @@ namespace Trident {
 				minAngle = angle;
 				vertexIndex = indexA;
 
-				// TODO(physics/2d/incident-edge-vertex-order): Why is the simulation unstable when a and b are inverted?
+				// TODO(physics/2d/convex-hull-convex-hull): Why is the simulation unstable when a and b are inverted?
 				incidentEdge.edge[0].position = b;
 				incidentEdge.edge[1].position = a;
 			}
