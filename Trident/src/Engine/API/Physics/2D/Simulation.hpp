@@ -69,6 +69,8 @@ namespace Trident {
 
 	BoxHull2D createBoxHull(vec2<float32> halfSize, float32 mass = 1.0f);
 
+	void updateMassProperties(const Shape2D& shape, RigidBody2D& rigidBody);
+
 	void broadPhase(PhysicsSimulation2D& simulation);
 	void narrowPhase(PhysicsSimulation2D& simulation);
 	void integrateVelocities(PhysicsSimulation2D& simulation);
