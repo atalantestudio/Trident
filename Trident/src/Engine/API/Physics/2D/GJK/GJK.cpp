@@ -157,7 +157,7 @@ namespace Trident {
 		const mat2x2<float32> inverseRotationA = rotationAngle<mat2x2<float32>>(-A.rotation);
 		const mat2x2<float32> inverseRotationB = rotationAngle<mat2x2<float32>>(-B.rotation);
 
-		vec2<float32> d = B.position - A.position;
+		vec2<float32> d = B.transform.position - A.transform.position;
 
 		Simplex2Vertex vertex;
 		vertex.iA = 0;

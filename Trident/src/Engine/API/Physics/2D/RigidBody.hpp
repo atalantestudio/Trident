@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Physics/2D/RigidBodyFlags.hpp"
+#include "Engine/API/Physics/2D/Transform.hpp"
 #include "Engine/API/Physics/RigidBodyType.hpp"
 
 namespace Trident {
@@ -30,7 +31,7 @@ namespace Trident {
 			return (
 				translation<mat3x3<float32>>(-centroid) *
 				rotationAngle<mat3x3<float32>>(rotation) *
-				translation<mat3x3<float32>>(position)
+				translation<mat3x3<float32>>(transform.position)
 			);
 		}
 
@@ -38,8 +39,7 @@ namespace Trident {
 		RigidBodyFlags2D flags;
 
 		// TODO(physics/2d): Use delta position and rotation.
-		// Transform2D transform;
-		vec2<float32> position;
+		Transform2D transform;
 
 		// TODO(physics/2d): Debug only.
 		float32 rotation;

@@ -239,7 +239,7 @@ namespace Trident {
 			const Shape2D& shape = simulation.shapes[selectedEntity];
 
 			RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
-			rigidBody.position += placeholderOffset;
+			rigidBody.transform.position += placeholderOffset;
 
 			selectedEntity = max<Entity>();
 		}

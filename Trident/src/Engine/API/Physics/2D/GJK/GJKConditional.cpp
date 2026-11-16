@@ -47,7 +47,7 @@ namespace Trident {
 
 		const mat2x2<float32> inverseRotationA = rotationAngle<mat2x2<float32>>(-A.rotation);
 
-		vec2<float32> d = p - A.position;
+		vec2<float32> d = p - A.transform.position;
 
 		if (lengthSquared(d) == 0.0f) {
 			// Degenerate case: The objects have the same position.

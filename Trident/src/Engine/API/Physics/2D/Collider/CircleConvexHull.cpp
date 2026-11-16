@@ -13,7 +13,7 @@ namespace Trident {
 		DEBUG_ASSERT(shapeA.type == ShapeType2D::CIRCLE);
 		DEBUG_ASSERT(shapeB.type == ShapeType2D::CONVEX_HULL);
 
-		const GJKPointOutput2D gjkOutput = GJKPoint2D(rigidBodyB, rigidBodyA.position, shapeB);
+		const GJKPointOutput2D gjkOutput = GJKPoint2D(rigidBodyB, rigidBodyA.transform.position, shapeB);
 		const float32 d = gjkOutput.distance - shapeA.circle.radius;
 
 		if (d > 0.0f) {
@@ -21,7 +21,7 @@ namespace Trident {
 		}
 
 		if (d > -shapeA.circle.radius) {
-			manifold->normal = normalized(gjkOutput.closestA - rigidBodyA.position);
+			manifold->normal = normalized(gjkOutput.closestA - rigidBodyA.transform.position);
 			manifold->contactCount = 1;
 
 			Contact2D& contact = manifold->contacts[0];

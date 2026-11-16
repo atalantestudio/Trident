@@ -45,7 +45,7 @@ namespace Trident {
 		RigidBody2D& rigidBody = simulation.rigidBodies[simulation.usedRigidBodyCount];
 		rigidBody.type = descriptor.type;
 		rigidBody.flags = descriptor.flags;
-		rigidBody.position = descriptor.position;
+		rigidBody.transform.position = descriptor.position;
 		rigidBody.rotation = descriptor.rotation;
 		rigidBody.centroid = {0.0_m, 0.0_m};
 		rigidBody.inverseMass = 0.0_kg;
