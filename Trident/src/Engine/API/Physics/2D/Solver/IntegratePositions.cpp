@@ -25,7 +25,7 @@ namespace Trident {
 			}
 
 			if (rigidBody.flags & RigidBodyFlags2D::LOCK_LINEAR_Y_MOVEMENT) {
-				rigidBody.linearVelocity.x = 0.0f;
+				rigidBody.linearVelocity.y = 0.0f;
 			}
 
 			if (rigidBody.flags & RigidBodyFlags2D::LOCK_ANGULAR_MOVEMENT) {
