@@ -34,8 +34,8 @@ namespace Trident {
 
 			rigidBody.transform.position += rigidBody.linearVelocity * simulation.deltaTime;
 			rigidBody.rotation += rigidBody.angularVelocity * simulation.deltaTime;
-			// rigidBody.transform.rotation = integrateRotation(rigidBody.transform.rotation, rigidBody.angularVelocity * simulation.deltaTime);
 			rigidBody.transform.rotation = rigidBody.rotation;
+			// rigidBody.transform.rotation = normalized(integrate(rigidBody.transform.rotation, rigidBody.angularVelocity * simulation.deltaTime));
 
 			rigidBody.force = {0.0f, 0.0f};
 			rigidBody.torque = 0.0f;

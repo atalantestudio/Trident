@@ -48,7 +48,7 @@ namespace Trident {
 		rigidBody.centroid = {0.0_m, 0.0_m};
 		rigidBody.transform.position = descriptor.position;
 		rigidBody.rotation = descriptor.rotation;
-		rigidBody.transform.rotation = rigidBody.rotation;
+		rigidBody.transform.rotation = normalized(integrate(rigidBody.transform.rotation, rigidBody.rotation));
 		rigidBody.inverseMass = 0.0_kg;
 		rigidBody.inverseInertia = 0.0f;
 		rigidBody.linearVelocity = descriptor.linearVelocity;

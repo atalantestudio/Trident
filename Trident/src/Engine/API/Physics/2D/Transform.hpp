@@ -57,10 +57,10 @@ namespace Trident {
 	}
 
 	inline Rotation2D integrate(Rotation2D q, float32 deltaAngle) {
-		return normalized({
+		return {
 			q.s + deltaAngle * q.c,
 			q.c - deltaAngle * q.s,
-		});
+		};
 	}
 
 	inline Rotation2D inverse(Rotation2D q) {
