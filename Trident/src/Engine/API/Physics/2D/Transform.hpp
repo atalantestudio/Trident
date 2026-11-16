@@ -6,14 +6,21 @@
 namespace Trident {
 	// Clockwise angle.
 	struct Rotation2D {
-		float32 getAngle() const {
-			return atan2(s, c);
-		}
+		Rotation2D() {}
 
-		void setAngle(float32 angle) {
-			s = sin(angle);
-			c = cos(angle);
-		}
+		Rotation2D(float32 s, float32 c) :
+			s(s),
+			c(c)
+		{}
+
+		Rotation2D(float32 angle) :
+			s(sin(angle)),
+			c(cos(angle))
+		{}
+
+		/* float32 getAngle() const {
+			return atan2(s, c);
+		} */
 
 		float32 s;
 		float32 c;
@@ -70,11 +77,11 @@ namespace Trident {
 		return q;
 	}
 
-	// CCW
+	// CW
 	inline vec2<float32> operator*(vec2<float32> a, Rotation2D q) {
 		return {
-			a.x * q.c - a.y * q.s,
-			a.x * q.s + a.y * q.c,
+			 a.x * q.c + a.y * q.s,
+			-a.x * q.s + a.y * q.c,
 		};
 	}
 
@@ -82,12 +89,15 @@ namespace Trident {
 		return a = a * q;
 	}
 
-	// CCW
+	// CW
 	inline vec2<float32> operator*(vec2<float32> a, Transform2D t) {
-		const float32 x = (t.rotation.c * a.x - t.rotation.s * a.y) + t.position.x;
-		const float32 y = (t.rotation.s * a.x + t.rotation.c * a.y) + t.position.y;
+		const vec2<float32> p = t.position;
+		const Rotation2D q = t.rotation;
 
-		return {x, y};
+		return {
+			( a.x * q.c + a.y * q.s) + p.x,
+			(-a.x * q.s + a.y * q.c) + p.y,
+		};
 	}
 
 	// TODO(physics/2d/transform): Refactor.

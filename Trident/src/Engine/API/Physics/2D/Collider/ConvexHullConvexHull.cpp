@@ -107,16 +107,21 @@ namespace Trident {
 		return clippedEdge;
 	}
 
-	static bool createEdgeContact(const SATEdgeQuery2D& query, const RigidBody2D& referenceBody, const RigidBody2D& incidentBody, const Shape2D& referenceShape, const Shape2D& incidentShape, ContactManifold2D* manifold) {
-		const uint32 referenceLeftEdgeIndex = (static_cast<sint32>(query.referenceEdgeIndex) - 1) % referenceShape.hull->vertexCount;
-		const uint32 referenceRightEdgeIndex = (query.referenceEdgeIndex + 1) % referenceShape.hull->vertexCount;
+	static bool createEdgeContact(SATEdgeQuery2D query, const RigidBody2D& referenceBody, const RigidBody2D& incidentBody, const Shape2D& referenceShape, const Shape2D& incidentShape, ContactManifold2D* manifold) {
+		query.axis *= referenceBody.transform.rotation;
+
+		const mat3x3<float32> referenceWorld = referenceBody.getWorld();
 
 		const vec2<float32>* referenceVertices = referenceShape.hull->getVertices();
 
+		const uint32 referenceLeftEdgeIndex = (static_cast<sint32>(query.referenceEdgeIndex) - 1) % referenceShape.hull->vertexCount;
+		const uint32 referenceRightEdgeIndex = (query.referenceEdgeIndex + 1) % referenceShape.hull->vertexCount;
+
 		const vec2<float32> localA = referenceVertices[query.referenceEdgeIndex];
 		const vec2<float32> localB = referenceVertices[referenceRightEdgeIndex];
-		const vec2<float32> a = localA * referenceBody.getWorld();
-		const vec2<float32> b = localB * referenceBody.getWorld();
+
+		const vec2<float32> a = localA * referenceWorld;
+		const vec2<float32> b = localB * referenceWorld;
 
 		Plane2D referencePlane;
 		referencePlane.normal = query.axis;
@@ -125,21 +130,21 @@ namespace Trident {
 			dot(referenceBody.transform.position, referencePlane.normal)
 		);
 
+		ClipFeature2D incidentEdge = findIncidentEdge(incidentBody, incidentShape, query.axis * inverse(incidentBody.transform.rotation));
+
 		Plane2D leftSidePlane;
 		leftSidePlane.normal = perpendicularLeft(query.axis);
 		leftSidePlane.offset = dot(a, leftSidePlane.normal);
-
-		Plane2D rightSidePlane;
-		rightSidePlane.normal = perpendicularRight(query.axis);
-		rightSidePlane.offset = dot(b, rightSidePlane.normal);
-
-		ClipFeature2D incidentEdge = findIncidentEdge(incidentBody, incidentShape, query.axis * rotationAngle<mat2x2<float32>>(-incidentBody.rotation));
 
 		incidentEdge = clipEdge(incidentEdge, leftSidePlane, referenceLeftEdgeIndex);
 
 		if (incidentEdge.vertexCount < 2) {
 			return false;
 		}
+
+		Plane2D rightSidePlane;
+		rightSidePlane.normal = perpendicularRight(query.axis);
+		rightSidePlane.offset = dot(b, rightSidePlane.normal);
 
 		incidentEdge = clipEdge(incidentEdge, rightSidePlane, referenceRightEdgeIndex);
 
@@ -178,19 +183,15 @@ namespace Trident {
 
 		manifold->contactCount = 0;
 
-		SATConvexHullConvexHullOutput2D output = SATConvexHullConvexHull2D(rigidBodyA, rigidBodyB, shapeA, shapeB);
+		const SATConvexHullConvexHullOutput2D output = SATConvexHullConvexHull2D(rigidBodyA, rigidBodyB, shapeA, shapeB);
 
 		if (!output.overlap) {
 			return false;
 		}
 
 		if (output.edgeQueryA.separation >= output.edgeQueryB.separation) {
-			output.edgeQueryA.axis *= rotationAngle<mat2x2<float32>>(rigidBodyA.rotation);
-
 			return createEdgeContact(output.edgeQueryA, rigidBodyA, rigidBodyB, shapeA, shapeB, manifold);
 		}
-
-		output.edgeQueryB.axis *= rotationAngle<mat2x2<float32>>(rigidBodyB.rotation);
 
 		const bool result = createEdgeContact(output.edgeQueryB, rigidBodyB, rigidBodyA, shapeB, shapeA, manifold);
 
