@@ -22,11 +22,7 @@ namespace Trident {
 			const vec2<float32> d = edgeNormalClockwise(a, b);
 			const vec2<float32> s = vertexSupport(incidentShape, -d * RBA) * incidentWorld;
 
-			// The centroid is not involved when calculating the edge distance because it is applied when multiplying by the world matrix.
-			const float32 edgeDistance = abs(signedDistanceLPAB(a, b, {0.0f, 0.0f}));
-			const vec2<float32> offset = edgeDistance * d * referenceWorld;
-
-			const float32 separation = signedDistanceLP(d * referenceBody.transform.rotation, offset, s);
+			const float32 separation = signedDistanceLP(d * referenceBody.transform.rotation, d * dot(a, d) * referenceWorld, s);
 
 			if (separation > output.separation) {
 				output.separation = separation;

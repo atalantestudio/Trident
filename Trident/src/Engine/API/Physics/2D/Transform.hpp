@@ -18,10 +18,6 @@ namespace Trident {
 			c(cos(angle))
 		{}
 
-		/* float32 getAngle() const {
-			return atan2(s, c);
-		} */
-
 		float32 s;
 		float32 c;
 	};
@@ -45,9 +41,8 @@ namespace Trident {
 		return qr;
 	}
 
-	// TODO(physics/2d/transform): Refactor.
 	inline Rotation2D normalized(Rotation2D q) {
-		const float32 length = sqrtf(q.s * q.s + q.c * q.c);
+		const float32 length = sqrt(q.s * q.s + q.c * q.c);
 
 		float32 inverseLength = 0.0f;
 
@@ -55,20 +50,17 @@ namespace Trident {
 			inverseLength = 1.0f / length;
 		}
 
-		return {q.c * inverseLength, q.s * inverseLength};
+		q.s *= inverseLength;
+		q.c *= inverseLength;
+
+		return q;
 	}
 
-	// TODO(physics/2d/transform): Refactor.
-	inline Rotation2D integrateRotation(Rotation2D q1, float32 deltaAngle) {
-		const Rotation2D q2 = {
-			q1.c - deltaAngle * q1.s,
-			q1.s + deltaAngle * q1.c,
-		};
-
-		const float32 mag = sqrt( q2.s * q2.s + q2.c * q2.c );
-		const float32 invMag = mag > 0.0f ? 1.0f / mag : 0.0f;
-
-		return {q2.c * invMag, q2.s * invMag};
+	inline Rotation2D integrate(Rotation2D q, float32 deltaAngle) {
+		return normalized({
+			q.s + deltaAngle * q.c,
+			q.c - deltaAngle * q.s,
+		});
 	}
 
 	inline Rotation2D inverse(Rotation2D q) {
@@ -91,24 +83,8 @@ namespace Trident {
 
 	// CW
 	inline vec2<float32> operator*(vec2<float32> a, Transform2D t) {
-		const vec2<float32> p = t.position;
-		const Rotation2D q = t.rotation;
-
-		return {
-			( a.x * q.c + a.y * q.s) + p.x,
-			(-a.x * q.s + a.y * q.c) + p.y,
-		};
+		return a * t.rotation + t.position;
 	}
-
-	// TODO(physics/2d/transform): Refactor.
-	/* inline vec2<float32> mulT(vec2<float32> v, Transform2D T) {
-		const float32 px = v.x - T.p.x;
-		const float32 py = v.y - T.p.y;
-		const float32 x = (T.q.c * px + T.q.s * py);
-		const float32 y = (-T.q.s * px + T.q.c * py);
-
-		return {x, y};
-	} */
 
 	inline vec2<float32> operator*=(vec2<float32>& a, Transform2D t) {
 		return a = a * t;
@@ -118,6 +94,8 @@ namespace Trident {
 		Transform2D t;
 		t.rotation = tA.rotation * tB.rotation;
 		t.position = tA.position * tB.rotation + tB.position;
+		// tB.rotation = tA.rotation * tB.rotation;
+		// tB.position = tB.position * tA.rotation + tA.position;
 
 		return t;
 	}

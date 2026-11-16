@@ -126,7 +126,7 @@ namespace Trident {
 		Plane2D referencePlane;
 		referencePlane.normal = query.axis;
 		referencePlane.offset = (
-			signedDistanceLPAB(localB, localA, referenceBody.centroid) +
+			dot(localA, edgeNormalClockwise(localA, localB)) +
 			dot(referenceBody.transform.position, referencePlane.normal)
 		);
 

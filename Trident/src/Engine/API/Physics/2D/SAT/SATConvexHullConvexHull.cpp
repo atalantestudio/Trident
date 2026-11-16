@@ -28,9 +28,7 @@ namespace Trident {
 			const vec2<float32> d = edgeNormalClockwise(a, b);
 			const vec2<float32> s = vertexSupport(incidentShape, -d * RBA) * incidentWorld;
 
-			const float32 edgeDistance = abs(signedDistanceLPAB(a, b, {0.0f, 0.0f}));
-			const vec2<float32> offset = edgeDistance * d * referenceWorld;
-			const float32 separation = signedDistanceLP(d * referenceBody.transform.rotation, offset, s);
+			const float32 separation = dot(d * referenceBody.transform.rotation, s - d * dot(a, d) * referenceWorld);
 
 			if (separation > query.separation) {
 				query.separation = separation;
