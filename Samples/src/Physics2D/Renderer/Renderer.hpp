@@ -55,6 +55,12 @@ namespace Trident {
 				ShapeID2D shapeId;
 			};
 
+			struct UniqueVertexCount {
+				uint32 vertexCount;
+				uint32 triangleStripIndexOffset;
+				uint32 lineStripIndexOffset;
+			};
+
 		private:
 			static constexpr float32 MIN_ZOOM_LEVEL = 1.0f;
 			static constexpr float32 MAX_ZOOM_LEVEL = 64.0f;
@@ -174,6 +180,7 @@ namespace Trident {
 			uint32 maxCircleInstanceCount;
 			uint32 circleInstanceCount;
 			sequence<PhysicsRendererBuildHull2D> hulls;
+			sequence<UniqueVertexCount> uniqueVertexCounts;
 			uint64 lineStripIndexOffset;
 			uint32 contactCount;
 			uint32 maxContactCount;

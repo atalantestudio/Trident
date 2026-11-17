@@ -3,9 +3,6 @@
 
 #include "pch.hpp"
 
-#include "Engine/API/Geometry/Hull2D.hpp"
-#include "Engine/ECS/Component/RigidBody2DComponent.hpp"
-
 #include "Physics2D/Renderer/Renderer.hpp"
 
 namespace Trident {
@@ -502,7 +499,6 @@ namespace Trident {
 
 		uint64 vertexOffset = 4 * sizeof(vec2<float32>);
 		uint32 instanceOffset = maxCircleInstanceCount;
-		uint32 indexOffset = 4;
 
 		// Draw hull shape.
 		/* if (lineStripIndexOffset < indexBuffer->getSize()) {
@@ -514,16 +510,16 @@ namespace Trident {
 			uint32 shapeIndex = 0;
 
 			while (shapeIndex < hulls.count()) {
-				const PhysicsRendererBuildHull2D& hull = hulls[shapeIndex];
+				const PhysicsRendererBuildHull2D hull = hulls[shapeIndex];
+				const UniqueVertexCount uniqueVertexCount = uniqueVertexCounts[hull.uniqueVertexCountIndex];
 
 				if (hull.instanceCount > 0) {
 					commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset);
-					commandEncoder->drawIndexed(hull.hullHeader->vertexCount, hull.instanceCount, indexOffset, 0, instanceOffset);
+					commandEncoder->drawIndexed(uniqueVertexCount.vertexCount, hull.instanceCount, uniqueVertexCount.triangleStripIndexOffset, 0, instanceOffset);
 				}
 
 				vertexOffset += hull.hullHeader->vertexCount * sizeof(vec2<float32>);
 				instanceOffset += hull.maxInstanceCount;
-				indexOffset += hull.hullHeader->vertexCount;
 				shapeIndex += 1;
 			}
 		} */
@@ -541,11 +537,12 @@ namespace Trident {
 			uint32 shapeIndex = 0;
 
 			while (shapeIndex < hulls.count()) {
-				const PhysicsRendererBuildHull2D& hull = hulls[shapeIndex];
+				const PhysicsRendererBuildHull2D hull = hulls[shapeIndex];
+				const UniqueVertexCount uniqueVertexCount = uniqueVertexCounts[hull.uniqueVertexCountIndex];
 
 				if (hull.instanceCount > 0) {
 					commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset);
-					commandEncoder->drawIndexed(hull.hullHeader->vertexCount + 1, hull.instanceCount, 0, 0, instanceOffset);
+					commandEncoder->drawIndexed(uniqueVertexCount.vertexCount + 1, hull.instanceCount, uniqueVertexCount.lineStripIndexOffset, 0, instanceOffset);
 				}
 
 				vertexOffset += hull.hullHeader->vertexCount * sizeof(vec2<float32>);

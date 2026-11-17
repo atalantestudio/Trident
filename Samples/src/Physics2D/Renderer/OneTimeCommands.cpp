@@ -31,54 +31,57 @@ namespace Trident {
 		const BufferView<uint16> indexStagingView = stagingBuffer->createView<uint16>(vertexStagingView.getOffset() + vertexStagingView.getSize(), indexBuffer->getSize());
 
 		vec2<float32>* vertexMappedRange = vertexStagingView.map();
-		uint16* indexMappedRange = indexStagingView.map();
 
 		std::copy_n(CIRCLE_VERTICES, 4, vertexMappedRange);
-		std::copy_n(CIRCLE_INDICES, 4, indexMappedRange);
 
 		vertexMappedRange += 4;
-		indexMappedRange += 4;
 
-		uint16 index;
-
-		for (const PhysicsRendererBuildHull2D& hull : hulls) {
+		for (const PhysicsRendererBuildHull2D hull : hulls) {
 			const vec2<float32>* hullVertices = hull.hullHeader->getVertices();
-			const uint32 halfVertexCount = hull.hullHeader->vertexCount / 2;
 
 			std::copy_n(hullVertices, hull.hullHeader->vertexCount, vertexMappedRange);
 
-			indexMappedRange[0] = 0;
+			vertexMappedRange += hull.hullHeader->vertexCount;
+		}
 
-			index = 1;
+		uint16* indexMappedRange = indexStagingView.map();
+		uint16 index;
 
-			while (index < hull.hullHeader->vertexCount) {
-				const uint16 x = (index + (index & 1)) / 2;
+		std::copy_n(CIRCLE_INDICES, 4, indexMappedRange);
 
-				if (index & 1) {
-					indexMappedRange[index] = x;
+		for (const UniqueVertexCount uniqueVertexCount : uniqueVertexCounts) {
+			// TODO(physics/2d/renderer): Handle odd vertex counts properly.
+			if (uniqueVertexCount.vertexCount == 3) {
+				indexMappedRange[uniqueVertexCount.triangleStripIndexOffset + 1] = 1;
+				indexMappedRange[uniqueVertexCount.triangleStripIndexOffset + 2] = 2;
+			}
+			else {
+				const uint32 halfVertexCount = uniqueVertexCount.vertexCount / 2;
+
+				index = 1;
+
+				while (index < uniqueVertexCount.vertexCount) {
+					const uint16 x = (index + (index & 1)) / 2;
+
+					if (index & 1) {
+						indexMappedRange[uniqueVertexCount.triangleStripIndexOffset + index] = x;
+					}
+					else {
+						indexMappedRange[uniqueVertexCount.triangleStripIndexOffset + uniqueVertexCount.vertexCount - index] = halfVertexCount + x;
+					}
+
+					index += 1;
 				}
-				else {
-					indexMappedRange[hull.hullHeader->vertexCount - index] = halfVertexCount + x;
-				}
+			}
+
+			index = 0;
+
+			while (index < uniqueVertexCount.vertexCount) {
+				indexMappedRange[lineStripIndexOffset / 2 + uniqueVertexCount.lineStripIndexOffset + index] = index;
 
 				index += 1;
 			}
-
-			vertexMappedRange += hull.hullHeader->vertexCount;
-			indexMappedRange += hull.hullHeader->vertexCount;
 		}
-
-		const uint16 lineStripIndexCount = static_cast<uint16>((indexStagingView.getSize() - lineStripIndexOffset) / sizeof(uint16));
-
-		index = 0;
-
-		while (index < lineStripIndexCount - 1) {
-			indexMappedRange[index] = index;
-
-			index += 1;
-		}
-
-		indexMappedRange[index] = 0;
 
 		stagingBuffer->unmap();
 

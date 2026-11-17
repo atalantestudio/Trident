@@ -18,17 +18,46 @@ namespace Trident {
 
 		build();
 
+		sequence<UniqueVertexCount> uniqueVertexCountsDraft(hulls.count());
 		uint32 vertexCount = 4;
 		uint32 instanceCount = options.maxCircleInstanceCount;
 		uint32 triangleStripIndexCount = 4;
 		uint32 lineStripIndexCount = 0;
+		uint32 uniqueVertexCountCount = 0;
 
-		for (const PhysicsRendererBuildHull2D& hull : hulls) {
+		for (PhysicsRendererBuildHull2D& hull : hulls) {
+			uint32 index = 0;
+
+			while (index < uniqueVertexCountCount) {
+				if (hull.hullHeader->vertexCount == uniqueVertexCountsDraft[index].vertexCount) {
+					break;
+				}
+
+				index += 1;
+			}
+
+			UniqueVertexCount& uniqueVertexCount = uniqueVertexCountsDraft[index];
+
+			if (index == uniqueVertexCountCount) {
+				uniqueVertexCount.vertexCount = hull.hullHeader->vertexCount;
+				uniqueVertexCount.triangleStripIndexOffset = triangleStripIndexCount;
+				uniqueVertexCount.lineStripIndexOffset = lineStripIndexCount;
+
+				triangleStripIndexCount += uniqueVertexCount.vertexCount;
+				lineStripIndexCount += uniqueVertexCount.vertexCount + 1;
+
+				hull.uniqueVertexCountIndex = index;
+
+				uniqueVertexCountCount += 1;
+			}
+
 			vertexCount += hull.hullHeader->vertexCount;
-			triangleStripIndexCount += hull.hullHeader->vertexCount;
-			lineStripIndexCount = max(lineStripIndexCount, hull.hullHeader->vertexCount + 1);
 			instanceCount += hull.maxInstanceCount;
 		}
+
+		uniqueVertexCounts = sequence<UniqueVertexCount>(uniqueVertexCountCount);
+
+		std::copy_n(&uniqueVertexCountsDraft[0], uniqueVertexCountCount, &uniqueVertexCounts[0]);
 
 		lineStripIndexOffset = triangleStripIndexCount * sizeof(uint16);
 
@@ -121,7 +150,7 @@ namespace Trident {
 		uint32 hullIndex = 0;
 
 		while (hullIndex < hulls.count()) {
-			const PhysicsRendererBuildHull2D& hull = hulls[hullIndex];
+			const PhysicsRendererBuildHull2D hull = hulls[hullIndex];
 
 			instanceMappedRanges[hullIndex + 1] = instanceMappedRange;
 			instanceMappedRange += hull.maxInstanceCount;

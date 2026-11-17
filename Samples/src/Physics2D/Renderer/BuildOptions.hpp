@@ -11,8 +11,11 @@ namespace Trident {
 		const HullHeader2D* hullHeader;
 		uint16 maxInstanceCount;
 
-		// Used internally by the renderer.
+		/// Set internally by the renderer.
 		uint16 instanceCount = 0;
+
+		/// Set internally by the renderer.
+		uint32 uniqueVertexCountIndex;
 	};
 
 	struct PhysicsRendererBuildOptions2D {
