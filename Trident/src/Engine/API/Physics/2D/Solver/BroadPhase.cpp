@@ -21,36 +21,79 @@ namespace Trident {
 	}
 
 	void broadPhase(PhysicsSimulation2D& simulation) {
-		CollisionPair2D pair;
-		uint32 indexA = 0;
+		uint32 shapeIdIndexA = 0;
 
-		// TODO(physics/2d/broad-phase): Only register potentially overlapping entities.
-		while (indexA < simulation.broadPhase.usedDynamicShapeIdCount) {
-			pair.shapeIdA = simulation.broadPhase.dynamicShapeIds[indexA];
+		while (shapeIdIndexA < simulation.broadPhase.usedDynamicShapeIdCount) {
+			CollisionPair2D pair;
+			pair.shapeIdA = simulation.broadPhase.dynamicShapeIds[shapeIdIndexA];
 
-			uint32 indexB = 0;
+			const Shape2D& shape = simulation.shapes[pair.shapeIdA];
+			const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 
-			// Register all dynamic-static entity pairs.
-			while (indexB < simulation.broadPhase.usedStaticShapeIdCount) {
-				pair.shapeIdB = simulation.broadPhase.staticShapeIds[indexB];
+			if (rigidBody.flags & RigidBodyFlags2D::DISABLE_SIMULATION) {
+				shapeIdIndexA += 1;
+
+				continue;
+			}
+
+			uint32 shapeIdIndexB = 0;
+
+			while (shapeIdIndexB < simulation.broadPhase.usedStaticShapeIdCount) {
+				pair.shapeIdB = simulation.broadPhase.staticShapeIds[shapeIdIndexB];
+
+				const Shape2D& shape = simulation.shapes[pair.shapeIdB];
+				const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
+
+				if (rigidBody.flags & RigidBodyFlags2D::DISABLE_SIMULATION) {
+					shapeIdIndexB += 1;
+
+					continue;
+				}
 
 				addPair(simulation, pair);
 
-				indexB += 1;
+				shapeIdIndexB += 1;
 			}
 
-			indexB = indexA + 1;
+			shapeIdIndexB = 0;
 
-			// Register all dynamic-dynamic entity pairs.
-			while (indexB < simulation.broadPhase.usedDynamicShapeIdCount) {
-				pair.shapeIdB = simulation.broadPhase.dynamicShapeIds[indexB];
+			while (shapeIdIndexB < simulation.broadPhase.usedKinematicShapeIdCount) {
+				pair.shapeIdB = simulation.broadPhase.kinematicShapeIds[shapeIdIndexB];
+
+				const Shape2D& shape = simulation.shapes[pair.shapeIdB];
+				const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
+
+				if (rigidBody.flags & RigidBodyFlags2D::DISABLE_SIMULATION) {
+					shapeIdIndexB += 1;
+
+					continue;
+				}
 
 				addPair(simulation, pair);
 
-				indexB += 1;
+				shapeIdIndexB += 1;
 			}
 
-			indexA += 1;
+			shapeIdIndexB = shapeIdIndexA + 1;
+
+			while (shapeIdIndexB < simulation.broadPhase.usedDynamicShapeIdCount) {
+				pair.shapeIdB = simulation.broadPhase.dynamicShapeIds[shapeIdIndexB];
+
+				const Shape2D& shape = simulation.shapes[pair.shapeIdB];
+				const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
+
+				if (rigidBody.flags & RigidBodyFlags2D::DISABLE_SIMULATION) {
+					shapeIdIndexB += 1;
+
+					continue;
+				}
+
+				addPair(simulation, pair);
+
+				shapeIdIndexB += 1;
+			}
+
+			shapeIdIndexA += 1;
 		}
 	}
 }
