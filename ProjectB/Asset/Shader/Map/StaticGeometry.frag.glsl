@@ -98,7 +98,7 @@ void main() {
 	*/
 
 	// TODO(project-b/map-renderer/gi)
-	/* uint carvingIndex = 0u;
+	uint carvingIndex = 0u;
 	uint triangleOffset = 0u;
 	float L0 = 0.0;
 
@@ -125,11 +125,11 @@ void main() {
 
 	fragment.rgb = L / (PI * 2.0);
 	fragment.rgb = tonemap(fragment.rgb);
-	fragment.rgb = gammaCorrect(fragment.rgb); */
+	fragment.rgb = gammaCorrect(fragment.rgb);
 
-	vec3 surfaceToCamera = normalize(camera.position - interstage.surface);
+	/* vec3 surfaceToCamera = normalize(camera.position - interstage.surface);
 	float angle = dot(interstage.normal, surfaceToCamera);
 
-	fragment.rgb = vec3(angle);
+	fragment.rgb = vec3(angle); */
 	fragment.a = 1.0;
 }

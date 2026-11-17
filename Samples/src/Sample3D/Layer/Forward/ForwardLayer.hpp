@@ -31,7 +31,8 @@ namespace Trident {
 			#endif
 
 			static constexpr float32 LOOK_SENSITIVITY = 0.075f;
-			static constexpr vec3<float32> PLAYER_EYE_LEVEL = {0.0f, 8.0f, 0.0f};
+			// static constexpr vec3<float32> PLAYER_EYE_LEVEL = {0.0f, 8.0f, 0.0f};
+			static constexpr vec3<float32> PLAYER_EYE_LEVEL = {0.0f, 64.0f, 0.0f};
 
 			// static constexpr vec3<float32> PLAYER_SCALE = {0.25f, 0.6f, 0.25f};
 			static constexpr vec3<float32> PLAYER_SCALE = {33.0f, 77.0f, 33.0f};
@@ -70,16 +71,22 @@ namespace Trident {
 
 				scene = allocateRef<Scene3D>(sceneAsset);
 
-				// createPlayerHullData(sceneAsset);
-				// createPlayerEntity();
-				playerEntity = scene->ecs.nextEntity - 1;
+				createPlayerHullData(sceneAsset);
+				createPlayerEntity();
+				// playerEntity = scene->ecs.nextEntity - 1;
 
 				// TODO(physics/3d/debug)
 				{
 					auto& player = scene->ecs.getComponent<RigidBody3DComponent>(playerEntity);
 					// player.position = {-64.0f, 64.0f, 128.0f};
 					// player.position = {64.0f, 30.0f, 64.0f};
-					player.position = {-130.0f, 0.0f, 130.0f};
+					// player.position = {-130.0f, 0.0f, 130.0f};
+					player.position = sceneAsset->spawnPosition;
+
+					if (sceneAssetName == "3d_cornell_box") {
+						player.position -= PLAYER_EYE_LEVEL;
+					}
+
 					player.updateWorld({0.0f, 0.0f, 0.0f});
 				}
 
@@ -100,18 +107,19 @@ namespace Trident {
 				renderer.setScene(scene);
 
 				PerspectiveCamera3D& camera = cameraController.getCamera();
-				camera.position = sceneAsset->spawnPosition;
+				camera.position = sceneAsset->spawnPosition + PLAYER_EYE_LEVEL;
 				camera.nearPlane = 0.01f;
 				camera.farPlane = 2048.0f;
 
-				#if defined(FORWARD_USE_NOCLIP_CAMERA) && defined(FORWARD_TEST_CORNELL_BOX)
-					camera.fieldOfView = radians(40.0_deg);
-				#else
-					// camera.position += CAMERA_OFFSET;
-					camera.fieldOfView = radians(70.0_deg);
+				camera.fieldOfView = radians(70.0_deg);
+
+				#if defined(FORWARD_USE_NOCLIP_CAMERA)
+					if (sceneAssetName == "3d_cornell_box") {
+						camera.fieldOfView = radians(40.0_deg);
+					}
 				#endif
 
-				camera.distance = 128.0f;
+				// camera.distance = 128.0f;
 				camera.aspectRatio = application->getWindow()->getAspectRatio();
 				camera.setOrientation(lookAt(FORWARD, sceneAsset->spawnDirection, UP));
 				camera.updateProjectionReversedZ();

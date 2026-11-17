@@ -129,7 +129,10 @@
 		{
 			"label": "Build (vs2026)",
 			"type": "process",
-			"command": "scripts/${command:cpptools.activeConfigName}/vs2026.bat",
+			// "command": "scripts/${command:cpptools.activeConfigName}/vs2026.bat",
+			"command": "scripts/Debug/vs2026.bat",
+			// "command": "scripts/Profile/vs2026.bat",
+			// "command": "scripts/Release/vs2026.bat",
 			"group": {
 				"kind": "build"
 			},
