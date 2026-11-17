@@ -20,7 +20,7 @@ namespace Trident {
 
 		uint32 vertexCount = 4;
 		uint32 instanceCount = options.maxCircleInstanceCount;
-		uint32 triangleStripIndexCount = 6;
+		uint32 triangleStripIndexCount = 4;
 		uint32 lineStripIndexCount = 0;
 
 		for (const PhysicsRendererBuildHull2D& hull : hulls) {

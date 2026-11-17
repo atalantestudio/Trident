@@ -10,13 +10,12 @@ namespace Trident {
 		static constexpr vec2<float32> CIRCLE_VERTICES[] = {
 			{-0.5f,  0.5f},
 			{ 0.5f,  0.5f},
-			{-0.5f, -0.5f},
 			{ 0.5f, -0.5f},
+			{-0.5f, -0.5f},
 		};
 
 		static constexpr uint16 CIRCLE_INDICES[] = {
-			0, 1, 2,
-			1, 3, 2,
+			0, 1, 3, 2,
 		};
 
 		const ref<Buffer> stagingBuffer = createDynamicBuffer({
@@ -35,10 +34,10 @@ namespace Trident {
 		uint16* indexMappedRange = indexStagingView.map();
 
 		std::copy_n(CIRCLE_VERTICES, 4, vertexMappedRange);
-		std::copy_n(CIRCLE_INDICES, 6, indexMappedRange);
+		std::copy_n(CIRCLE_INDICES, 4, indexMappedRange);
 
 		vertexMappedRange += 4;
-		indexMappedRange += 6;
+		indexMappedRange += 4;
 
 		uint16 index;
 

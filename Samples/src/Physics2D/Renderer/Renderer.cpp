@@ -497,12 +497,12 @@ namespace Trident {
 			commandEncoder->bindVertexBuffer(1, instanceBuffer, 0);
 			commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(indexBuffer, 0);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
-			commandEncoder->drawIndexed(6, circleInstanceCount, 0, 0, 0);
+			commandEncoder->drawIndexed(4, circleInstanceCount, 0, 0, 0);
 		}
 
 		uint64 vertexOffset = 4 * sizeof(vec2<float32>);
 		uint32 instanceOffset = maxCircleInstanceCount;
-		uint32 indexOffset = 6;
+		uint32 indexOffset = 4;
 
 		// Draw hull shape.
 		/* if (lineStripIndexOffset < indexBuffer->getSize()) {

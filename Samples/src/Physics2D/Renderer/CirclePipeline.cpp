@@ -50,7 +50,7 @@ namespace Trident {
 				},
 				"Physics2D/Circle.frag"
 			),
-			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
+			.primitiveTopology = PrimitiveTopology::TRIANGLE_STRIP,
 			.polygonMode = PolygonMode::FILL,
 			.cullMode = CullMode::BACK,
 			.frontFace = FrontFace::CLOCKWISE,
