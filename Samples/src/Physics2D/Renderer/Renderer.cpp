@@ -500,8 +500,7 @@ namespace Trident {
 		uint64 vertexOffset = 4 * sizeof(vec2<float32>);
 		uint32 instanceOffset = maxCircleInstanceCount;
 
-		// Draw hull shape.
-		/* if (lineStripIndexOffset < indexBuffer->getSize()) {
+		if (flags & PhysicsRendererFlags2D::RENDER_SOLID) {
 			commandEncoder->bindGraphicsPipeline(shapeFillPipeline);
 			commandEncoder->bindVertexBuffer(1, instanceBuffer, 0);
 			commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(indexBuffer, 0);
@@ -522,13 +521,12 @@ namespace Trident {
 				instanceOffset += hull.maxInstanceCount;
 				shapeIndex += 1;
 			}
-		} */
+		}
 
 		vertexOffset = 4 * sizeof(vec2<float32>);
 		instanceOffset = maxCircleInstanceCount;
 
-		// Draw hull shape wireframes.
-		if (lineStripIndexOffset < indexBuffer->getSize()) {
+		if (flags & PhysicsRendererFlags2D::RENDER_WIREFRAME && hulls.count() > 0) {
 			commandEncoder->bindGraphicsPipeline(shapeStrokePipeline);
 			commandEncoder->bindVertexBuffer(1, instanceBuffer, 0);
 			commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(indexBuffer, lineStripIndexOffset);
@@ -551,8 +549,7 @@ namespace Trident {
 			}
 		}
 
-		// Draw contacts.
-		if (contactCount > 0) {
+		if (flags & PhysicsRendererFlags2D::RENDER_CONTACTS && contactCount > 0) {
 			commandEncoder->bindGraphicsPipeline(contactPipeline);
 			commandEncoder->bindVertexBuffer(0, contactBuffer, 0);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);

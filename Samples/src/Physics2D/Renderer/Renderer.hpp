@@ -9,6 +9,7 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 #include "Physics2D/Renderer/BuildOptions.hpp"
+#include "Physics2D/Renderer/Flags.hpp"
 
 namespace Trident {
 	// Toggle vertex/edge feature rendering.
@@ -172,6 +173,8 @@ namespace Trident {
 			#endif
 
 		public:
+			PhysicsRendererFlags2D flags = PhysicsRendererFlags2D::RENDER_WIREFRAME | PhysicsRendererFlags2D::RENDER_CONTACTS;
+
 			vec2<float32> cameraPosition = {0.0_m, 0.0_m};
 
 		private:
