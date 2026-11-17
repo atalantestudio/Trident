@@ -96,8 +96,6 @@ namespace Trident {
 
 		RigidBody2D& rigidBody = simulation.rigidBodies[descriptor.rigidBodyId];
 
-		// TODO(physics/2d): Set centroid.
-
 		if (rigidBody.type == RigidBodyType::DYNAMIC) {
 			updateMassProperties(shape, rigidBody);
 		}

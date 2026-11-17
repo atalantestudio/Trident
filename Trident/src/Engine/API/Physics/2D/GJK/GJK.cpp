@@ -154,6 +154,9 @@ namespace Trident {
 		DEBUG_ASSERT(hullA.hull->vertexCount < max<uint8>());
 		DEBUG_ASSERT(hullB.hull->vertexCount < max<uint8>());
 
+		const mat3x3<float32> worldA = A.getWorld();
+		const mat3x3<float32> worldB = B.getWorld();
+
 		const mat2x2<float32> inverseRotationA = rotationAngle<mat2x2<float32>>(-A.rotation);
 		const mat2x2<float32> inverseRotationB = rotationAngle<mat2x2<float32>>(-B.rotation);
 
@@ -162,8 +165,8 @@ namespace Trident {
 		Simplex2Vertex vertex;
 		vertex.iA = 0;
 		vertex.iB = 0;
-		vertex.vA = hullA.hull->getVertices()[vertex.iA] * A.getWorld();
-		vertex.vB = hullB.hull->getVertices()[vertex.iB] * B.getWorld();
+		vertex.vA = hullA.hull->getVertices()[vertex.iA] * worldA;
+		vertex.vB = hullB.hull->getVertices()[vertex.iB] * worldB;
 		vertex.v = vertex.vB - vertex.vA;
 
 		Simplex2 s = {vertex};
@@ -263,8 +266,8 @@ namespace Trident {
 				break;
 			}
 
-			vertex.vA = hullA.hull->getVertices()[vertex.iA] * A.getWorld();
-			vertex.vB = hullB.hull->getVertices()[vertex.iB] * B.getWorld();
+			vertex.vA = hullA.hull->getVertices()[vertex.iA] * worldA;
+			vertex.vB = hullB.hull->getVertices()[vertex.iB] * worldB;
 			vertex.v = vertex.vB - vertex.vA;
 
 			s[s.count] = vertex;

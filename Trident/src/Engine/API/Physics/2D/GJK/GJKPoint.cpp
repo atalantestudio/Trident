@@ -152,6 +152,8 @@ namespace Trident {
 		DEBUG_ASSERT(shapeA.type == ShapeType2D::CONVEX_HULL);
 		DEBUG_ASSERT(shapeA.hull->vertexCount < max<uint8>());
 
+		const mat3x3<float32> worldA = A.getWorld();
+
 		const mat2x2<float32> inverseRotationA = rotationAngle<mat2x2<float32>>(-A.rotation);
 
 		vec2<float32> d = p - A.transform.position;
@@ -159,7 +161,7 @@ namespace Trident {
 		Simplex2Vertex vertex;
 		vertex.iA = 0;
 		vertex.iB = 0;
-		vertex.vA = shapeA.hull->getVertices()[vertex.iA] * A.getWorld();
+		vertex.vA = shapeA.hull->getVertices()[vertex.iA] * worldA;
 		vertex.vB = p;
 		vertex.v = vertex.vB - vertex.vA;
 
@@ -258,7 +260,7 @@ namespace Trident {
 				break;
 			}
 
-			vertex.vA = shapeA.hull->getVertices()[vertex.iA] * A.getWorld();
+			vertex.vA = shapeA.hull->getVertices()[vertex.iA] * worldA;
 			vertex.vB = p;
 			vertex.v = vertex.vB - vertex.vA;
 

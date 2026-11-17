@@ -45,6 +45,8 @@ namespace Trident {
 	bool GJKConditional2D(const RigidBody2D& A, vec2<float32> p, const Shape2D& shapeA) {
 		constexpr uint8 GJK_2D_CONDITIONAL_ITERATION_LIMIT = 8;
 
+		const mat3x3<float32> worldA = A.getWorld();
+
 		const mat2x2<float32> inverseRotationA = rotationAngle<mat2x2<float32>>(-A.rotation);
 
 		vec2<float32> d = p - A.transform.position;
@@ -54,7 +56,7 @@ namespace Trident {
 			return true;
 		}
 
-		vec2<float32> a = vertexSupport(shapeA, d * inverseRotationA) * A.getWorld() - p;
+		vec2<float32> a = vertexSupport(shapeA, d * inverseRotationA) * worldA - p;
 
 		if (dot(a, d) < 0.0f) {
 			return false;
@@ -67,7 +69,7 @@ namespace Trident {
 		uint8 iteration = 0;
 
 		while (iteration < GJK_2D_CONDITIONAL_ITERATION_LIMIT) {
-			a = vertexSupport(shapeA, d * inverseRotationA) * A.getWorld() - p;
+			a = vertexSupport(shapeA, d * inverseRotationA) * worldA - p;
 
 			if (dot(a, d) < 0.0f) {
 				return false;

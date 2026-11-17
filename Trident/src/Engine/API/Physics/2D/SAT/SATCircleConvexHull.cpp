@@ -38,6 +38,7 @@ namespace Trident {
 		}
 	}
 
+	// TODO(physics/2d/sat/circle-convex-hull): Fix implementation.
 	// TODO(ci/debugger/undefined-identifier)
 	// The returned object cannot be debugged because "an unspecified error occurs".
 	// See https://developercommunity.visualstudio.com/t/When-a-custom-function-returns-a-custom-/10422600.

@@ -10,7 +10,7 @@
 
 namespace Trident {
 	/// Finds and returns the incident edge on the provided rigid body.
-	static ClipFeature2D findIncidentEdge(const RigidBody2D& incidentBody, const Shape2D& incidentShape, vec2<float32> referenceEdgeNormal) {
+	static ClipFeature2D findIncidentEdge(const mat3x3<float32>& incidentWorld, const Shape2D& incidentShape, vec2<float32> referenceEdgeNormal) {
 		const vec2<float32>* vertices = incidentShape.hull->getVertices();
 
 		ClipFeature2D incidentEdge{};
@@ -40,14 +40,14 @@ namespace Trident {
 		}
 
 		ClipVertex2D& a = incidentEdge.edge[0];
-		a.position = a.position * incidentBody.getWorld();
+		a.position = a.position * incidentWorld;
 		a.id.referenceEdgeAIndex = ContactID2D::NULL_EDGE_INDEX;
 		a.id.referenceEdgeBIndex = ContactID2D::NULL_EDGE_INDEX;
 		a.id.incidentEdgeAIndex = (vertexIndex + 1) % incidentShape.hull->vertexCount;
 		a.id.incidentEdgeBIndex = vertexIndex;
 
 		ClipVertex2D& b = incidentEdge.edge[1];
-		b.position = b.position * incidentBody.getWorld();
+		b.position = b.position * incidentWorld;
 		b.id.referenceEdgeAIndex = ContactID2D::NULL_EDGE_INDEX;
 		b.id.referenceEdgeBIndex = ContactID2D::NULL_EDGE_INDEX;
 		b.id.incidentEdgeAIndex = vertexIndex;
@@ -111,6 +111,7 @@ namespace Trident {
 		query.axis *= referenceBody.transform.rotation;
 
 		const mat3x3<float32> referenceWorld = referenceBody.getWorld();
+		const mat3x3<float32> incidentWorld = incidentBody.getWorld();
 
 		const vec2<float32>* referenceVertices = referenceShape.hull->getVertices();
 
@@ -130,7 +131,7 @@ namespace Trident {
 			dot(referenceBody.transform.position, referencePlane.normal)
 		);
 
-		ClipFeature2D incidentEdge = findIncidentEdge(incidentBody, incidentShape, query.axis * inverse(incidentBody.transform.rotation));
+		ClipFeature2D incidentEdge = findIncidentEdge(incidentWorld, incidentShape, query.axis * inverse(incidentBody.transform.rotation));
 
 		Plane2D leftSidePlane;
 		leftSidePlane.normal = perpendicularLeft(query.axis);

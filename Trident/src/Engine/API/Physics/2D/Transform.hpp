@@ -63,7 +63,6 @@ namespace Trident {
 		return q;
 	}
 
-	// CW
 	inline vec2<float32> operator*(vec2<float32> a, Rotation2D q) {
 		return {
 			 a.x * q.c + a.y * q.s,
@@ -75,7 +74,6 @@ namespace Trident {
 		return a = a * q;
 	}
 
-	// CW
 	inline vec2<float32> operator*(vec2<float32> a, Transform2D t) {
 		return a * t.rotation + t.position;
 	}

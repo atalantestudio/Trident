@@ -40,6 +40,7 @@ namespace Trident {
 		RigidBodyType type;
 		RigidBodyFlags2D flags;
 
+		// TODO(physics/2d): This is always 0 because the centroid is the local origin of the shape.
 		/// Position of the centroid in local space.
 		vec2<float32> centroid;
 

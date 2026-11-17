@@ -10,9 +10,6 @@ namespace Trident {
 		const Shape2D& shapeA = simulation.shapes[pair.shapeIdA];
 		const Shape2D& shapeB = simulation.shapes[pair.shapeIdB];
 
-		// TODO(physics/2d): Fix broadphase order.
-		// std::swap(pair.shapeIdA, pair.shapeIdB);
-
 		if (shapeA.type > shapeB.type) {
 			std::swap(pair.shapeIdA, pair.shapeIdB);
 		}
@@ -20,6 +17,8 @@ namespace Trident {
 		simulation.collisionPairs.emplace_back(pair);
 	}
 
+	// TODO(physics/2d/broad-phase): Improve broad-phase.
+	// TODO(physics/2d/broad-phase/pair-order): Fix broad-phase order.
 	void broadPhase(PhysicsSimulation2D& simulation) {
 		uint32 shapeIdIndexA = 0;
 

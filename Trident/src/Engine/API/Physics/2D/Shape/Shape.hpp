@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Physics/2D/Base.hpp"
+#include "Engine/API/Physics/2D/Shape/CircleShape.hpp"
 #include "Engine/API/Physics/2D/Shape/Hull/HullHeader.hpp"
 #include "Engine/API/Physics/2D/Shape/ShapeType.hpp"
 #include "Engine/API/Physics/Material.hpp"
@@ -14,11 +15,6 @@ namespace Trident {
 		RigidBodyID2D rigidBodyId;
 		PhysicsMaterial material;
 		float32 density;
-	};
-
-	struct CircleShape2D {
-		// TODO(base/include): float32 isn't recognized when the struct is in its own file.
-		float32 radius;
 	};
 
 	struct Shape2D {
