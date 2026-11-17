@@ -38,7 +38,7 @@ namespace Trident {
 
 			// const Rotation2D deltaRotation = rigidBody.angularVelocity * simulation.deltaTime;
 
-			// rigidBody.transform.rotation = normalized(integrate(rigidBody.transform.rotation, deltaRotation));
+			// rigidBody.transform.rotation = normalized(rigidBody.transform.rotation * deltaRotation);
 
 			rigidBody.force = {0.0f, 0.0f};
 			rigidBody.torque = 0.0f;

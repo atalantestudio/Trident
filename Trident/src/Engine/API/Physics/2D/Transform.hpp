@@ -35,13 +35,11 @@ namespace Trident {
 		Rotation2D rotation;
 	};
 
-	// CCW
-	inline Rotation2D operator*(Rotation2D q, Rotation2D r) {
-		Rotation2D qr;
-		qr.s = q.c * r.s - q.s * r.c;
-		qr.c = q.c * r.c + q.s * r.s;
-
-		return qr;
+	inline Rotation2D operator*(Rotation2D a, Rotation2D b) {
+		return {
+			a.s * b.c + a.c * b.s,
+			a.c * b.c - a.s * b.s,
+		};
 	}
 
 	inline Rotation2D normalized(Rotation2D q) {
@@ -57,13 +55,6 @@ namespace Trident {
 		q.c *= inverseLength;
 
 		return q;
-	}
-
-	inline Rotation2D integrate(Rotation2D q, Rotation2D delta) {
-		return {
-			q.s * delta.c + q.c * delta.s,
-			q.c * delta.c - q.s * delta.s,
-		};
 	}
 
 	inline Rotation2D inverse(Rotation2D q) {
@@ -95,7 +86,7 @@ namespace Trident {
 
 	inline Transform2D operator*(Transform2D tA, Transform2D tB) {
 		Transform2D t;
-		t.rotation = tA.rotation * tB.rotation;
+		t.rotation = inverse(tA.rotation) * tB.rotation;
 		t.position = tA.position * tB.rotation + tB.position;
 		// tB.rotation = tA.rotation * tB.rotation;
 		// tB.position = tB.position * tA.rotation + tA.position;

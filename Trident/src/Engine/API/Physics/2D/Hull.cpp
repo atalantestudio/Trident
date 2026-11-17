@@ -45,10 +45,10 @@ namespace Trident {
 		DEBUG_ASSERT(vertices.count() == 3 || vertices.count() == 4);
 
 		const uint32 userIndex = getUserIndex();
-		const uint8 vertexCount = vertices.count();
+		const uint8 vertexCount = static_cast<uint8>(vertices.count());
 
 		vec2<float32> centroid = {0.0f, 0.0f};
-		float32 radiusSquared = 0.0f;
+		// float32 radiusSquared = 0.0f;
 		uint8 vertexIndex = 0;
 
 		while (vertexIndex < vertexCount) {
@@ -71,7 +71,7 @@ namespace Trident {
 
 			hull.vertices[vertexIndex] = vertex;
 
-			radiusSquared = max(radiusSquared, lengthSquared(vertex));
+			// radiusSquared = max(radiusSquared, lengthSquared(vertex));
 
 			vertexIndex += 1;
 		}

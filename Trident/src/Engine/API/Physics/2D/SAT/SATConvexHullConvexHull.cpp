@@ -17,7 +17,7 @@ namespace Trident {
 
 		const mat3x3<float32> referenceWorld = referenceBody.getWorld();
 		const mat3x3<float32> incidentWorld = incidentBody.getWorld();
-		const Rotation2D RBA = incidentBody.transform.rotation * referenceBody.transform.rotation;
+		const Rotation2D RBA = referenceBody.transform.rotation * inverse(incidentBody.transform.rotation);
 
 		uint16 indexA = 0;
 
