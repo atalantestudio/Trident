@@ -1,6 +1,30 @@
 # Trident
 
-Trident is a 2D/3D game engine developed by Atalante Studio, intended for technical teams. It features a set of low-level APIs that allow developers to create high performance games, UIs and applications. It is written in C++ 20 and is currently available on Windows, with Linux support already planned.
+Trident is a 2D/3D game engine developed by Atalante Studio, intended for technical teams. It features a set of low-level APIs that allow developers to create high performance games, UIs and applications. It is written in C++ 20 and is currently available on Windows, with Linux support planned.
+
+###### Static lighting and real-time sun shadows
+
+<img alt="Image" src="docs/debug_map.png" />
+
+###### Static lighting only
+
+<img alt="Image" src="docs/debug_map_lighting.png" />
+
+###### Lightmapped scene (HL2 textures) 1
+
+<img alt="Image" src="docs/hall.png" />
+
+###### Lightmapped scene (HL2 textures) 2
+
+<img alt="Image" src="docs/snap_test.png" />
+
+###### Text rendering
+
+<img alt="Image" src="docs/text.png" />
+
+###### Glyph atlas preview
+
+<img alt="Image" src="docs/glyph_atlas.png" />
 
 
 
@@ -8,19 +32,23 @@ Trident is a 2D/3D game engine developed by Atalante Studio, intended for techni
 
 ### Engine
 
-- Window abstraction with Win32 adapter (X11 and/or Wayland to be added)
-- IO (byte/bit streams, readers/writers, encoders/decoders)
-- FBX, PNG, QOI and TTF parsing
-- Low-level graphics abstraction with OpenGL, Vulkan and DirectX 12 adapters
-- Immediate-mode 2D GUI API with automatic layout distribution
-- Sparse ECS
-- 2D physics engine with support for convex hulls and spheres
-- 3D physics engine with support for convex hulls
-- Asset builder
-- Lightmapper
-- SDF glyph map generator
-- Custom binary file formats for font, geometry, image and scene assets
-- Custom shader language (compiler, LSP server and completion features)
+- **Rendering**
+	- Window abstraction with Win32 adapter (X11 and/or Wayland to be added)
+	- Low-level graphics abstraction with OpenGL, Vulkan and DirectX 12 adapters
+	- Custom shader language (compiler, LSP server and completion features)
+- **Physics**
+	- 2D physics engine with support for convex hulls and spheres
+	- 3D physics engine with support for convex hulls
+- **UI**
+	- Immediate-mode 2D GUI API with automatic layout distribution
+- **Filesystem**
+	- IO (byte/bit streams, readers/writers, encoders/decoders)
+	- FBX, PNG, QOI and TTF parsing
+	- Custom binary file formats for font, geometry, image and scene assets
+- **Tools**
+	- Asset builder
+	- Lightmapper
+	- SDF glyph map generator
 
 ### Client
 
@@ -37,34 +65,6 @@ Trident is a 2D/3D game engine developed by Atalante Studio, intended for techni
 	- Directional shadow mapping
 	- MSAA
 - 3D Visibility renderer
-
-
-
-## Screenshots
-
-###### Debug map with static lighting and real-time sun shadows.
-
-<img alt="Image" src="docs/debug_map.png" />
-
-###### Debug map with static lighting only.
-
-<img alt="Image" src="docs/debug_map_lighting.png" />
-
-###### Lightmapped scene (HL2 textures).
-
-<img alt="Image" src="docs/hall.png" />
-
-###### Lightmapped scene (HL2 textures).
-
-<img alt="Image" src="docs/snap_test.png" />
-
-###### Text rendering for UI components.
-
-<img alt="Image" src="docs/text.png" />
-
-###### Glyph map atlas preview.
-
-<img alt="Image" src="docs/glyph_atlas.png" />
 
 
 
