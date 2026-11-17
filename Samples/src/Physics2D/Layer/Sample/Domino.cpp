@@ -75,7 +75,7 @@ namespace Trident {
 			.type = ShapeType2D::CONVEX_HULL,
 			.rigidBodyId = createRigidBody(simulation, {
 				.type = RigidBodyType::STATIC,
-				.position = {-7.0f, 4.0f},
+				.position = {-7.1f, 4.0f},
 			}),
 			.material = material,
 			.density = 1.0f,
